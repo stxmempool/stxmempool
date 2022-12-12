@@ -39,6 +39,9 @@ export interface Env {
   BISQ_WEBSITE_URL: string;
   MINING_DASHBOARD: boolean;
   LIGHTNING: boolean;
+  MAINNET_BLOCK_AUDIT_START_HEIGHT: number;
+  TESTNET_BLOCK_AUDIT_START_HEIGHT: number;
+  SIGNET_BLOCK_AUDIT_START_HEIGHT: number;
 }
 
 const defaultEnv: Env = {
@@ -64,6 +67,9 @@ const defaultEnv: Env = {
   'BISQ_WEBSITE_URL': 'https://bisq.markets',
   'MINING_DASHBOARD': true,
   'LIGHTNING': false,
+  'MAINNET_BLOCK_AUDIT_START_HEIGHT': 0,
+  'TESTNET_BLOCK_AUDIT_START_HEIGHT': 0,
+  'SIGNET_BLOCK_AUDIT_START_HEIGHT': 0,
 };
 
 @Injectable({
@@ -111,6 +117,8 @@ export class StateService {
   blockScrolling$: Subject<boolean> = new Subject<boolean>();
   timeLtr: BehaviorSubject<boolean>;
   hideFlow: BehaviorSubject<boolean>;
+
+  txCache: { [txid: string]: Transaction } = {};
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: any,
@@ -264,5 +272,20 @@ export class StateService {
 
   isLiquid() {
     return this.network === 'liquid' || this.network === 'liquidtestnet';
+  }
+
+  setTxCache(transactions) {
+    this.txCache = {};
+    transactions.forEach(tx => {
+      this.txCache[tx.txid] = tx;
+    });
+  }
+ 
+  getTxFromCache(txid) {
+    if (this.txCache && this.txCache[txid]) {
+      return this.txCache[txid];
+    } else {
+      return null;
+    }
   }
 }

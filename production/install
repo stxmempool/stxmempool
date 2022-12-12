@@ -401,7 +401,7 @@ FREEBSD_PKG+=(nginx rsync py39-certbot-nginx mariadb105-server keybase)
 FREEBSD_PKG+=(geoipupdate)
 
 FREEBSD_UNFURL_PKG=()
-FREEBSD_UNFURL_PKG+=(nvidia-driver-470-470.129.06 chromium xinit xterm twm ja-sourcehansans-otf)
+FREEBSD_UNFURL_PKG+=(nvidia-driver-470 chromium xinit xterm twm ja-sourcehansans-otf)
 FREEBSD_UNFURL_PKG+=(zh-sourcehansans-sc-otf ko-aleefonts-ttf lohit tlwg-ttf)
 
 #############################
@@ -1324,9 +1324,9 @@ case $OS in
         osPackageInstall ${CLN_PKG}
 
         echo "[*] Installing Core Lightning mainnet Cronjob"
-        crontab_cln+='@reboot sleep 60 ; screen -dmS main lightningd --alias `hostname` --bitcoin-datadir /bitcoin\n'
-        crontab_cln+='@reboot sleep 90 ; screen -dmS tes lightningd --alias `hostname` --bitcoin-datadir /bitcoin --network testnet\n'
-        crontab_cln+='@reboot sleep 120 ; screen -dmS sig lightningd --alias `hostname` --bitcoin-datadir /bitcoin --network signet\n'
+        crontab_cln+='@reboot sleep 60 ; screen -dmS main lightningd --alias `hostname` --fee-base 0 --bitcoin-datadir /bitcoin\n'
+        crontab_cln+='@reboot sleep 90 ; screen -dmS tes lightningd --alias `hostname` --fee-base 0 --bitcoin-datadir /bitcoin --network testnet\n'
+        crontab_cln+='@reboot sleep 120 ; screen -dmS sig lightningd --alias `hostname` --fee-base 0 --bitcoin-datadir /bitcoin --network signet\n'
         echo "${crontab_cln}" | crontab -u "${CLN_USER}" -
     ;;
     Debian)
@@ -1842,13 +1842,13 @@ create database mempool_signet;
 grant all on mempool_signet.* to '${MEMPOOL_SIGNET_USER}'@'localhost' identified by '${MEMPOOL_SIGNET_PASS}';
 
 create database mempool_mainnet_lightning;
-grant all on mempool_mainnet_lightning.* to '${LN_MEMPOOL_MAINNET_USER}'@'%' identified by '${LN_MEMPOOL_MAINNET_PASS}';
+grant all on mempool_mainnet_lightning.* to '${LN_MEMPOOL_MAINNET_USER}'@'localhost' identified by '${LN_MEMPOOL_MAINNET_PASS}';
 
 create database mempool_testnet_lightning;
-grant all on mempool_testnet_lightning.* to '${LN_MEMPOOL_TESTNET_USER}'@'%' identified by '${LN_MEMPOOL_TESTNET_PASS}';
+grant all on mempool_testnet_lightning.* to '${LN_MEMPOOL_TESTNET_USER}'@'localhost' identified by '${LN_MEMPOOL_TESTNET_PASS}';
 
 create database mempool_signet_lightning;
-grant all on mempool_signet_lightning.* to '${LN_MEMPOOL_SIGNET_USER}'@'%' identified by '${LN_MEMPOOL_SIGNET_PASS}';
+grant all on mempool_signet_lightning.* to '${LN_MEMPOOL_SIGNET_USER}'@'localhost' identified by '${LN_MEMPOOL_SIGNET_PASS}';
 
 create database mempool_liquid;
 grant all on mempool_liquid.* to '${MEMPOOL_LIQUID_USER}'@'localhost' identified by '${MEMPOOL_LIQUID_PASS}';

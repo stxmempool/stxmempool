@@ -49,6 +49,7 @@ export namespace ILightningApi {
     }[];
     color: string;
     features: { [key: number]: Feature };
+    custom_records?: { [type: number]: string };
   }
 
   export interface Info {
@@ -81,5 +82,11 @@ export namespace ILightningApi {
     name: string;
     is_required: boolean;
     is_known: boolean;
+  }
+
+  export interface ForensicOutput {
+    node?: 1 | 2;
+    type: number;
+    value: number;
   }
 }
