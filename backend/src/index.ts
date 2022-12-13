@@ -36,6 +36,7 @@ import liquidRoutes from './api/liquid/liquid.routes';
 import bitcoinRoutes from './api/bitcoin/bitcoin.routes';
 import fundingTxFetcher from './tasks/lightning/sync-tasks/funding-tx-fetcher';
 import forensicsService from './tasks/lightning/forensics.service';
+import stacksMempool from './api/stacks/stacks-mempool';
 
 class Server {
   private wss: WebSocket.Server | undefined;
@@ -131,9 +132,9 @@ class Server {
 
     this.setUpHttpApiRoutes();
 
-    if (config.MEMPOOL.ENABLED) {
+    // if (config.MEMPOOL.ENABLED) {
       this.runMainUpdateLoop();
-    }
+    // }
 
     if (config.BISQ.ENABLED) {
       bisq.startBisqService();
@@ -146,6 +147,7 @@ class Server {
       this.$runLightningBackend();
     }
 
+
     this.server.listen(config.MEMPOOL.HTTP_PORT, () => {
       if (worker) {
         logger.info(`Mempool Server worker #${process.pid} started`);
@@ -157,20 +159,22 @@ class Server {
 
   async runMainUpdateLoop(): Promise<void> {
     try {
-      try {
-        await memPool.$updateMemPoolInfo();
-      } catch (e) {
-        const msg = `updateMempoolInfo: ${(e instanceof Error ? e.message : e)}`;
-        if (config.MEMPOOL.USE_SECOND_NODE_FOR_MINFEE) {
-          logger.warn(msg);
-        } else {
-          logger.debug(msg);
-        }
-      }
-      await poolsUpdater.updatePoolsJson();
-      await blocks.$updateBlocks();
-      await memPool.$updateMempool();
-      indexer.$run();
+      // try {
+      //   await memPool.$updateMemPoolInfo();
+      // } catch (e) {
+      //   const msg = `updateMempoolInfo: ${(e instanceof Error ? e.message : e)}`;
+      //   if (config.MEMPOOL.USE_SECOND_NODE_FOR_MINFEE) {
+      //     logger.warn(msg);
+      //   } else {
+      //     logger.debug(msg);
+      //   }
+      // }
+      // await poolsUpdater.updatePoolsJson();
+      // await blocks.$updateBlocks();
+      // await memPool.$updateMempool();
+      // indexer.$run();
+      await stacksMempool.$updateStacksMempool();
+
 
       setTimeout(this.runMainUpdateLoop.bind(this), config.MEMPOOL.POLL_RATE_MS);
       this.currentBackendRetryInterval = 5;
@@ -221,6 +225,7 @@ class Server {
       memPool.setAsyncMempoolChangedCallback(websocketHandler.handleMempoolChange.bind(websocketHandler));
       blocks.setNewAsyncBlockCallback(websocketHandler.handleNewBlock.bind(websocketHandler));
     }
+    stacksMempool.setMempoolChangedCallback(websocketHandler.handleStacksMempoolChange.bind(websocketHandler));
     fiatConversion.setProgressChangedCallback(websocketHandler.handleNewConversionRates.bind(websocketHandler));
     loadingIndicators.setProgressChangedCallback(websocketHandler.handleLoadingChanged.bind(websocketHandler));
   }

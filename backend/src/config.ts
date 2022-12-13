@@ -121,6 +121,17 @@ interface IConfig {
     GEOLITE2_ASN: string;
     GEOIP2_ISP: string;
   },
+  STACKS: {
+    ENABLED: boolean;
+    BLOCK_MAX_RUNTIME: number;
+    BLOCK_MAX_READ_COUNT: number;
+    BLOCK_MAX_READ_LENGTH: number;
+    BLOCK_MAX_WRITE_COUNT: number;
+    BLOCK_MAX_WRITE_LENGTH: number;
+    BLOCK_MAX_SIZE: number;
+    INITIAL_BLOCKS_AMOUNT: number;
+    MEMPOOL_BLOCKS_AMOUNT: number;
+  },
 }
 
 const defaults: IConfig = {
@@ -242,6 +253,17 @@ const defaults: IConfig = {
     'GEOLITE2_ASN': '/usr/local/share/GeoIP/GeoLite2-ASN.mmdb',
     'GEOIP2_ISP': '/usr/local/share/GeoIP/GeoIP2-ISP.mmdb'
   },
+  'STACKS': {
+    'ENABLED': true,
+    'BLOCK_MAX_RUNTIME': 5000000000,
+    'BLOCK_MAX_READ_COUNT': 15000,
+    'BLOCK_MAX_READ_LENGTH': 100000000,
+    'BLOCK_MAX_WRITE_COUNT': 15000,
+    'BLOCK_MAX_WRITE_LENGTH': 15000000,
+    'BLOCK_MAX_SIZE': 2000000,
+    'INITIAL_BLOCKS_AMOUNT': 8,
+    'MEMPOOL_BLOCKS_AMOUNT': 8,
+  },
 };
 
 class Config implements IConfig {
@@ -261,6 +283,8 @@ class Config implements IConfig {
   PRICE_DATA_SERVER: IConfig['PRICE_DATA_SERVER'];
   EXTERNAL_DATA_SERVER: IConfig['EXTERNAL_DATA_SERVER'];
   MAXMIND: IConfig['MAXMIND'];
+  STACKS: IConfig['STACKS'];
+
 
   constructor() {
     const configs = this.merge(configFromFile, defaults);
@@ -280,6 +304,7 @@ class Config implements IConfig {
     this.PRICE_DATA_SERVER = configs.PRICE_DATA_SERVER;
     this.EXTERNAL_DATA_SERVER = configs.EXTERNAL_DATA_SERVER;
     this.MAXMIND = configs.MAXMIND;
+    this.STACKS = configs.STACKS;
   }
 
   merge = (...objects: object[]): IConfig => {

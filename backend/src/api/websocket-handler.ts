@@ -19,6 +19,9 @@ import feeApi from './fee-api';
 import BlocksAuditsRepository from '../repositories/BlocksAuditsRepository';
 import BlocksSummariesRepository from '../repositories/BlocksSummariesRepository';
 import Audit from './audit';
+import stacksMempoolBlocks from './stacks/stacks-mempool-blocks';
+import stacksMempool from './stacks/stacks-mempool';
+import { ExtendedStacksTransaction } from './stacks/stacks-api.interface';
 
 class WebsocketHandler {
   private wss: WebSocket.Server | undefined;
@@ -243,7 +246,33 @@ class WebsocketHandler {
       }));
     });
   }
-
+  
+  handleStacksMempoolChange(newMempool: { [txid: string]: ExtendedStacksTransaction },
+    newTransactions: ExtendedStacksTransaction[], deletedTransactions: ExtendedStacksTransaction[]) {
+    if (!this.wss) {
+      throw new Error('WebSocket.Server is not set');
+    }
+    // stacksMempoolBlocks.updateMempoolBlocks(newMempool);
+    stacksMempoolBlocks.updateMempoolBlocks(newMempool);
+    const mBlocks = stacksMempoolBlocks.getMempoolBlocks();
+    const mBlockDeltas = stacksMempoolBlocks.getMempoolBlockDeltas();
+    const mempoolInfo = stacksMempool.getMempoolInfo();
+    const vBytesPerSecond = stacksMempool.getVBytesPerSecond();
+    // const rbfTransactions = Common.findRbfTransactions(newTransactions, deletedTransactions);
+    this.wss.clients.forEach(async (client) => {
+      if (client.readyState !== WebSocket.OPEN) {
+        return;
+      }
+      const response = {};
+      if (client['want-mempool-blocks']) {
+        response['mempool-blocks'] = mBlocks;
+      }
+      if (Object.keys(response).length) {
+        client.send(JSON.stringify(response));
+      }
+    });
+  }
+  
   async handleMempoolChange(newMempool: { [txid: string]: TransactionExtended },
     newTransactions: TransactionExtended[], deletedTransactions: TransactionExtended[]): Promise<void> {
     if (!this.wss) {
