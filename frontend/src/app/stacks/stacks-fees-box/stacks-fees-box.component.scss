@@ -1,0 +1,128 @@
+.card-title {
+  color: #4a68b9;
+  font-size: 10px;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.card-text {
+  font-size: 22px;
+  span {
+    font-size: 11px;
+    position: relative;
+    top: -2px;
+    display: inline-flex;
+  }
+  .green-color {
+    display: block;
+  }
+}
+
+.fee-estimation-container {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  .item {
+    width: 100px;
+    margin: 0;
+    width: -webkit-fill-available;
+    &:first-child {
+      @media (767px < width < 992px), (width < 576px) {
+        display: none
+      }
+    }
+    margin: 0 auto 0px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    .card-text span {
+      color: #ffffff66;
+      font-size: 12px;
+      top: 0px;
+    }
+    .fee-text{
+      border-bottom: 1px solid #ffffff1c;
+      width: fit-content;
+      margin: auto;
+      font-size: 20px;
+    }
+    .fiat {
+      display: block;
+      font-size: 13px !important;
+    }
+  }
+}
+
+.loading-container{
+  height: 50px;
+}
+
+.card-text {
+  .skeleton-loader {
+    width: 100%;
+    display: block;
+    &:first-child {
+      max-width: 70px;
+      margin: 10px auto 3px;
+    }
+    &:last-child {
+      margin: 10px auto 3px;
+      max-width: 55px;
+    }
+  }
+}
+
+.fee-progress-bar {
+  width: 25%;
+  height: 22px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: row;
+  transition: background-color 1s;
+  &.priority {
+    @media (767px < width < 992px), (width < 576px) {
+      width: 100%;
+    }
+    width: 75%;
+    border-radius: 0px 10px 10px 0px;
+  }
+  &:first-child {
+    @media (767px < width < 992px), (width < 576px) {
+      display: none
+    }
+  }
+}
+
+.band-separator {
+  width: 5%;
+  @media (767px < width < 992px), (width < 576px) {
+    display: none
+  }
+  &.fill {
+    height: 22px;
+    background: repeating-linear-gradient(
+      90deg,
+      rgb(45, 51, 72),
+      rgb(45, 51, 72) 2px,
+      rgb(29, 31, 49) 2px,
+      rgb(29, 31, 49) 4px
+    );  
+  }
+}
+
+.fee-label {
+  padding-top: 2px;
+  font-size: 12px;
+  width: 100%;
+  @media (767px < width < 992px), (width < 576px) {
+    width: 33%;
+  }
+  &.prority {
+    width: 33%;
+  }
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 5px;
+  padding-right: 5px;
+}

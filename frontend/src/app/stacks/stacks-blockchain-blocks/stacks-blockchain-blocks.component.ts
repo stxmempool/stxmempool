@@ -7,12 +7,12 @@ import { Location } from '@angular/common';
 import { config } from 'process';
 
 @Component({
-  selector: 'app-blockchain-blocks',
-  templateUrl: './blockchain-blocks.component.html',
-  styleUrls: ['./blockchain-blocks.component.scss'],
+  selector: 'app-stacks-blockchain-blocks',
+  templateUrl: './stacks-blockchain-blocks.component.html',
+  styleUrls: ['./stacks-blockchain-blocks.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BlockchainBlocksComponent implements OnInit, OnDestroy {
+export class StacksBlockchainBlocksComponent implements OnInit, OnDestroy {
   specialBlocks = specialBlocks;
   network = '';
   blocks: BlockExtended[] = [];
@@ -27,7 +27,7 @@ export class BlockchainBlocksComponent implements OnInit, OnDestroy {
   emptyBlockStyles = [];
   interval: any;
   tabHidden = false;
-  feeRounding = '1.0-0';
+  feeRounding = '1.0-1';
   arrowVisible = false;
   arrowLeftPx = 30;
   blocksFilled = false;
@@ -169,7 +169,8 @@ export class BlockchainBlocksComponent implements OnInit, OnDestroy {
   }
 
   getStyleForBlock(block: any) {
-    const greenBackgroundHeight = 100 - (block.weight / this.stateService.env.BLOCK_WEIGHT_UNITS) * 100;
+    // const greenBackgroundHeight = 100 - (block.weight / this.stateService.env.BLOCK_WEIGHT_UNITS) * 100;
+    const greenBackgroundHeight = 100 - (block.execution_cost_read_count / 15000) * 100;
 
     let addLeft = 0;
 

@@ -1,0 +1,77 @@
+<div class="fee-estimation-wrapper" *ngIf="(isLoadingWebSocket$ | async) === false && (recommendedFees$ | async) as recommendedFees; else loadingFees">
+  <div class="d-flex">
+    <div class="fee-progress-bar" [style.background]="noPriority">
+      <span class="fee-label" i18n="fees-box.no-priority" i18n-ngbTooltip="Transaction feerate tooltip (economy)" ngbTooltip="Either 2x the minimum, or the Low Priority rate (whichever is lower)" placement="top">No Priority</span>
+    </div>
+    <div class="band-separator fill"></div>
+    <div class="fee-progress-bar priority" [style.background]="gradient">
+      <span class="fee-label prority" i18n="fees-box.low-priority" i18n-ngbTooltip="Transaction feerate tooltip (low priority)" ngbTooltip="Usually places your transaction in between the second and third mempool blocks" placement="top">Low Priority</span>
+      <span class="fee-label prority" i18n="fees-box.medium-priority" i18n-ngbTooltip="Transaction feerate tooltip (medium priority)" ngbTooltip="Usually places your transaction in between the first and second mempool blocks" placement="top">Medium Priority</span>
+      <span class="fee-label prority" i18n="fees-box.high-priority" i18n-ngbTooltip="Transaction feerate tooltip (high priority)" ngbTooltip="Places your transaction in the first mempool block" placement="top">High Priority</span>
+    </div>
+  </div>
+  <div class="fee-estimation-container">
+    <div class="item">
+      <div class="card-text">
+        <div class="fee-text">{{ recommendedFees[type].p25 }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p25" ></app-fiat></span>
+      </div>
+    </div>
+    <div class="band-separator"></div>
+    <div class="item">
+      <div class="card-text">
+        <div class="fee-text">{{ recommendedFees[type].p50 }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p50" ></app-fiat></span>
+      </div>
+    </div>
+    <div class="item">
+      <div class="card-text">
+        <div class="fee-text">{{ recommendedFees[type].p75 }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p75" ></app-fiat></span>
+      </div>
+    </div>
+    <div class="item">
+      <div class="card-text">
+        <div class="fee-text">{{ recommendedFees[type].p95 | number: feeRounding }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p95" ></app-fiat></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingFees>
+  <div class="d-flex">
+    <div class="fee-progress-bar" [style.background]="noPriority">
+      <span class="fee-label" i18n="fees-box.no-priority">No Priority</span>
+    </div>
+    <div class="band-separator fill"></div>
+    <div class="fee-progress-bar priority" [style.background]="gradient">
+      <span class="fee-label prority" i18n="fees-box.low-priority">Low Priority</span>
+      <span class="fee-label prority" i18n="fees-box.medium-priority">Medium Priority</span>
+      <span class="fee-label prority" i18n="fees-box.high-priority">High Priority</span>
+    </div>
+  </div>
+  <div class="fee-estimation-container loading-container">
+    <div class="item">
+      <div class="card-text">
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
+      </div>
+    </div>
+    <div class="band-separator"></div>
+    <div class="item">
+      <div class="card-text">
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="card-text">
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="card-text">
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
+      </div>
+    </div>
+  </div>
+</ng-template>

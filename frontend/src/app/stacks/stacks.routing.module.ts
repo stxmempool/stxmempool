@@ -16,11 +16,14 @@ import { PrivacyPolicyComponent } from '../components/privacy-policy/privacy-pol
 import { PushTransactionComponent } from '../components/push-transaction/push-transaction.component';
 import { StacksMasterPageComponent } from '../components/stacks-master-page/stacks-master-page.component';
 import { StartComponent } from '../components/start/start.component';
+import { StacksStartComponent } from './stacks-start/stacks-start.component';
 import { TermsOfServiceComponent } from '../components/terms-of-service/terms-of-service.component';
 import { TrademarkPolicyComponent } from '../components/trademark-policy/trademark-policy.component';
 import { TransactionComponent } from '../components/transaction/transaction.component';
 import { DashboardComponent } from '../dashboard/dashboard.component';
 import { StacksDashboardComponent } from './stacks-dashboard/stacks-dashboard.component';
+import { StacksBlockchainComponent } from '../stacks/stacks-blockchain/stacks-blockchain.component';
+
 
 
 const routes: Routes = [
@@ -31,7 +34,7 @@ const routes: Routes = [
   // },
   {
     path: '',
-    component: StartComponent,
+    component: StacksStartComponent,
     // component: StacksMasterPageComponent,
     children: [
       {

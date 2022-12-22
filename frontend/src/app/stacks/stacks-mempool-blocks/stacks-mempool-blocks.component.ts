@@ -11,12 +11,12 @@ import { Location } from '@angular/common';
 import { DifficultyAdjustment } from '../../interfaces/node-api.interface';
 
 @Component({
-  selector: 'app-mempool-blocks',
-  templateUrl: './mempool-blocks.component.html',
-  styleUrls: ['./mempool-blocks.component.scss'],
+  selector: 'app-stacks-mempool-blocks',
+  templateUrl: './stacks-mempool-blocks.component.html',
+  styleUrls: ['./stacks-mempool-blocks.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MempoolBlocksComponent implements OnInit, OnDestroy {
+export class StacksMempoolBlocksComponent implements OnInit, OnDestroy {
   specialBlocks = specialBlocks;
   mempoolBlocks: MempoolBlock[] = [];
   mempoolEmptyBlocks: MempoolBlock[] = this.mountEmptyBlocks();
@@ -43,7 +43,7 @@ export class MempoolBlocksComponent implements OnInit, OnDestroy {
   blockPadding = 30;
   arrowVisible = false;
   tabHidden = false;
-  feeRounding = '1.0-0';
+  feeRounding = '1.0-1';
 
   rightPosition = 0;
   transition = 'background 2s, right 2s, transform 1s';

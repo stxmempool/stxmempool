@@ -31,10 +31,19 @@ class TransactionUtils {
     return this.extendTransaction(transaction);
   }
 
-  public async $getStacksTransactionExtended(txId: string): Promise<ExtendedStacksTransaction> {
+  public async $getStacksTransactionExtended(txId: string, verboseTransaction: Transaction | MempoolTransaction): Promise<ExtendedStacksTransaction> {
+    // const transaction = await stacksApi.$getTransaction(txId);
+    const size = await stacksApi.$getTransactionSize(txId);
+    // return this.extendStacksTransaction(transaction, size);
+    return this.extendStacksTransaction(verboseTransaction, size);
+
+  }
+  public async $getStacksMempoolTransactionExtended(txId: string): Promise<ExtendedStacksTransaction> {
     const transaction = await stacksApi.$getTransaction(txId);
     const size = await stacksApi.$getTransactionSize(txId);
     return this.extendStacksTransaction(transaction, size);
+    // return this.extendStacksTransaction(verboseTransaction, size);
+
   }
 
   private extendTransaction(transaction: IEsploraApi.Transaction): TransactionExtended {

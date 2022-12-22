@@ -1,4 +1,4 @@
-import { Block, Transaction, MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
+import { Block, Transaction, MempoolTransaction, TransactionFound } from '@stacks/stacks-blockchain-api-types';
 
 export interface BlockExtension {
   totalFees?: number;
@@ -7,9 +7,10 @@ export interface BlockExtension {
   avgFee?: number;
   avgFeeRate?: number;
   usd?: number | null;
+  reward: number;
 }
 export interface ExtendedStacksBlock extends Block {
-  extras?: BlockExtension;
+  extras: BlockExtension;
   tx_count: number;
   id: string;
   timestamp: number;
@@ -49,11 +50,18 @@ export interface StacksTransactionStripped {
   txid: string;
   fee: number;
   vsize: number;
-  value: number;
+  type: 'token_transfer' | 'smart_contract' | 'contract_call' | 'poison_microblock' | 'coinbase';
+}
+export interface StacksBlockSummary {
+  id: string;
+  transactions: StacksTransactionStripped[];
 }
 export interface StacksMempoolBlockDelta {
   added: StacksTransactionStripped[];
   removed: string[];
+}
+export interface CustomTransactionList {
+  [k: string]: TransactionFound;
 }
 // export type ExtendedStacksTransaction = MempoolTransaction | Transaction & {
 //   firstSeen?: number;

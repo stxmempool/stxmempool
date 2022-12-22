@@ -85,7 +85,7 @@ export class Common {
       fee: tx.feeRateAsNumber,
       vsize: tx.vsize,
       // place holder value
-      value: 8,
+      type: tx.tx_type,
     };
   }
 

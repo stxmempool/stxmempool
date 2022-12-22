@@ -1,15 +1,32 @@
 
 <div class="container-xl dashboard-container">
-  <!-- <div class="row row-cols-1 row-cols-md-2" *ngIf="{ value: (mempoolInfoData$ | async) } as mempoolInfoData">
+  <div class="row row-cols-1 row-cols-md-2" *ngIf="{ value: (mempoolInfoData$ | async) } as mempoolInfoData">
     <ng-container *ngIf="(network$ | async) !== 'liquid' && (network$ | async) !== 'liquidtestnet'">
-      <div class="col card-wrapper">
-        <div class="main-title" i18n="fees-box.transaction-fees">Transaction Fees</div>
+      <!-- <div class="col card-wrapper">
+        <div class="main-title" i18n="fees-box.transaction-fees">Token Transfer Transaction Fees</div>
         <div class="card">
           <div class="card-body less-padding">
-            <app-fees-box class="d-block"></app-fees-box>
+            <app-stacks-fees-box class="d-block" [type]="'tokenTransfer'"></app-stacks-fees-box>
           </div>
         </div>
-      </div>
+        <div class="main-title" i18n="fees-box.transaction-fees">Smart Contract Transaction Fees</div>
+        <div class="card">
+          <div class="card-body less-padding">
+            <app-stacks-fees-box class="d-block"></app-stacks-fees-box>
+            <app-stacks-fees-box class="d-block" [type]="'smartContract'"></app-stacks-fees-box>
+
+          </div>
+        </div>
+        <div class="main-title" i18n="fees-box.transaction-fees"> Contract Call Transaction Fees</div>
+        <div class="card">
+          <div class="card-body less-padding">
+            <app-stacks-fees-box class="d-block"></app-stacks-fees-box>
+            <app-stacks-fees-box class="d-block" [type]="'contractCall'"></app-stacks-fees-box>
+
+          </div>
+        </div>
+      </div> -->
+      
       <div class="col">
         <app-difficulty></app-difficulty>
       </div>
@@ -24,28 +41,31 @@
           <ng-template [ngIf]="(network$ | async) !== 'liquid'" [ngIfElse]="liquidPegs">
             <ng-container *ngIf="{ value: (mempoolStats$ | async) } as mempoolStats">
               <div class="mempool-graph">
-                <app-mempool-graph
+                <app-stacks-mempool-graph
                 [template]="'widget'"
                 [limitFee]="150"
                 [limitFilterFee]="1"
                 [data]="mempoolStats.value?.mempool"
                 [windowPreferenceOverride]="'2h'"
-                ></app-mempool-graph>
+                ></app-stacks-mempool-graph>
               </div>
             </ng-container>
           </ng-template>
           <ng-template #liquidPegs>
-            <app-lbtc-pegs-graph [data]="liquidPegsMonth$ | async"></app-lbtc-pegs-graph>
+            <!-- <app-lbtc-pegs-graph [data]="liquidPegsMonth$ | async"></app-lbtc-pegs-graph> -->
+            <!-- TAKE THIS SHIT OUT -->
+            <p>Liquid enabled</p>
           </ng-template>
         </div>
       </div>
     </div>
+
     <div class="col">
       <div class="card graph-card">
         <div class="card-body">
           <ng-container *ngTemplateOutlet="stateService.network === 'liquid' ? mempoolTable : txPerSecond; context: { $implicit: mempoolInfoData }"></ng-container>
           <hr>
-          <div class="mempool-graph" *ngIf="stateService.network === 'liquid'; else mempoolGraph">
+          <!-- <div class="mempool-graph" *ngIf="stateService.network === 'liquid'; else mempoolGraph">
             <table class="table table-borderless table-striped" *ngIf="(featuredAssets$ | async) as featuredAssets else loadingAssetsTable">
               <tbody>
                 <tr *ngFor="let group of featuredAssets">
@@ -61,20 +81,20 @@
                 </tr>
               </tbody>
             </table>
-          </div>
-          <ng-template #mempoolGraph>
+          </div> -->
+          <!-- <ng-template #mempoolGraph> -->
             <div class="mempool-graph" *ngIf="{ value: (mempoolStats$ | async) } as mempoolStats">
-              <app-incoming-transactions-graph
+              <app-stacks-incoming-transactions-graph
                 [left]="50"
                 [data]="mempoolStats.value?.weightPerSecond"
                 [windowPreferenceOverride]="'2h'"
-                ></app-incoming-transactions-graph>
+                ></app-stacks-incoming-transactions-graph>
             </div>
-          </ng-template>
+          <!-- </ng-template> -->
         </div>
       </div>
     </div>
-    <div class="col" style="max-height: 410px">
+    <!--<div class="col" style="max-height: 410px">
       <div class="card">
         <div class="card-body">
           <a class="title-link" href="" [routerLink]="['/blocks' | relativeUrl]">
@@ -113,8 +133,8 @@
           </table>
         </div>
       </div>
-    </div>
-    <div class="col" style="max-height: 410px">
+    </div>-->
+    <!--<div class="col" style="max-height: 410px">
       <div class="card">
         <div class="card-body">
           <h5 class="card-title" i18n="dashboard.latest-transactions">Latest transactions</h5>
@@ -137,8 +157,8 @@
           <div class="">&nbsp;</div>
         </div>
       </div>
-    </div>
-  </div> -->
+    </div> -->
+  </div>
 
   <app-language-selector></app-language-selector>
 
@@ -197,7 +217,7 @@
       <h5 *ngIf="!mempoolInfoData.value || mempoolInfoData.value.memPoolInfo.mempoolminfee === 0.00001 || (stateService.env.BASE_MODULE === 'liquid' && mempoolInfoData.value.memPoolInfo.mempoolminfee === 0.000001) else purgingText" class="card-title" i18n="dashboard.minimum-fee|Minimum mempool fee">Minimum fee</h5>
       <ng-template #purgingText><h5 class="card-title" i18n="dashboard.purging|Purgin below fee">Purging</h5></ng-template>
       <p class="card-text" *ngIf="(isLoadingWebSocket$ | async) === false && mempoolInfoData.value; else loading">
-        <ng-template [ngIf]="mempoolInfoData.value.memPoolInfo.mempoolminfee > 0.00001">&lt; </ng-template>{{ mempoolInfoData.value.memPoolInfo.mempoolminfee * 100000 | feeRounding }} <span><ng-container i18n="shared.sat-vbyte|sat/vB">sat/vB</ng-container></span>
+        <ng-template [ngIf]="mempoolInfoData.value.memPoolInfo.mempoolminfee > 0.00001">&lt; </ng-template>{{ mempoolInfoData.value.memPoolInfo.mempoolminfee * 100000 | feeRounding }} <span><ng-container i18n="shared.sat-vbyte|sat/vB">uSTX/vB</ng-container></span>
       </p>
     </div>
     <div class="item">

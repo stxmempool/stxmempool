@@ -29,6 +29,10 @@ class StacksMempoolBlocks {
     });
   }
 
+  public getMempoolBlocksWithTransactions(): StacksMempoolBlockWithTransactions[] {
+    return this.mempoolBlocks;
+  }
+  
   public getMempoolBlockDeltas(): StacksMempoolBlockDelta[] {
     return this.mempoolBlockDeltas;
   }

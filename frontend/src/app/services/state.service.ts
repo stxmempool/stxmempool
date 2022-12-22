@@ -51,7 +51,7 @@ const defaultEnv: Env = {
   'SIGNET_ENABLED': false,
   'LIQUID_ENABLED': false,
   'LIQUID_TESTNET_ENABLED': false,
-  "STACKS_ENABLED": false,
+  'STACKS_ENABLED': false,
   'BASE_MODULE': 'mempool',
   'BISQ_ENABLED': false,
   'BISQ_SEPARATE_BACKEND': false,
@@ -94,7 +94,9 @@ export class StateService {
   conversions$ = new ReplaySubject<any>(1);
   bsqPrice$ = new ReplaySubject<number>(1);
   mempoolInfo$ = new ReplaySubject<MempoolInfo>(1);
-  mempoolBlocks$ = new ReplaySubject<MempoolBlock[]>(1);
+  // mempoolBlocks$ = new ReplaySubject<MempoolBlock[]>(1);
+  mempoolBlocks$ = new ReplaySubject<any[]>(1);
+
   mempoolBlockTransactions$ = new Subject<TransactionStripped[]>();
   mempoolBlockDelta$ = new Subject<MempoolBlockDelta>();
   txReplaced$ = new Subject<ReplacedTransaction>();

@@ -261,6 +261,7 @@ export class WebsocketService {
     }
 
     if (response['mempool-blocks']) {
+      console.log('response --> mempool-blocks', response['mempool-blocks']);
       this.stateService.mempoolBlocks$.next(response['mempool-blocks']);
     }
 

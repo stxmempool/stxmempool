@@ -37,6 +37,8 @@ import bitcoinRoutes from './api/bitcoin/bitcoin.routes';
 import fundingTxFetcher from './tasks/lightning/sync-tasks/funding-tx-fetcher';
 import forensicsService from './tasks/lightning/forensics.service';
 import stacksMempool from './api/stacks/stacks-mempool';
+import stacksBlocks from './api/stacks/stacks-blocks';
+import stacksApi from './api/stacks/stacks-api';
 
 class Server {
   private wss: WebSocket.Server | undefined;
@@ -131,7 +133,8 @@ class Server {
     fiatConversion.startService();
 
     this.setUpHttpApiRoutes();
-
+    // const result = await stacksBlocks.$processRosettaBlock(87164, '0xcf9bd90fa702bfcfa1ae2e9cf3957249f0844a6387b8c6fd004f6e82b17cf149');
+    // console.log(result);
     // if (config.MEMPOOL.ENABLED) {
       this.runMainUpdateLoop();
     // }
@@ -174,6 +177,7 @@ class Server {
       // await memPool.$updateMempool();
       // indexer.$run();
       await stacksMempool.$updateStacksMempool();
+      await stacksBlocks.$updateBlocks();
 
 
       setTimeout(this.runMainUpdateLoop.bind(this), config.MEMPOOL.POLL_RATE_MS);
@@ -225,13 +229,19 @@ class Server {
       memPool.setAsyncMempoolChangedCallback(websocketHandler.handleMempoolChange.bind(websocketHandler));
       blocks.setNewAsyncBlockCallback(websocketHandler.handleNewBlock.bind(websocketHandler));
     }
-    stacksMempool.setMempoolChangedCallback(websocketHandler.handleStacksMempoolChange.bind(websocketHandler));
+    if (!config.MEMPOOL.ENABLED && config.STACKS.ENABLED){
+      statistics.setNewStatisticsEntryCallback(websocketHandler.handleNewStatistic.bind(websocketHandler));
+      stacksBlocks.setNewAsyncBlockCallback(websocketHandler.handleNewStacksBlock.bind(websocketHandler));
+      // blocks.setNewAsyncBlockCallback(websocketHandler.handleNewBlock.bind(websocketHandler));
+      stacksMempool.setAsyncMempoolChangedCallback(websocketHandler.handleStacksMempoolChange.bind(websocketHandler));
+    }
     fiatConversion.setProgressChangedCallback(websocketHandler.handleNewConversionRates.bind(websocketHandler));
     loadingIndicators.setProgressChangedCallback(websocketHandler.handleLoadingChanged.bind(websocketHandler));
   }
   
   setUpHttpApiRoutes(): void {
     bitcoinRoutes.initRoutes(this.app);
+    statisticsRoutes.initRoutes(this.app);
     if (config.STATISTICS.ENABLED && config.DATABASE.ENABLED && config.MEMPOOL.ENABLED) {
       statisticsRoutes.initRoutes(this.app);
     }
