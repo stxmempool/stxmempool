@@ -11,6 +11,7 @@ import {
   TransactionList
 } from '@stacks/stacks-blockchain-api-types';
 import { StacksTransactionCostsAndFees, CustomTransactionList } from "./stacks-api.interface";
+import logger from '../../logger';
 
 class StacksApi {
   protected network_identifier: { blockchain: string, network: string } = {
@@ -117,20 +118,106 @@ class StacksApi {
     const { data } = await axios.post<{ block: RosettaBlock}>('https://stacks-node-api.mainnet.stacks.co/rosetta/v1/block', payload);
     return data.block;
   }
-  public async $getVerboseTransactions(transactionIds: string[]): Promise<CustomTransactionList> {
-    let query = '';
-    for (let i = 0; i < transactionIds.length; i++) {
-      if (i === transactionIds.length - 1) {
-        query = query + 'tx_id=' + transactionIds[i];
-      } else {
-        query = query + 'tx_id=' + transactionIds[i] + '&';
+  public async $getVerboseTransactions(transactionIds: string[]): Promise<CustomTransactionList | undefined> {
+    // I want to build a string that resets on increments of 50
+    // add the transaction id to the query string 
+    // if the counter is evenly divided by 50
+      // make the query
+      // add the response to result
+      // reset the query string to ''
+      // continue to iterate
+
+    if (transactionIds.length > 50 && transactionIds.length <= 100) {
+      try {
+        let query = '';
+        for (let i = 0; i < 50; i++) {
+          if (i === transactionIds.length - 1) {
+            query = query + 'tx_id=' + transactionIds[i];
+          } else {
+            query = query + 'tx_id=' + transactionIds[i] + '&';
+          }
+        }
+        const { data } = await axios.get<CustomTransactionList>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`);
+        query = '';
+        for (let i = 50; i < transactionIds.length; i++) {
+          if (i === transactionIds.length - 1) {
+            query = query + 'tx_id=' + transactionIds[i];
+          } else {
+            query = query + 'tx_id=' + transactionIds[i] + '&';
+          }
+        }
+        const response = await axios.get<CustomTransactionList>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`);
+        return {...data, ...response.data};
+      } catch (error) {
+        console.log('error in $getVerbose-->', error);
+      }
+    } else if (transactionIds.length > 100) {
+      try {
+        let query = '';
+        for (let i = 0; i < 50; i++) {
+          if (i === transactionIds.length - 1) {
+            query = query + 'tx_id=' + transactionIds[i];
+          } else {
+            query = query + 'tx_id=' + transactionIds[i] + '&';
+          }
+        }
+        const { data } = await axios.get<CustomTransactionList>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`);
+        query = '';
+        for (let i = 50; i < 100; i++) {
+          if (i === transactionIds.length - 1) {
+            query = query + 'tx_id=' + transactionIds[i];
+          } else {
+            query = query + 'tx_id=' + transactionIds[i] + '&';
+          }
+        }
+        const response = await axios.get<CustomTransactionList>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`);
+        query = '';
+        for (let i = 100; i < transactionIds.length; i++) {
+          if (i === transactionIds.length - 1) {
+            query = query + 'tx_id=' + transactionIds[i];
+          } else {
+            query = query + 'tx_id=' + transactionIds[i] + '&';
+          }
+        }
+        const response2 = await axios.get<CustomTransactionList>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`);
+        return {...data, ...response.data, ...response2.data};
+      } catch (error) {
+        console.log('error in $getVerbose-->', error);
+      }
+    } else {
+      try {
+        let query = '';
+        for (let i = 0; i < transactionIds.length; i++) {
+          if (i === transactionIds.length - 1) {
+            query = query + 'tx_id=' + transactionIds[i];
+          } else {
+            query = query + 'tx_id=' + transactionIds[i] + '&';
+          }
+        }
+        const { data } = await axios.get<CustomTransactionList>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`);
+        return data;
+      } catch (error) {
+        console.log('error in $getVerbose-->', error);
       }
     }
-    const { data } = await axios.get<CustomTransactionList>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`);
-    return data;
+    // let query = '';
+    // for (let i = 0; i < transactionIds.length; i++) {
+    //   if (i === transactionIds.length - 1) {
+    //     query = query + 'tx_id=' + transactionIds[i];
+    //   } else {
+    //     query = query + 'tx_id=' + transactionIds[i] + '&';
+    //   }
+    // }
+    // const { data } = await axios.get<CustomTransactionList>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`);
+    // return data;
   }
   public async $getStacksFees(): Promise<MempoolTransactionStatsResponse> {
     const { data } = await axios.get<MempoolTransactionStatsResponse>('https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/mempool/stats');
+    return data;
+  }
+
+  public async $getBlockByHash(hash: string): Promise<Block> {
+    const { data } = await axios.get<Block>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/block/${hash}`);
     return data;
   }
 }

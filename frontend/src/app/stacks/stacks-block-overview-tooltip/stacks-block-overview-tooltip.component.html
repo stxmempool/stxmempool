@@ -1,0 +1,51 @@
+<div
+  #tooltip
+  class="block-overview-tooltip"
+  [class.clickable]="clickable"
+  [style.visibility]="tx ? 'visible' : 'hidden'"
+  [style.left]="tooltipPosition.x + 'px'"
+  [style.top]="tooltipPosition.y + 'px'"
+>
+  <table>
+    <tbody>
+      <tr>
+        <td class="td-width" i18n="shared.transaction">Transaction</td>
+        <td>
+          <a [routerLink]="['/tx/' | relativeUrl, txid]">{{ txid | shortenString : 16}}</a>
+        </td>
+      </tr>
+      <tr>
+        <!-- <td class="td-width" i18n="dashboard.latest-transactions.amount">Amount</td> -->
+        <td class="td-width" i18n="dashboard.latest-transactions.amount">Transaction Type</td>
+
+        <!-- <td><app-amount [satoshis]="value"></app-amount></td> -->
+        <td>{{value}}</td>
+      </tr>
+      <tr>
+        <td class="td-width" i18n="transaction.fee|Transaction fee">Fee</td>
+        <td>{{ fee | number }} <span class="symbol" i18n="shared.sat|sat">sat</span> &nbsp; <span class="fiat"><app-stacks-fiat [value]="fee"></app-stacks-fiat></span></td>
+      </tr>
+      <tr>
+        <td class="td-width" i18n="transaction.fee-rate|Transaction fee rate">Fee rate</td>
+        <td>
+          {{ feeRate | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">sat/vB</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="td-width" i18n="transaction.vsize|Transaction Virtual Size">Virtual size</td>
+        <td [innerHTML]="'&lrm;' + (vsize | vbytes: 2)"></td>
+      </tr>
+      <tr *ngIf="tx && tx.status && tx.status.length">
+        <td class="td-width" i18n="transaction.audit-status">Audit status</td>
+        <ng-container [ngSwitch]="tx?.status">
+          <td *ngSwitchCase="'found'" i18n="transaction.audit.match">match</td>
+          <td *ngSwitchCase="'censored'" i18n="transaction.audit.removed">removed</td>
+          <td *ngSwitchCase="'missing'" i18n="transaction.audit.marginal">marginal fee rate</td>
+          <td *ngSwitchCase="'fresh'" i18n="transaction.audit.recently-broadcast">recently broadcast</td>
+          <td *ngSwitchCase="'added'" i18n="transaction.audit.added">added</td>
+          <td *ngSwitchCase="'selected'" i18n="transaction.audit.marginal">marginal fee rate</td>
+        </ng-container>
+      </tr>
+    </tbody>
+  </table>
+</div>

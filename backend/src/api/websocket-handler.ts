@@ -21,7 +21,7 @@ import BlocksSummariesRepository from '../repositories/BlocksSummariesRepository
 import Audit from './audit';
 import stacksMempoolBlocks from './stacks/stacks-mempool-blocks';
 import stacksMempool from './stacks/stacks-mempool';
-import { ExtendedStacksBlock, ExtendedStacksTransaction } from './stacks/stacks-api.interface';
+import { StacksBlockExtended, StacksTransactionExtended } from './stacks/stacks-api.interface';
 import stacksBlocks from './stacks/stacks-blocks';
 
 class WebsocketHandler {
@@ -124,7 +124,8 @@ class WebsocketHandler {
             if (Number.isInteger(parsedMessage['track-mempool-block']) && parsedMessage['track-mempool-block'] >= 0) {
               const index = parsedMessage['track-mempool-block'];
               client['track-mempool-block'] = index;
-              const mBlocksWithTransactions = mempoolBlocks.getMempoolBlocksWithTransactions();
+              // const mBlocksWithTransactions = mempoolBlocks.getMempoolBlocksWithTransactions();
+              const mBlocksWithTransactions = stacksMempoolBlocks.getMempoolBlocksWithTransactions();
               response['projected-block-transactions'] = {
                 index: index,
                 blockTransactions: mBlocksWithTransactions[index]?.transactions || [],
@@ -211,7 +212,7 @@ class WebsocketHandler {
   }
 
   // getInitData(_blocks?: BlockExtended[]) {
-  getInitData(_blocks?: ExtendedStacksBlock[]) {
+  getInitData(_blocks?: StacksBlockExtended[]) {
 
     if (!_blocks) {
       // _blocks = blocks.getBlocks().slice(-config.MEMPOOL.INITIAL_BLOCKS_AMOUNT);
@@ -264,8 +265,8 @@ class WebsocketHandler {
     });
   }
   
-  async handleStacksMempoolChange(newMempool: { [txid: string]: ExtendedStacksTransaction },
-    newTransactions: ExtendedStacksTransaction[], deletedTransactions: ExtendedStacksTransaction[]) {
+  async handleStacksMempoolChange(newMempool: { [txid: string]: StacksTransactionExtended },
+    newTransactions: StacksTransactionExtended[], deletedTransactions: StacksTransactionExtended[]) {
     if (!this.wss) {
       throw new Error('WebSocket.Server is not set');
     }
@@ -294,6 +295,16 @@ class WebsocketHandler {
       }
       if (client['want-mempool-blocks']) {
         response['mempool-blocks'] = mBlocks;
+      }
+
+      if (client['track-mempool-block'] >= 0) {
+        const index = client['track-mempool-block'];
+        if (mBlockDeltas[index]) {
+          response['projected-block-transactions'] = {
+            index: index,
+            delta: mBlockDeltas[index],
+          };
+        }
       }
       if (Object.keys(response).length) {
         client.send(JSON.stringify(response));
@@ -468,7 +479,7 @@ class WebsocketHandler {
       }
     });
   }
-  async handleNewStacksBlock(block: ExtendedStacksBlock, txIds: string[], transactions: ExtendedStacksTransaction[]): Promise<void> {
+  async handleNewStacksBlock(block: StacksBlockExtended, txIds: string[], transactions: StacksTransactionExtended[]): Promise<void> {
     if (!this.wss) {
       throw new Error('WebSocket.Server is not set');
     }
@@ -501,6 +512,15 @@ class WebsocketHandler {
       };
       if (mBlocks && client['want-mempool-blocks']) {
         response['mempool-blocks'] = mBlocks;
+      }
+      if (client['track-mempool-block'] >= 0) {
+        const index = client['track-mempool-block'];
+        if (mBlockDeltas && mBlockDeltas[index]) {
+          response['projected-block-transactions'] = {
+            index: index,
+            delta: mBlockDeltas[index],
+          };
+        }
       }
       client.send(JSON.stringify(response));
     });

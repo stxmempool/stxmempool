@@ -4,7 +4,7 @@ import { TransactionExtended, OptimizedStatistic } from '../../mempool.interface
 import { Common } from '../common';
 import statisticsApi from './statistics-api';
 import stacksMempool from '../stacks/stacks-mempool';
-import { ExtendedStacksTransaction } from '../stacks/stacks-api.interface';
+import { StacksTransactionExtended } from '../stacks/stacks-api.interface';
 
 class Statistics {
   protected intervalTimer: NodeJS.Timer | undefined;
@@ -166,7 +166,7 @@ class Statistics {
 
     logger.debug('Running Stacks statistics');
 
-    let memPoolArray: ExtendedStacksTransaction[] = [];
+    let memPoolArray: StacksTransactionExtended[] = [];
     for (const i in currentMempool) {
       if (currentMempool.hasOwnProperty(i)) {
         memPoolArray.push(currentMempool[i]);

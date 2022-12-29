@@ -9,13 +9,14 @@ export interface BlockExtension {
   usd?: number | null;
   reward: number;
 }
-export interface ExtendedStacksBlock extends Block {
+export interface StacksBlockExtended extends Block {
   extras: BlockExtension;
   tx_count: number;
   id: string;
   timestamp: number;
   previousblockhash: string;
   size?: number;
+  minerAddress: string;
 }
 export interface StacksTransactionCostsAndFees {
   fee_rate: number;
@@ -63,7 +64,7 @@ export interface StacksMempoolBlockDelta {
 export interface CustomTransactionList {
   [k: string]: TransactionFound;
 }
-// export type ExtendedStacksTransaction = MempoolTransaction | Transaction & {
+// export type StacksTransactionExtended = MempoolTransaction | Transaction & {
 //   firstSeen?: number;
 //   vsize?: number;
 //   feePerVsize?: number;
@@ -71,7 +72,7 @@ export interface CustomTransactionList {
 //   deleteAfter?: number;
 // }
 type Midpoint = MempoolTransaction | Transaction
-export type ExtendedStacksTransaction = Midpoint & {
+export type StacksTransactionExtended = Midpoint & {
   feeRateAsNumber: number;
   firstSeen?: number;
   vsize: number;

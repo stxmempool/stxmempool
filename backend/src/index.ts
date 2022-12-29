@@ -39,6 +39,7 @@ import forensicsService from './tasks/lightning/forensics.service';
 import stacksMempool from './api/stacks/stacks-mempool';
 import stacksBlocks from './api/stacks/stacks-blocks';
 import stacksApi from './api/stacks/stacks-api';
+import stacksRoutes from './api/stacks/stacks.routes';
 
 class Server {
   private wss: WebSocket.Server | undefined;
@@ -241,7 +242,6 @@ class Server {
   
   setUpHttpApiRoutes(): void {
     bitcoinRoutes.initRoutes(this.app);
-    statisticsRoutes.initRoutes(this.app);
     if (config.STATISTICS.ENABLED && config.DATABASE.ENABLED && config.MEMPOOL.ENABLED) {
       statisticsRoutes.initRoutes(this.app);
     }
@@ -258,6 +258,10 @@ class Server {
       generalLightningRoutes.initRoutes(this.app);
       nodesRoutes.initRoutes(this.app);
       channelsRoutes.initRoutes(this.app);
+    }
+    if (config.STACKS.ENABLED) {
+      statisticsRoutes.initRoutes(this.app);
+      stacksRoutes.initRoutes(this.app);
     }
   }
 }

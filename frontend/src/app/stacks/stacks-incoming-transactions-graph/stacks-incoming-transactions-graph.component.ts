@@ -176,7 +176,8 @@ export class StacksIncomingTransactionsGraphComponent implements OnInit, OnChang
               width: 2,
             },
             data: [{
-              yAxis: 1667,
+              // yAxis: 1667,
+              yAxis: 200,
               label: {
                 show: false,
                 color: '#ffffff',

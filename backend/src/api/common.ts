@@ -2,7 +2,7 @@ import { CpfpInfo, TransactionExtended, TransactionStripped } from '../mempool.i
 import config from '../config';
 import { NodeSocket } from '../repositories/NodesSocketsRepository';
 import { isIP } from 'net';
-import { ExtendedStacksTransaction, StacksTransactionStripped } from './stacks/stacks-api.interface';
+import { StacksTransactionExtended, StacksTransactionStripped } from './stacks/stacks-api.interface';
 export class Common {
   static nativeAssetId = config.MEMPOOL.NETWORK === 'liquidtestnet' ?
     '144c654344aa716d6f3abcc1ca90e5641e4e2a7f633bc09fe3baf64585819a49'
@@ -35,7 +35,7 @@ export class Common {
     return numbers[index];
   }
 
-  static getFeesInRange(transactions: TransactionExtended[] |  ExtendedStacksTransaction[], rangeLength: number) {
+  static getFeesInRange(transactions: TransactionExtended[] |  StacksTransactionExtended[], rangeLength: number) {
     const arr = [transactions[transactions.length - 1].effectiveFeePerVsize];
     const chunk = 1 / (rangeLength - 1);
     let itemsToAdd = rangeLength - 2;
@@ -79,7 +79,7 @@ export class Common {
       value: tx.vout.reduce((acc, vout) => acc + (vout.value ? vout.value : 0), 0),
     };
   }
-  static stripStacksTransaction(tx: ExtendedStacksTransaction): StacksTransactionStripped {
+  static stripStacksTransaction(tx: StacksTransactionExtended): StacksTransactionStripped {
     return {
       txid: tx.tx_id,
       fee: tx.feeRateAsNumber,

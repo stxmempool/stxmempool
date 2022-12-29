@@ -23,6 +23,11 @@ import { TransactionComponent } from '../components/transaction/transaction.comp
 import { DashboardComponent } from '../dashboard/dashboard.component';
 import { StacksDashboardComponent } from './stacks-dashboard/stacks-dashboard.component';
 import { StacksBlockchainComponent } from '../stacks/stacks-blockchain/stacks-blockchain.component';
+import { StacksBlockComponent } from '../stacks/stacks-block/stacks-block.component';
+import { StacksMempoolBlocksComponent } from '../stacks/stacks-mempool-blocks/stacks-mempool-blocks.component';
+import { StacksMempoolBlockComponent } from './stacks-mempool-block/stacks-mempool-block.component';
+
+
 
 
 
@@ -40,7 +45,7 @@ const routes: Routes = [
       {
         path: '',
         component: StacksDashboardComponent,
-      }
+      },
       // {
       //   path: 'tx/push',
       //   component: PushTransactionComponent,
@@ -130,7 +135,35 @@ const routes: Routes = [
       //     }
       //   ]
       // },
-    ]
+    ],
+  },
+  {
+    path: 'block',
+    data: { networkSpecific: true },
+    component: StacksStartComponent,
+    children: [
+      {
+        path: ':id',
+        component: StacksBlockComponent,
+        data: {
+          ogImage: true
+        }
+      },
+    ],
+  },
+  {
+    path: 'mempool-block/:id',
+    data: { networks: ['bitcoin', 'liquid'] },
+    component: StacksStartComponent,
+    children: [
+      {
+        path: '',
+        component: StacksMempoolBlockComponent,
+        data: {
+          ogImage: true
+        }
+      },
+    ],
   },
   // {
   //   path: 'about',

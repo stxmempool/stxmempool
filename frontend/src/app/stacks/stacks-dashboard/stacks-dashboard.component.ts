@@ -8,6 +8,8 @@ import { StateService } from '../../services/state.service';
 import { WebsocketService } from '../../services/websocket.service';
 import { SeoService } from '../../services/seo.service';
 import { StorageService } from '../../services/storage.service';
+// this is trash, make a set of interfaces for frontend
+import { StacksBlockExtended, StacksTransactionStripped } from '../../../../../backend/src/api/stacks/stacks-api.interface';
 
 interface MempoolBlocksData {
   blocks: number;
@@ -39,8 +41,12 @@ export class StacksDashboardComponent implements OnInit {
   mempoolInfoData$: Observable<MempoolInfoData>;
   mempoolLoadingStatus$: Observable<number>;
   vBytesPerSecondLimit = 1667;
-  blocks$: Observable<BlockExtended[]>;
-  transactions$: Observable<TransactionStripped[]>;
+  // blocks$: Observable<BlockExtended[]>;
+  blocks$: Observable<StacksBlockExtended[]>;
+
+  // transactions$: Observable<TransactionStripped[]>;
+  transactions$: Observable<StacksTransactionStripped[]>;
+
   latestBlockHeight: number;
   mempoolTransactionsWeightPerSecondData: any;
   mempoolStats$: Observable<MempoolStatsData>;
@@ -225,7 +231,7 @@ export class StacksDashboardComponent implements OnInit {
     };
   }
 
-  trackByBlock(index: number, block: BlockExtended) {
+  trackByBlock(index: number, block: StacksBlockExtended) {
     return block.height;
   }
 }

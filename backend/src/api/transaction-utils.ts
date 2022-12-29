@@ -3,7 +3,7 @@ import stacksApi from './stacks/stacks-api';
 import { TransactionExtended, TransactionMinerInfo } from '../mempool.interfaces';
 import { IEsploraApi } from './bitcoin/esplora-api.interface';
 import { Transaction, MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
-import { ExtendedStacksTransaction } from './stacks/stacks-api.interface';
+import { StacksTransactionExtended } from './stacks/stacks-api.interface';
 
 
 import config from '../config';
@@ -31,14 +31,14 @@ class TransactionUtils {
     return this.extendTransaction(transaction);
   }
 
-  public async $getStacksTransactionExtended(txId: string, verboseTransaction: Transaction | MempoolTransaction): Promise<ExtendedStacksTransaction> {
+  public async $getStacksTransactionExtended(txId: string, verboseTransaction: Transaction | MempoolTransaction): Promise<StacksTransactionExtended> {
     // const transaction = await stacksApi.$getTransaction(txId);
     const size = await stacksApi.$getTransactionSize(txId);
     // return this.extendStacksTransaction(transaction, size);
     return this.extendStacksTransaction(verboseTransaction, size);
 
   }
-  public async $getStacksMempoolTransactionExtended(txId: string): Promise<ExtendedStacksTransaction> {
+  public async $getStacksMempoolTransactionExtended(txId: string): Promise<StacksTransactionExtended> {
     const transaction = await stacksApi.$getTransaction(txId);
     const size = await stacksApi.$getTransactionSize(txId);
     return this.extendStacksTransaction(transaction, size);
@@ -65,14 +65,14 @@ class TransactionUtils {
     return transactionExtended;
   }
 
-  public extendStacksTransaction (transaction: Transaction | MempoolTransaction, size: number): ExtendedStacksTransaction {
+  public extendStacksTransaction (transaction: Transaction | MempoolTransaction, size: number): StacksTransactionExtended {
     // @ts-ignore
     if (transaction.vsize) {
       // @ts-ignore
       return transaction;
     }
     const feePerVbytes = Math.max(1, (Number(transaction.fee_rate) || 0) / size);
-    const transactionExtended: ExtendedStacksTransaction = Object.assign({
+    const transactionExtended: StacksTransactionExtended = Object.assign({
       feeRateAsNumber: Number(transaction.fee_rate),
       vsize: size,
       feePerVsize: feePerVbytes,

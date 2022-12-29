@@ -3,7 +3,7 @@ import loadingIndicators from '../loading-indicators';
 import transactionUtils from '../transaction-utils';
 import { VbytesPerSecond } from '../../mempool.interfaces';
 import { Block, MempoolTransactionListResponse, Transaction, MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
-import { ExtendedStacksTransaction } from './stacks-api.interface';
+import { StacksTransactionExtended } from './stacks-api.interface';
 import { Common } from '../common';
 import logger from '../../logger';
 import axios from 'axios';
@@ -13,15 +13,15 @@ class StacksMempool {
   private static LAZY_DELETE_AFTER_SECONDS = 30;
   private inSync: boolean = false;
   private mempoolCacheDelta: number = -1;
-  private mempoolCache: { [txId: string] : ExtendedStacksTransaction} = {};
+  private mempoolCache: { [txId: string] : StacksTransactionExtended} = {};
   // fake info as a placeholder because Stacks does not have an equivalent endpoint
   private mempoolInfo: any = { loaded: true, size: 2213, bytes: 739446, usage: 3984000, total_fee: 1,
     maxmempool: 300000000, mempoolminfee: 0.00001000, minrelaytxfee: 0.00001000 };
 
-  private mempoolChangedCallback: ((newMempool: {[txId: string]: ExtendedStacksTransaction; }, newTransactions: ExtendedStacksTransaction[],
-    deletedTransactions: ExtendedStacksTransaction[]) => void) | undefined;
-  private asyncMempoolChangedCallback: ((newMempool: {[txId: string]: ExtendedStacksTransaction; }, newTransactions: ExtendedStacksTransaction[],
-    deletedTransactions: ExtendedStacksTransaction[]) => void) | undefined;
+  private mempoolChangedCallback: ((newMempool: {[txId: string]: StacksTransactionExtended; }, newTransactions: StacksTransactionExtended[],
+    deletedTransactions: StacksTransactionExtended[]) => void) | undefined;
+  private asyncMempoolChangedCallback: ((newMempool: {[txId: string]: StacksTransactionExtended; }, newTransactions: StacksTransactionExtended[],
+    deletedTransactions: StacksTransactionExtended[]) => void) | undefined;
   private txPerSecondArray: number[] = [];
   private txPerSecond: number = 0;
 
@@ -58,16 +58,16 @@ class StacksMempool {
     return this.latestTransactions;
   }
 
-  public setMempoolChangedCallback(fn: (newMempool: { [txId: string]: ExtendedStacksTransaction; },
-    newTransactions: ExtendedStacksTransaction[], deletedTransactions: ExtendedStacksTransaction[]) => void) {
+  public setMempoolChangedCallback(fn: (newMempool: { [txId: string]: StacksTransactionExtended; },
+    newTransactions: StacksTransactionExtended[], deletedTransactions: StacksTransactionExtended[]) => void) {
     this.mempoolChangedCallback = fn;
   }
-  public setAsyncMempoolChangedCallback(fn: (newMempool: { [txId: string]: ExtendedStacksTransaction; },
-    newTransactions: ExtendedStacksTransaction[], deletedTransactions: ExtendedStacksTransaction[]) => Promise<void>) {
+  public setAsyncMempoolChangedCallback(fn: (newMempool: { [txId: string]: StacksTransactionExtended; },
+    newTransactions: StacksTransactionExtended[], deletedTransactions: StacksTransactionExtended[]) => Promise<void>) {
     this.asyncMempoolChangedCallback = fn;
   }
 
-  public getMempool(): { [txid: string]: ExtendedStacksTransaction } {
+  public getMempool(): { [txid: string]: StacksTransactionExtended } {
     return this.mempoolCache;
   }
   /* Related to loading and setting for diskcache
@@ -106,7 +106,7 @@ class StacksMempool {
     const transactions = await this.$getStacksMempoolTransactions();
     const diff = transactions.length - currentMempoolSize;
     // const newTransactions: TransactionExtended[] = [];
-    const newTransactions: ExtendedStacksTransaction[] = [];
+    const newTransactions: StacksTransactionExtended[] = [];
     this.mempoolCacheDelta = Math.abs(diff);
 
     if (!this.inSync) {
@@ -117,7 +117,7 @@ class StacksMempool {
 
       if (!this.mempoolCache[txid]) {
         try {
-          const transaction: ExtendedStacksTransaction = await transactionUtils.$getStacksMempoolTransactionExtended(txid);
+          const transaction: StacksTransactionExtended = await transactionUtils.$getStacksMempoolTransactionExtended(txid);
           this.mempoolCache[txid] = transaction;
           // txCount++;
           if (this.inSync) {
@@ -160,7 +160,7 @@ class StacksMempool {
       }, 1000 * 60 * config.MEMPOOL.CLEAR_PROTECTION_MINUTES);
     }
 
-    const deletedTransactions: ExtendedStacksTransaction[] = [];
+    const deletedTransactions: StacksTransactionExtended[] = [];
 
 
     if (this.mempoolProtection !== 1) {

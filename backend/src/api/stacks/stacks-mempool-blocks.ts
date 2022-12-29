@@ -1,7 +1,7 @@
 import logger from "../../logger";
 import config from "../../config";
 import {
-  ExtendedStacksTransaction,
+  StacksTransactionExtended,
   StacksMempoolBlockWithTransactions,
   StacksTransactionStripped,
   StacksMempoolBlockDelta,
@@ -37,9 +37,9 @@ class StacksMempoolBlocks {
     return this.mempoolBlockDeltas;
   }
 
-  updateMempoolBlocks (memPool: { [txId: string]: ExtendedStacksTransaction }): void {
+  updateMempoolBlocks (memPool: { [txId: string]: StacksTransactionExtended }): void {
     const latestMempool = memPool;
-    const memPoolArray: ExtendedStacksTransaction[] = [];
+    const memPoolArray: StacksTransactionExtended[] = [];
     for (const i in latestMempool) {
       if (latestMempool.hasOwnProperty(i)) {
         memPoolArray.push(latestMempool[i]);
@@ -59,7 +59,7 @@ class StacksMempoolBlocks {
     this.mempoolBlockDeltas = deltas;
   }
 
-  private calculateMempoolBlocks(transactionsSorted: ExtendedStacksTransaction[], prevBlocks: StacksMempoolBlockWithTransactions[]):
+  private calculateMempoolBlocks(transactionsSorted: StacksTransactionExtended[], prevBlocks: StacksMempoolBlockWithTransactions[]):
     { blocks: StacksMempoolBlockWithTransactions[], deltas: StacksMempoolBlockDelta[]} {
     const mempoolBlocks: StacksMempoolBlockWithTransactions[] = [];
     // const mempoolBlockDeltas: MempoolBlockDelta[] = [];
@@ -86,7 +86,7 @@ class StacksMempoolBlocks {
     // let blockWriteCount = 0;
     // let blockWriteLength = 0;
     let blockSize = 0;
-    let transactions: ExtendedStacksTransaction[] = [];
+    let transactions: StacksTransactionExtended[] = [];
     transactionsSorted.forEach((tx) => {
       if (blockSize + tx.vsize <= config.STACKS.BLOCK_MAX_SIZE
         || mempoolBlocks.length === config.STACKS.MEMPOOL_BLOCKS_AMOUNT - 1) {
@@ -140,7 +140,7 @@ class StacksMempoolBlocks {
       deltas: mempoolBlockDeltas
     };
   }
-  dataToMempoolBlocks(transactions: ExtendedStacksTransaction[], 
+  dataToMempoolBlocks(transactions: StacksTransactionExtended[], 
     blockSize: number, blocksIndex: number): StacksMempoolBlockWithTransactions {
     let rangeLength = 4;
     if (blocksIndex === 0) {

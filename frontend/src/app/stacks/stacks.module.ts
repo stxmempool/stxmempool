@@ -20,6 +20,17 @@ import { StacksApiService } from './stacks-api.service';
 import { StacksFeesBoxComponent } from '../stacks/stacks-fees-box/stacks-fees-box.component';
 import { StacksMempoolGraphComponent } from '../stacks/stacks-mempool-graph/stacks-mempool-graph.component';
 import { StacksIncomingTransactionsGraphComponent } from '../stacks/stacks-incoming-transactions-graph/stacks-incoming-transactions-graph.component';
+import { StacksBlockComponent } from '../stacks/stacks-block/stacks-block.component';
+import { StacksBlockPreviewComponent } from '../stacks/stacks-block/stacks-block-preview.component';
+import { StacksBlockOverviewTooltipComponent} from '../stacks/stacks-block-overview-tooltip/stacks-block-overview-tooltip.component';
+import { StacksBlockOverviewGraphComponent } from '../stacks/stacks-block-overview-graph/stacks-block-overview-graph.component';
+import { StacksFiatComponent } from '../stacks/stacks-fiat/stacks-fiat.component';
+import { StacksTransactionsListComponent } from '../stacks/stacks-transactions-list/stacks-transactions-list.component';
+import { StacksAmountComponent } from '../stacks/stacks-amount/stacks-amount.component';
+import { StacksMempoolBlockComponent } from '../stacks/stacks-mempool-block/stacks-mempool-block.component';
+import { StacksFeeDistributionGraphComponent } from '../stacks/stacks-fee-distribution-graph/stacks-fee-distribution-graph.component';
+import { StacksMempoolBlockOverviewComponent } from '../stacks/stacks-mempool-block-overview/stacks-mempool-block-overview.component';
+import { BasicSimpleComponent } from '../stacks/simple-chart/basic-simple.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +42,18 @@ import { StacksIncomingTransactionsGraphComponent } from '../stacks/stacks-incom
     StacksMempoolBlocksComponent,
     StacksFeesBoxComponent,
     StacksMempoolGraphComponent,
-    StacksIncomingTransactionsGraphComponent
+    StacksIncomingTransactionsGraphComponent,
+    StacksBlockComponent,
+    StacksBlockPreviewComponent,
+    StacksBlockOverviewTooltipComponent,
+    StacksBlockOverviewGraphComponent,
+    StacksFiatComponent,
+    StacksTransactionsListComponent,
+    StacksAmountComponent,
+    StacksMempoolBlockComponent,
+    StacksFeeDistributionGraphComponent,
+    StacksMempoolBlockOverviewComponent,
+    BasicSimpleComponent
   ],
   imports: [
     CommonModule,
