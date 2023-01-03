@@ -118,7 +118,7 @@ export class StacksIncomingTransactionsGraphComponent implements OnInit, OnChang
               itemFormatted += `<div class="item">
                 <div class="indicator-container">${colorSpan(item.color)}</div>
                 <div class="grow"></div>
-                <div class="value">${formatNumber(item.value[1], this.locale, '1.0-0')}<span class="symbol">vB/s</span></div>
+                <div class="value">${formatNumber(item.value[1], this.locale, '1.0-0')}<span class="symbol">B/s</span></div>
               </div>`;
             }
           });
@@ -177,7 +177,8 @@ export class StacksIncomingTransactionsGraphComponent implements OnInit, OnChang
             },
             data: [{
               // yAxis: 1667,
-              yAxis: 200,
+              // yAxis: 116,
+              yAxis: 50,
               label: {
                 show: false,
                 color: '#ffffff',
@@ -191,32 +192,79 @@ export class StacksIncomingTransactionsGraphComponent implements OnInit, OnChang
         top: 50,
         right: 10,
         pieces: [{
+          // original
+          // gt: 0,
+          // lte: 50,
+
           gt: 0,
-          lte: 1667,
+
+          // step desc
+          // lte: 116,
+          
+          // I think 50 is proper baseline so far
+          lte: 50,
           color: '#7CB342'
         },
         {
-          gt: 1667,
-          lte: 2000,
+          // original 50%
+          // gt: 50,
+          // lte: 100,
+
+          // 83% step asc
+          gt: 50,
+          lte: 60,
+
+          // 80% step desc
+          // gt: 116,
+          // lte: 140,
           color: '#FDD835'
         },
         {
-          gt: 2000,
-          lte: 2500,
+          // original 66%
+          // gt: 100,
+          // lte: 150,
+
+          // 80% step asc
+          gt: 60,
+          lte: 75,
+          
+          // 80% step desc
+          // gt: 140,
+          // lte: 176,
           color: '#FFB300'
         },
         {
-          gt: 2500,
-          lte: 3000,
+          // original 75%
+          // gt: 150,
+          // lte: 200,
+
+          // 83% step asc
+          gt: 75,
+          lte: 90,
+
+          // 83% step desc
+          // gt: 176,
+          // lte: 212,
           color: '#FB8C00'
         },
         {
-          gt: 3000,
-          lte: 3500,
+          // original 80%
+          // gt: 200,
+
+          // 85% step asc
+          gt: 90,
+          lte: 105,
+
+          //85% step desc
+          // gt: 212.5,
+          // lte: 250,
           color: '#F4511E'
         },
         {
-          gt: 3500,
+          // original
+          // gt: 250,
+          gt: 105,
+
           color: '#D81B60'
         }],
         outOfRange: {

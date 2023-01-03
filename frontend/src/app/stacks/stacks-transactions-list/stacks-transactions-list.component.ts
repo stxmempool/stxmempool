@@ -9,6 +9,7 @@ import { filter, map, tap, switchMap } from 'rxjs/operators';
 import { BlockExtended } from '../../interfaces/node-api.interface';
 import { StacksTransactionExtended, MinedStacksTransactionExtended } from '../stacks.interfaces';
 import { ApiService } from '../../services/api.service';
+import { MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
 
 
 /*
@@ -288,6 +289,9 @@ export class StacksTransactionsListComponent implements OnInit {
       limit = tx.vout.length;
     }
     return limit;
+  }
+  parseContractName (contractId: string): string {
+    return contractId.slice(contractId.indexOf('.') + 1);
   }
 
   // ngOnDestroy(): void {

@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, Inject, LOCALE_ID, ChangeDetectionStrategy, OnChanges } from '@angular/core';
 import { VbytesPipe } from '../../shared/pipes/bytes-pipe/vbytes.pipe';
+import { BytesPipe } from 'src/app/shared/pipes/bytes-pipe/bytes.pipe';
 import { formatNumber } from '@angular/common';
 import { OptimizedMempoolStats } from '../../interfaces/node-api.interface';
 import { StateService } from '../../services/state.service';
@@ -51,6 +52,7 @@ export class StacksMempoolGraphComponent implements OnInit, OnChanges {
     private vbytesPipe: VbytesPipe,
     private stateService: StateService,
     private storageService: StorageService,
+    private bytesPipe: BytesPipe,
     @Inject(LOCALE_ID) private locale: string,
   ) { }
 
@@ -213,7 +215,7 @@ export class StacksMempoolGraphComponent implements OnInit, OnChanges {
                   <span class="symbol">%</span>
                 </span>
                 <span class="total-parcial-vbytes">
-                  ${this.vbytesPipe.transform(totalParcial, 2, 'vB', 'MvB', false)}
+                  ${this.bytesPipe.transform(totalParcial, 2, 'B', 'MB', false)}
                 </span>
                 <div class="total-percentage-bar">
                   <span class="total-percentage-bar-background">
@@ -237,12 +239,12 @@ export class StacksMempoolGraphComponent implements OnInit, OnChanges {
               </td>
               <td class="total-progress-sum">
                 <span>
-                  ${this.vbytesPipe.transform(item.value[1], 2, 'vB', 'MvB', false)}
+                  ${this.bytesPipe.transform(item.value[1], 2, 'B', 'MB', false)}
                 </span>
               </td>
               <td class="total-progress-sum">
                 <span>
-                  ${this.vbytesPipe.transform(totalValueArray[index], 2, 'vB', 'MvB', false)}
+                  ${this.bytesPipe.transform(totalValueArray[index], 2, 'B', 'MB', false)}
                 </span>
               </td>
               <td class="total-progress-sum-bar">
@@ -263,7 +265,7 @@ export class StacksMempoolGraphComponent implements OnInit, OnChanges {
             <div class="title">
               ${axisValueLabel}
               <span class="total-value">
-                ${this.vbytesPipe.transform(totalValue, 2, 'vB', 'MvB', false)}
+                ${this.bytesPipe.transform(totalValue, 2, 'B', 'MB', false)}
               </span>
             </div>
             <table>
@@ -342,7 +344,7 @@ export class StacksMempoolGraphComponent implements OnInit, OnChanges {
         axisLine: { onZero: false },
         axisLabel: {
           fontSize: 11,
-          formatter: (value: number) => (`${this.vbytesPipe.transform(value, 2, 'vB', 'MvB', true)}`),
+          formatter: (value: number) => (`${this.bytesPipe.transform(value, 2, 'B', 'MB', true)}`),
         },
         splitLine: {
           lineStyle: {

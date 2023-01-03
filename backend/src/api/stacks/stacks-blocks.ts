@@ -25,7 +25,6 @@ class StacksBlocks {
   private previousDifficultyRetarget = 0;
   public initialBlocks: Block[] = [];
   public extendedBlocks: StacksBlockExtended[] = [];
-  // public extendedBlocks: any = [];
   public stacksBlockTip: number = 0;
   private counter: number = 1;
   private genesisDate: Date = new Date('2021-01-14T17:28:24.000Z');
@@ -136,77 +135,18 @@ class StacksBlocks {
           }
         }
         // TODO WRITE CUSTOM FUNCTION TO RETIREVE COINBASE TRANSACTION
-        // if()
         if (onlyCoinbase === true) {
           break; // Fetch the first transaction and exit
         }
       }
     }
-      // transactions.forEach((tx) => {
-      //   if (!tx.cpfpChecked) {
-      //     Common.setRelativesAndGetCpfpInfo(tx, mempool); // Child Pay For Parent
-      //   }
-      // });
       if (!quiet) {
         logger.debug(`${transactionsFound} of ${txIds.length} found in mempool. ${transactionsFetched} fetched through backend service.`);
       }
     
       return transactions;
   }
-
-  /**
-   * Return a block summary (list of stripped transactions)
-   * @param block
-   * @returns StacksBlockSummary
-   */
-  //  private summarizeBlock(block: Block): StacksBlockSummary {
-  //   const stripped = block.txs.map((tx) => {
-  //     return {
-  //       txid: tx.txid,
-  //       vsize: tx.weight / 4,
-  //       fee: tx.fee ? Math.round(tx.fee * 100000000) : 0,
-  //       value: Math.round(tx.vout.reduce((acc, vout) => acc + (vout.value ? vout.value : 0), 0) * 100000000)
-  //     };
-  //   });
-
-  //   return {
-  //     id: block.hash,
-  //     transactions: stripped
-  //   };
-  // }
-
-  /**
-   * Return a block with additional data (reward, coinbase, fees...)
-   * @param block
-   * @param transactions
-   * @returns BlockExtended
-   */
-
-  public calcCost(block: Block): number {
-    // const totalRuntimeCost = transactionsData.map(data => data.execution_cost_runtime).reduce((a, b) => a + b);
-    // const totalReadCountCost = transactionsData.map(data => data.execution_cost_read_count).reduce((a, b) => a + b);
-    // const totalReadLengthCost = transactionsData.map(data => data.execution_cost_read_length).reduce((a, b) => a + b);
-    // const totalWriteCountCost = transactionsData.map(data => data.execution_cost_write_count).reduce((a, b) => a + b);
-    // const totalWriteLengthCost = transactionsData.map(data => data.execution_cost_write_length).reduce((a, b) => a + b);
-    
-    const percentageUsedOfRuntime = block.execution_cost_runtime / 5000000000;
-    const percentageUsedOfReadCount = block.execution_cost_read_count / 15000;
-    const percentageUsedOfReadLength = block.execution_cost_read_length / 100000000;
-    const percentageUsedOfWriteCount = block.execution_cost_write_count / 15000;
-    const percentageUsedOfWriteLength = block.execution_cost_write_length / 15000000;
-    // console.log('runtime total cost-->', totalRuntimeCost);
-    // console.log('readCount total cost-->', readCountCostArray);
-    // console.log('writeCount total cost-->', writeCountCostArray);
-    // console.log('runtime total cost-->', runtimeCostArray);
-    console.log('percentageUsedOfRuntime-->', percentageUsedOfRuntime);
-    console.log('percentageUsedOfReadCount-->', percentageUsedOfReadCount);
-    console.log('percentageUsedOfReadLength-->', percentageUsedOfReadLength);
-    console.log('percentageUsedOfWriteCount-->', percentageUsedOfWriteCount);
-    console.log('percentageUsedOfWriteLength-->', percentageUsedOfWriteLength);
-    const percentageUsed = (percentageUsedOfRuntime + percentageUsedOfReadCount + percentageUsedOfReadLength + percentageUsedOfWriteCount + percentageUsedOfWriteLength) / 5;
-    console.log('average precentage used of Block-->', percentageUsed * 100);
-    return percentageUsed * 100;
-  }
+  // TODO remove this
   public calcFeeRange(transactionExtras: any[]): BlockExtension {
     const feeArray = transactionExtras.map(extra => extra.fee_rate);
     const filteredArray = feeArray.filter(fee => fee !== 0);
@@ -257,9 +197,7 @@ class StacksBlocks {
     const blockHeightTip = await stacksApi.$getBlockHeightTip();
     this.currentBTCHeight = await bitcoinApi.$getBlockHeightTip();
     if (this.blocks.length === 0) {
-      console.log('this.blocks length is zero');
       this.currentBlockHeight = Math.max(blockHeightTip - config.STACKS.INITIAL_BLOCKS_AMOUNT, -1);
-      // this.currentBlockHeight = Math.max(blockHeightTip - 3, -1);
 
     } else {
       this.currentBlockHeight = this.blocks[this.blocks.length - 1].height;
@@ -273,8 +211,6 @@ class StacksBlocks {
       logger.info(`Re-indexing skipped blocks and corresponding hashrates data`);
       // indexer.reindex(); // Make sure to index the skipped blocks #1619
     }
-
-    // At this time DifficultyAdjustment is not relevent
 
     if (!this.lastDifficultyAdjustmentTime) {
       const blockchainInfo = await bitcoinClient.getBlockchainInfo();
@@ -385,12 +321,25 @@ class StacksBlocks {
       //   'feerate_percentiles', 'minfeerate', 'maxfeerate', 'totalfee', 'avgfee', 'avgfeerate'
       // ]);
       // remove the 0 fee of a coinbase transacation
-      const feeArray = transactions.map(tx => tx.feeRateAsNumber);
-      const filteredArray = feeArray.filter(fee => fee !== 0);
+      // const feeArray = transactions.map(tx => tx.feeRateAsNumber);
 
+      //TODO refactor, way too many sort functions
+      const feeArray = transactions.map(tx => tx.feeRateAsNumber);
+      const feePerVSizeArray = transactions.map(tx => tx.effectiveFeePerVsize);
+      feePerVSizeArray.sort((a, b) => a - b);
+      const filteredArray = feeArray.filter(fee => fee !== 0);
+      // change this later
+      const rangeLength = 8;
       filteredArray.sort((a, b) => a - b);
-      blockExtended.extras.medianFee = Common.percentile(filteredArray, config.MEMPOOL.RECOMMENDED_FEE_PERCENTILE);
-      blockExtended.extras.feeRange = filteredArray;
+      transactions.sort((a, b) => b.feePerVsize - a.feePerVsize);
+      // blockExtended.extras.medianFee = Common.percentile(filteredArray, config.MEMPOOL.RECOMMENDED_FEE_PERCENTILE);
+      // blockExtended.extras.medianFee = Common.percentile(transactions.map((tx) => tx.effectiveFeePerVsize), config.MEMPOOL.RECOMMENDED_FEE_PERCENTILE);
+      blockExtended.extras.medianFee = Common.percentile(feePerVSizeArray, config.MEMPOOL.RECOMMENDED_FEE_PERCENTILE);
+
+
+      // blockExtended.extras.feeRange = filteredArray;
+      blockExtended.extras.feeRange = Common.getFeesInRange(transactions, rangeLength);
+
       blockExtended.extras.totalFees = feeArray.reduce((acc, curr) => acc + curr);
       blockExtended.extras.avgFee = blockExtended.extras.totalFees / filteredArray.length;
       blockExtended.extras.avgFeeRate = transactions.map(tx => tx.feePerVsize).reduce((acc, curr) => acc + curr) / filteredArray.length;
@@ -410,169 +359,31 @@ class StacksBlocks {
     });
     return allBlockFees;
   }
-  public async $setInitialBlocks(): Promise<void> {
-    const response = await axios.get('https://stacks-node-api.mainnet.stacks.co/extended/v1/block?limit=8');
-    // const response = await axios.get('http://localhost:3999/extended/v1/block?limit=8');
-
-    this.initialBlocks = response.data.results;
-  }
-
-  // public async $processNewBlock() {
-  //   const observedBlock = this.initialBlocks[0];
-  //   const transactions = observedBlock.txs;
-  //   const blockExtended: StacksBlockExtended = Object.assign({ 
-  //     id: observedBlock.hash,
-  //     tx_count: observedBlock.txs.length,
-  //     timestamp: observedBlock.burn_block_time,
-  //     previousblockhash: observedBlock.parent_block_hash
-  //   }, observedBlock);
+  // TODO Remove
+  // public async $getBlockExtended(block: StacksBlockExtended, transactions: string[]): Promise<StacksBlockExtended | undefined> {
   //   try {
-  //     const finishedBlock = await this.$getBlockExtended(blockExtended, transactions);
-  //     // if (blockExtended) {
-  //     //   blockExtended.tx_count = observedBlock.txs.length;
-  //     //   blockExtended.id = blockExtended.hash;
-  //     //   blockExtended.timestamp = observedBlock.burn_block_time;
-  //     //   blockExtended.previousblockhash = observedBlock.parent_block_hash;
-  //     // }
-  //     // console.log(blockExtended);
-  //     // return blockExtended;
-  //     if (finishedBlock) this.extendedBlocks.unshift(finishedBlock);
-
+  //     const blockExtended: StacksBlockExtended = Object.assign({ extras: {} }, block);
+  //     const transactionsData = await this.$iterateThroughTransactions(transactions);
+  //     if (transactionsData) {
+  //       // console.log(transactionsData);
+  //       // const totalRuntime = allFees.reduce((a, b) => a + b);
+  //       // const percentageofTotalRuntime = totalRuntime / 5000000000;
+  //       // console.log('totalRuntime-->', allFees);
+  //       // console.log(transactionsData);
+  //       // blockExtended.totalRuntime = this.calcCost(transactionsData);
+  //       const sizes = transactionsData.map(data => data.size);
+  //       blockExtended.extras = this.calcFeeRange(transactionsData);
+  //       blockExtended.size = sizes.reduce((acc, curr) => acc + curr);
+  //       blockExtended.extras.usd = await stacksApi.$getStacksPrice();
+  //     }
+  //     return blockExtended;
   //   } catch (error) {
-  //     console.log('ERROR in $processBlock', error);
-  //   }
-  // }
-  // public async $processBlock() {
-  //   if (this.counter > 8) return;
-  //   const observedBlock = this.initialBlocks[this.initialBlocks.length - this.counter];
-  //   const transactions = observedBlock.txs;
-  //   const blockExtended: StacksBlockExtended = Object.assign({ 
-  //     id: observedBlock.hash,
-  //     tx_count: observedBlock.txs.length,
-  //     timestamp: observedBlock.burn_block_time,
-  //     previousblockhash: observedBlock.parent_block_hash
-  //   }, observedBlock);
-  //   try {
-  //     const finishedBlock = await this.$getBlockExtended(blockExtended, transactions);
-  //     // if (blockExtended) {
-  //     //   blockExtended.tx_count = observedBlock.txs.length;
-  //     //   blockExtended.id = blockExtended.hash;
-  //     //   blockExtended.timestamp = observedBlock.burn_block_time;
-  //     //   blockExtended.previousblockhash = observedBlock.parent_block_hash;
-  //     // }
-  //     // console.log(blockExtended);
-  //     // return blockExtended;
-  //     if (finishedBlock) this.extendedBlocks.unshift(finishedBlock);
-  //   } catch (error) {
-  //     console.log('ERROR in $processBlock', error);
-  //   }
-  //   this.counter++;
-  // }
-  // public async $checkForNewBlock(): Promise<void> {
-  //   this.stacksBlockTip = await stacksApi.$getBlockHeightTip();
-  //   if (this.stacksBlockTip > this.extendedBlocks[0].height && this.counter !== 8) {
-  //     console.log('processing blocks');
-  //     console.log(`current block tip --> ${this.stacksBlockTip}, current stored extended block height--> ${this.extendedBlocks[0].height}, and current counter ${this.counter}`)
-  //     await this.$processBlock();
-  //   } else if (this.stacksBlockTip > this.extendedBlocks[0].height && this.counter === 8) {
-  //     console.log('new block detected');
-  //     console.log(`current block tip --> ${this.stacksBlockTip}, current stored extended block height--> ${this.extendedBlocks[0].height}, and current counter ${this.counter}`)
-  //     const newestBlock = await stacksApi.$getNewestBlock();
-  //     this.initialBlocks.unshift(newestBlock);
-  //     this.counter--;
-  //     await this.$processBlock();
-  //   } else if (this.stacksBlockTip === this.extendedBlocks[0].height) {
-  //     console.log('no new blocks');
-  //     return;
+  //     console.log('error in $getBlockExtended-->', error);
   //   }
   // }
 
-  public async $getBlockExtended(block: StacksBlockExtended, transactions: string[]): Promise<StacksBlockExtended | undefined> {
-    try {
-      const blockExtended: StacksBlockExtended = Object.assign({ extras: {} }, block);
-      const transactionsData = await this.$iterateThroughTransactions(transactions);
-      if (transactionsData) {
-        // console.log(transactionsData);
-        // const totalRuntime = allFees.reduce((a, b) => a + b);
-        // const percentageofTotalRuntime = totalRuntime / 5000000000;
-        // console.log('totalRuntime-->', allFees);
-        // console.log(transactionsData);
-        // blockExtended.totalRuntime = this.calcCost(transactionsData);
-        const sizes = transactionsData.map(data => data.size);
-        blockExtended.extras = this.calcFeeRange(transactionsData);
-        blockExtended.size = sizes.reduce((acc, curr) => acc + curr);
-        blockExtended.extras.usd = await stacksApi.$getStacksPrice();
-      }
-      return blockExtended;
-    } catch (error) {
-      console.log('error in $getBlockExtended-->', error);
-    }
-  }
+  // TODO Need to finish this function to include a DB solution
 
-  public async $iterateThroughTransactions(transactionArray: string[]) {
-    try {
-      const result = Promise.all(transactionArray.map( async transaction => {
-        // const value = await this.$getTransactionFee(transaction);
-        // const value = await this.$getTransactionRuntimeCost(transaction);
-        const size = await stacksApi.$getTransactionSize(transaction);
-        const data = await stacksApi.$getTransactionData(transaction);
-        
-          return {
-            fee_rate: data.fee_rate,
-            execution_cost_read_count: data.execution_cost_read_count,
-            execution_cost_read_length: data.execution_cost_read_length,
-            execution_cost_runtime: data.execution_cost_runtime, 
-            execution_cost_write_count: data.execution_cost_write_count,
-            execution_cost_write_length: data.execution_cost_write_length,
-            size,
-          };
-        
-
-        // return fee_rate;
-        // return {
-        //   size,
-        //   fee_rate
-        // };
-    }));
-      return result;
-    } catch (error) {
-      console.log('Error in iterateThroughTransactions', error);
-    }
-  }
-
-
-
-  // not being used
-  // public async $whatever() {
-  //   try {
-  //     const blocks = await this.$getBlocks();
-  //     const results = Promise.all(blocks.map( async block => {
-  //       const transactions = block.txs;
-  //       const blockExtended = await this.$getBlockExtended(block, transactions);
-  //       blockExtended.tx_count = block.txs.length;
-  //       blockExtended.id = blockExtended.hash;
-  //       blockExtended.timestamp = block.burn_block_time;
-  //       blockExtended.previousblockhash = block.parent_block_hash;
-  //       //this only works for one block
-  //       // blockExtended.percentagedUsed = this.calcCost(blocks[0]);
-  //       console.log(blockExtended);
-  //       return blockExtended;
-  //     }));
-  //     return results;
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
-  // not being used
-  public async $getBlocks() {
-    const response = await axios.get('https://stacks-node-api.mainnet.stacks.co/extended/v1/block?limit=1');
-    // const response = await axios.get('http://localhost:3999/extended/v1/block?limit=1');
-
-    // const response = await axios.get('https://stacks-node-api.mainnet.stacks.co/extended/v1/block?limit=10');
-    this.initialBlocks = response.data.results;
-    this.extendedBlocks = response.data.results;
-    return this.initialBlocks;
-  }
   public async $getBlock(hash: string): Promise<StacksBlockExtended> {
     const blockByHash = this.getBlocks().find((b) => b.id === hash);
     if (blockByHash) {
@@ -600,6 +411,8 @@ class StacksBlocks {
 
     return blockExtended;
   }
+  
+  // TODO Need to finish this function to include a DB solution
   public async $getStrippedBlockTransactions(hash: string, skipMemoryCache = false, skipDBLookup = false): Promise<StacksTransactionStripped[] | undefined> {
     if (skipMemoryCache === false) {
       // Check the memory cache

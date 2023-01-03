@@ -35,6 +35,7 @@ li.nav-item {
 
 .navbar-nav {
   background: #212121;
+  // background-color: red;
   bottom: 0;
   box-shadow: 0px 0px 15px 0px #000;
   flex-direction: row;
@@ -64,7 +65,7 @@ li.nav-item {
 
 @media (min-width: 992px) {
   .navbar-collapse {
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 }
 

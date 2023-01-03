@@ -182,6 +182,8 @@ export class StacksDashboardComponent implements OnInit {
       .pipe(
         filter((state) => state === 2),
         switchMap(() => this.apiService.list2HStatistics$()),
+        // switchMap(() => this.apiService.list24HStatistics$()),
+
         switchMap((mempoolStats) => {
           return merge(
             this.stateService.live2Chart$
@@ -233,5 +235,8 @@ export class StacksDashboardComponent implements OnInit {
 
   trackByBlock(index: number, block: StacksBlockExtended) {
     return block.height;
+  }
+  convertTxType(txType: string): string {
+    return txType.replace('_', ' ');
   }
 }

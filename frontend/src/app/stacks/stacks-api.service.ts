@@ -34,6 +34,9 @@ export class StacksApiService {
   getBlockTransactions$(hash: string, index: number = 0): Observable<Transaction[]> {
     return this.httpClient.get<Transaction[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/block/' + hash + '/txs/' + index);
   }
+  getTransaction$(txId: string): Observable<Transaction> {
+    return this.httpClient.get<Transaction>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/tx/' + txId);
+  }
 
   list2HStatistics$(): Observable<OptimizedMempoolStats[]> {
     console.log('Base Path', this.apiBasePath);

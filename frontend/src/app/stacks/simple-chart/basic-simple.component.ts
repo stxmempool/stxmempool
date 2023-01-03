@@ -22,61 +22,77 @@ export class BasicSimpleComponent implements OnInit {
 
   ngOnInit(): void {
     const xAxisData = ['Runtime', 'Read Count', 'Read Length', 'Write Count', 'Write Length'];
-    const data1 = [];
-    const data2 = [];
-    console.log([this.runtime, this.readCount, this.readLength, this.writeCount, this.writeLength])
-
-    // for (let i = 0; i < 100; i++) {
-    //   xAxisData.push('category' + i);
-    //   data1.push((Math.sin(i / 5) * (i / 5 - 10) + i / 6) * 5);
-    //   data2.push((Math.cos(i / 5) * (i / 5 - 10) + i / 6) * 5);
-    // }
-
     this.options = {
-      // legend: {
-      //   data: ['bar', 'bar2'],
-      //   align: 'left',
-      // },
-      // tooltip: {},
-      // xAxis: {
-      //   data: xAxisData,
-      //   silent: false,
-      //   splitLine: {
-      //     show: false,
-      //   },
-      // },
       xAxis: {
         data: xAxisData,
         type: 'category',
-        // silent: false,
-        // splitLine: {
-        //   show: false,
-        // },
+        axisTick: {
+          alignWithLabel: true
+        }
       },
       yAxis: {
         type: 'value',
         name: '% Used of Block Execution Capacity',
         nameLocation: 'middle',
         nameTextStyle: {
-          // backgroundColor: 'red',
           padding: [0, 0, 10, 0]
+        },
+        axisLabel: {
+          fontSize: 11,
+        },
+        splitLine: {
+          lineStyle: {
+            type: 'dotted',
+            color: '#ffffff66',
+            opacity: 0.25,
+          }
         }
       },
       series: [
         {
-          // name: 'bar',
           type: 'bar',
-          // data: data1,
           data: [this.runtime / this.runtimeLimit * 100, this.readCount / this.readCountLimit * 100, this.readLength / this.readLengthLimit * 100, this.writeCount / this.writeCountLimit * 100, this.writeLength / this.writeLengthLimit * 100],
           animationDelay: (idx) => idx * 10,
         },
-        // {
-        //   name: 'bar2',
-        //   type: 'bar',
-        //   data: data2,
-        //   animationDelay: (idx) => idx * 10 + 100,
-        // },
       ],
+      visualMap: {
+        show: false,
+        type: 'piecewise',
+        top: 50,
+        right: 10,
+        pieces: [{
+          gt: 0,
+          lte: 20,
+          color: '#7CB342'
+        },
+        {
+          gt: 20,
+          lte: 50,
+          color: '#FDD835'
+        },
+        {
+          gt: 50,
+          lte: 75,
+          color: '#FFB300'
+        },
+        {
+          gt: 75,
+          lte: 85,
+          color: '#FB8C00'
+        },
+        {
+          gt: 85,
+          lte: 95,
+          color: '#F4511E'
+        },
+        {
+          gt: 95,
+          color: '#D81B60'
+        }],
+        outOfRange: {
+          color: '#999'
+        }
+      },
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx) => idx * 5,
     };

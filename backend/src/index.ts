@@ -134,8 +134,6 @@ class Server {
     fiatConversion.startService();
 
     this.setUpHttpApiRoutes();
-    // const result = await stacksBlocks.$processRosettaBlock(87164, '0xcf9bd90fa702bfcfa1ae2e9cf3957249f0844a6387b8c6fd004f6e82b17cf149');
-    // console.log(result);
     // if (config.MEMPOOL.ENABLED) {
       this.runMainUpdateLoop();
     // }
@@ -233,7 +231,6 @@ class Server {
     if (!config.MEMPOOL.ENABLED && config.STACKS.ENABLED){
       statistics.setNewStatisticsEntryCallback(websocketHandler.handleNewStatistic.bind(websocketHandler));
       stacksBlocks.setNewAsyncBlockCallback(websocketHandler.handleNewStacksBlock.bind(websocketHandler));
-      // blocks.setNewAsyncBlockCallback(websocketHandler.handleNewBlock.bind(websocketHandler));
       stacksMempool.setAsyncMempoolChangedCallback(websocketHandler.handleStacksMempoolChange.bind(websocketHandler));
     }
     fiatConversion.setProgressChangedCallback(websocketHandler.handleNewConversionRates.bind(websocketHandler));

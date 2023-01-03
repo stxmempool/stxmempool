@@ -53,8 +53,8 @@
               <!-- <tr>
                 <td i18n="block.weight">Weight</td>
                 <td [innerHTML]="'&lrm;' + (block.weight | wuBytes: 2)"></td>
-              </tr> -->
-              <!-- <tr *ngIf="auditEnabled">
+              </tr>
+              <tr *ngIf="auditEnabled">
                 <td i18n="block.health">Block health</td>
                 <td>
                   <span *ngIf="blockAudit?.matchRate != null">{{ blockAudit.matchRate }}%</span>
@@ -65,11 +65,11 @@
                 <tr *ngIf="isMobile && auditEnabled"></tr>
                 <tr *ngIf="network !== 'liquid' && network !== 'liquidtestnet'">
                   <td i18n="mempool-block.fee-span">Fee span</td>
-                  <td><span>{{ block.extras.feeRange[0] | number:'1.0-0' }} - {{ block.extras.feeRange[block.extras.feeRange.length - 1] | number:'1.0-0' }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">uSTX/vB</span></span></td>
+                  <td><span>{{ block.extras.feeRange[0] | number:'1.0-0' }} - {{ block.extras.feeRange[block.extras.feeRange.length - 1] | number:'1.0-0' }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">uSTX/B</span></span></td>
                 </tr>
                 <tr *ngIf="block?.extras?.medianFee != undefined">
                   <td class="td-width" i18n="block.median-fee">Median fee</td>
-                  <td>~{{ block?.extras?.medianFee | number:'1.0-0' }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">uSTX/vB</span> <span class="fiat"><app-stacks-fiat [value]="block?.extras?.medianFee * 140" digitsInfo="1.2-2" i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom"></app-stacks-fiat></span></td>
+                  <td>~{{ block?.extras?.medianFee | number:'1.0-0' }} <span class="symbol" i18n="shared.sat-vbyte|uSTX/B">uSTX/B</span> <span class="fiat"><app-stacks-fiat [value]="block?.extras?.medianFee * 140" digitsInfo="1.2-2" i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom"></app-stacks-fiat></span></td>
                 </tr>
                 <ng-template [ngIf]="fees !== undefined" [ngIfElse]="loadingFees">
                   <tr>
@@ -109,31 +109,22 @@
                 </ng-template>
                 <tr *ngIf="network !== 'liquid' && network !== 'liquidtestnet'">
                   <td i18n="block.miner">Miner</td>
-                  <td *ngIf="stateService.env.MINING_DASHBOARD">
+                  <!--<td *ngIf="stateService.env.MINING_DASHBOARD">
                     <a placement="bottom" [routerLink]="['/mining/pool' | relativeUrl, block.extras.pool.slug]" class="badge"
                       [class]="block.extras.pool.name === 'Unknown' ? 'badge-secondary' : 'badge-primary'">
                       {{ block.extras.pool.name }}
                     </a>
-                  </td>
+                  </td> -->
                   <!-- <td *ngIf="!stateService.env.MINING_DASHBOARD && stateService.env.BASE_MODULE === 'mempool'"> -->
                   <td *ngIf="!stateService.env.MINING_DASHBOARD && stateService.env.BASE_MODULE === 'stacks'">
 
-                    <span placement="bottom" class="badge" >
+                    <!-- <span placement="bottom" class="badge" > -->
                       <!-- [class]="block.extras.pool.name === 'Unknown' ? 'badge-secondary' : 'badge-primary'"> -->
-                      {{ block.minerAddress }}
-                  </span>
+                      {{ block.minerAddress | shortenString: 16 }}
+                  <!-- </span> -->
                   </td>
                 </tr>
               </ng-container>
-              <p> hello</p>
-              <!-- <div echarts [options]="options" class="demo-chart"></div> -->
-              <app-basic-simple
-                [readCount]="block.execution_cost_read_count"
-                [readLength]="block.execution_cost_read_length"
-                [writeCount]="block.execution_cost_write_count"
-                [writeLength]="block.execution_cost_write_length"
-                [runtime]="block.execution_cost_runtime"
-                ></app-basic-simple>
             </tbody>
           </table>
         </div>
@@ -265,7 +256,7 @@
           </tbody>
         </table>
         <div class="col-sm chart-container" *ngIf="webGlEnabled && (!indexingAvailable || auditDataMissing)">
-          <app-block-overview-graph
+          <app-stacks-block-overview-graph
             #blockGraphActual
             [isLoading]="isLoadingOverview"
             [resolution]="75"
@@ -273,7 +264,7 @@
             [orientation]="'top'"
             [flip]="false"
             (txClickEvent)="onTxClick($event)"
-          ></app-block-overview-graph>
+          ></app-stacks-block-overview-graph>
         </div>
       </div>
     </div>
@@ -354,10 +345,27 @@
       </div>
     </div>
 
-    <div class="text-right mt-3">
+    <!-- <div class="text-right mt-3">
       <button type="button" class="btn btn-outline-info btn-sm btn-details" (click)="toggleShowDetails()" i18n="transaction.details|Transaction Details">Details</button>
+    </div> -->
+    <br>
+    <div class="title float-left">
+      <h2 id="flow" i18n="transaction.flow|Execution Costs">Execution Costs</h2>
     </div>
-
+    <div class="clearfix"></div>
+    <div class="box">
+      <!-- <div class="graph-container" #graphContainer> -->
+        <div class="col-sm chart-container">
+        <app-basic-simple
+        [readCount]="block.execution_cost_read_count"
+        [readLength]="block.execution_cost_read_length"
+        [writeCount]="block.execution_cost_write_count"
+        [writeLength]="block.execution_cost_write_length"
+        [runtime]="block.execution_cost_runtime"
+        ></app-basic-simple>
+      </div>
+    </div>
+      <br>
     <div #blockTxTitle id="block-tx-title" class="block-tx-title">
       <h2 class="text-left">
         <ng-container *ngTemplateOutlet="block.tx_count === 1 ? transactionsSingular : transactionsPlural; context: {$implicit: block.tx_count | number}"></ng-container>

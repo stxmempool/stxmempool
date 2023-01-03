@@ -26,115 +26,22 @@ import { StacksBlockchainComponent } from '../stacks/stacks-blockchain/stacks-bl
 import { StacksBlockComponent } from '../stacks/stacks-block/stacks-block.component';
 import { StacksMempoolBlocksComponent } from '../stacks/stacks-mempool-blocks/stacks-mempool-blocks.component';
 import { StacksMempoolBlockComponent } from './stacks-mempool-block/stacks-mempool-block.component';
+import { StacksTransactionComponent } from './stacks-transaction/stacks-transaction.component';
+
 
 
 
 
 
 const routes: Routes = [
-  // {
-  //   path: '',
-  //   pathMatch: 'full',
-  //   loadChildren: () => import('../graphs/graphs.module').then(m => m.GraphsModule)
-  // },
   {
     path: '',
     component: StacksStartComponent,
-    // component: StacksMasterPageComponent,
     children: [
       {
         path: '',
         component: StacksDashboardComponent,
-      },
-      // {
-      //   path: 'tx/push',
-      //   component: PushTransactionComponent,
-      // },
-      // {
-      //   path: 'about',
-      //   component: AboutComponent,
-      // },
-      // {
-      //   path: 'blocks',
-      //   component: BlocksList,
-      // },
-      // {
-      //   path: 'terms-of-service',
-      //   component: TermsOfServiceComponent
-      // },
-      // {
-      //   path: 'privacy-policy',
-      //   component: PrivacyPolicyComponent
-      // },
-      // {
-      //   path: 'trademark-policy',
-      //   component: TrademarkPolicyComponent
-      // },
-      // {
-      //   path: 'address/:id',
-      //   children: [],
-      //   component: AddressComponent,
-      //   data: {
-      //     ogImage: true,
-      //     networkSpecific: true,
-      //   }
-      // },
-      // {
-      //   path: 'tx',
-      //   data: { networkSpecific: true },
-      //   component: StartComponent,
-      //   children: [
-      //     {
-      //       path: ':id',
-      //       component: TransactionComponent
-      //     },
-      //   ],
-      // },
-      // {
-      //   path: 'block',
-      //   data: { networkSpecific: true },
-      //   component: StartComponent,
-      //   children: [
-      //     {
-      //       path: ':id',
-      //       component: BlockComponent,
-      //       data: {
-      //         ogImage: true
-      //       }
-      //     },
-      //   ],
-      // },
-      // {
-      //   path: 'assets',
-      //   data: { networks: ['liquid'] },
-      //   component: AssetsNavComponent,
-      //   children: [
-      //     {
-      //       path: 'featured',
-      //       data: { networkSpecific: true },
-      //       component: AssetsFeaturedComponent,
-      //     },
-      //     {
-      //       path: 'all',
-      //       data: { networks: ['liquid'] },
-      //       component: AssetsComponent,
-      //     },
-      //     {
-      //       path: 'asset/:id',
-      //       data: { networkSpecific: true },
-      //       component: AssetComponent
-      //     },
-      //     {
-      //       path: 'group/:id',
-      //       data: { networkSpecific: true },
-      //       component: AssetGroupComponent
-      //     },
-      //     {
-      //       path: '**',
-      //       redirectTo: 'featured'
-      //     }
-      //   ]
-      // },
+      }
     ],
   },
   {
@@ -165,11 +72,17 @@ const routes: Routes = [
       },
     ],
   },
-  // {
-  //   path: 'about',
-  //   component: AboutComponent
-  // }
-  
+  {
+    path: 'tx',
+    data: { networkSpecific: true },
+    component: StacksStartComponent,
+    children: [
+      {
+        path: ':id',
+        component: StacksTransactionComponent
+      },
+    ],
+  },
 ];
 
 @NgModule({

@@ -50,13 +50,14 @@ export default class TxView implements TransactionStripped {
   dirty: boolean;
 
   constructor(tx: any, vertexArray: FastVertexArray) {
-    console.log(tx.txid);
     this.context = tx.context;
     this.txid = tx.txid;
     // this.txid = tx.type;
 
     this.fee = tx.fee;
     this.vsize = tx.vsize;
+    // this.vsize = tx.execution_cost_runtime;
+
     // this.value = tx.value;
     this.value = tx.type;
     this.feerate = tx.fee / tx.vsize;

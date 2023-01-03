@@ -27,6 +27,7 @@
   }
 }
 .table {
+  // background-color: yellow;
   tr td {
     &:last-child {
       text-align: right;
@@ -170,6 +171,7 @@ h1 {
   @media (min-width: 768px) {
     margin: auto;
   }
+  // background-color: red;
 }
 
 .menu-button {

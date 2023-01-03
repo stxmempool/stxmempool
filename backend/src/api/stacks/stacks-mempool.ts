@@ -81,7 +81,8 @@ class StacksMempool {
     }
   }
   */
-  /* Related to Mempool infor we are not able to replicate
+
+  /* Related to Mempool info we are not able to replicate
   public async $updateMemPoolInfo() {
     this.mempoolInfo = await this.$getMempoolInfo();
   }
@@ -102,10 +103,8 @@ class StacksMempool {
     const start = new Date().getTime();
     let hasChange: boolean = false;
     const currentMempoolSize = Object.keys(this.mempoolCache).length;
-    // let txCount = 0;
     const transactions = await this.$getStacksMempoolTransactions();
     const diff = transactions.length - currentMempoolSize;
-    // const newTransactions: TransactionExtended[] = [];
     const newTransactions: StacksTransactionExtended[] = [];
     this.mempoolCacheDelta = Math.abs(diff);
 
@@ -119,7 +118,6 @@ class StacksMempool {
         try {
           const transaction: StacksTransactionExtended = await transactionUtils.$getStacksMempoolTransactionExtended(txid);
           this.mempoolCache[txid] = transaction;
-          // txCount++;
           if (this.inSync) {
             this.txPerSecondArray.push(new Date().getTime());
             this.vBytesPerSecondArray.push({
@@ -180,6 +178,7 @@ class StacksMempool {
 
     const newTransactionsStripped = newTransactions.map((tx) => Common.stripStacksTransaction(tx));
     this.latestTransactions = newTransactionsStripped.concat(this.latestTransactions).slice(0, 6);
+    console.log('Sync-->', this.inSync, 'transactions length-->', transactions.length, 'mempoolCache length' , Object.keys(this.mempoolCache).length)
 
     if (!this.inSync && transactions.length === Object.keys(this.mempoolCache).length) {
       this.inSync = true;
@@ -205,7 +204,7 @@ class StacksMempool {
     logger.debug(`Mempool updated in ${time / 1000} seconds. New size: ${cacheSize} (${diff > 0 ? '+' + diff : diff})`);
 
   }
-
+  // TODO move to stacksApi
   public async $getStacksMempoolTransactions(): Promise<string[]> {
     const response = await axios.post('https://stacks-node-api.mainnet.stacks.co/rosetta/v1/mempool', 
     // const response = await axios.post('http://localhost:3999/rosetta/v1/mempool', 
@@ -219,6 +218,7 @@ class StacksMempool {
     const transactionArray: string[] = response.data.transaction_identifiers.map(({ hash }) => hash);
     return transactionArray;
   }
+
   private updateTxPerSecond() {
     const nowMinusTimeSpan = new Date().getTime() - (1000 * config.STATISTICS.TX_PER_SECOND_SAMPLE_PERIOD);
     this.txPerSecondArray = this.txPerSecondArray.filter((unixTime) => unixTime > nowMinusTimeSpan);
@@ -231,6 +231,7 @@ class StacksMempool {
       );
     }
   }
+  
   private deleteExpiredTransactions() {
     const now = new Date().getTime();
     for (const tx in this.mempoolCache) {

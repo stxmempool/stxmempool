@@ -36,15 +36,22 @@
               <tr >
                 <!-- To show the arrows next to the transactions -->
                 <td class="arrow-td">
-                  <div *ngIf="tx.tx_status === 'success'; else aborted">
+                  <div *ngIf="tx.tx_status === 'success'; else notSuccessful">
                     <span class="green">
                       <fa-icon [icon]="['fas', 'circle-check']" [fixedWidth]="true"></fa-icon>
                     </span>
                   </div>
-                  <ng-template #aborted>
-                    <span class="red">
-                      <fa-icon [icon]="['fas', 'circle-xmark']" [fixedWidth]="true"></fa-icon>
-                    </span>
+                  <ng-template #notSuccessful>
+                    <ng-template [ngIf]="tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition'" [ngIfElse]="pending">
+                      <span class="red">
+                        <fa-icon [icon]="['fas', 'circle-xmark']" [fixedWidth]="true"></fa-icon>
+                      </span>
+                    </ng-template>
+                    <ng-template #pending>
+                      <span class="grey">
+                        <fa-icon [icon]="['fas', 'arrow-alt-circle-right']" [fixedWidth]="true"></fa-icon>
+                      </span>
+                    </ng-template>
                   </ng-template>
                 </td>
 
@@ -245,11 +252,12 @@
               <td>
                 <div [ngSwitch]="true">
                   <ng-container *ngSwitchCase="tx.tx_type === 'coinbase'">
-                    <p>Reward: <app-stacks-amount  [satoshis]="1000000000"></app-stacks-amount></p>
+                    <p>Reward: <app-stacks-amount  [satoshis]="1000000000"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="1000000000"></app-stacks-fiat></span></p>
                   </ng-container>
                   <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
-                    <p>Function Name: <span>{{tx.contract_call?.function_name}}</span></p>
+                    <p>Function Name: <span>{{ tx.contract_call?.function_name }}</span></p>
                     <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="tx.feeRateAsNumber"></app-stacks-fiat></span></p>
+                    <p>Contract Name: <span>{{ parseContractName(tx.contract_call?.contract_id) | titlecase }}</span></p>
                   </ng-container>
                   <ng-container *ngSwitchCase="tx.tx_type === 'token_transfer'">
                     <p>Amount Sent <app-stacks-amount [satoshis]="convertStringToInt(tx.token_transfer.amount)"></app-stacks-amount></p>

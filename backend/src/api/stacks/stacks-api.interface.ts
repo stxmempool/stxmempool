@@ -64,14 +64,8 @@ export interface StacksMempoolBlockDelta {
 export interface CustomTransactionList {
   [k: string]: TransactionFound;
 }
-// export type StacksTransactionExtended = MempoolTransaction | Transaction & {
-//   firstSeen?: number;
-//   vsize?: number;
-//   feePerVsize?: number;
-//   effectiveFeePerVsize?: number;
-//   deleteAfter?: number;
-// }
 type Midpoint = MempoolTransaction | Transaction
+
 export type StacksTransactionExtended = Midpoint & {
   feeRateAsNumber: number;
   firstSeen?: number;

@@ -13,23 +13,30 @@
   <div class="fee-estimation-container">
     <div class="item">
       <div class="card-text">
-        <div class="fee-text">{{ recommendedFees[type].p25 }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p25" ></app-stacks-fiat></span>
+        <!-- <div class="fee-text">{{ recommendedFees[type].p25 }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p25" ></app-stacks-fiat></span> -->
+        <div class="fee-text">{{ recommendedFees.economyFee }} <span i18n="shared.sat-vbyte|sat/vB">uSTX/B</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees.economyFee * 140" ></app-stacks-fiat></span>
+
       </div>
     </div>
     <div class="band-separator"></div>
     <div class="item">
       <div class="card-text">
-        <div class="fee-text">{{ recommendedFees[type].p50 }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p50" ></app-stacks-fiat></span>
+        <!-- <div class="fee-text">{{ recommendedFees[type].p50 }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p50" ></app-stacks-fiat></span> -->
+        <div class="fee-text">{{ recommendedFees.hourFee }} <span i18n="shared.sat-vbyte|sat/vB">uSTX/B</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees.economyFee * 140" ></app-stacks-fiat></span>
+
       </div>
     </div>
     <div class="item">
       <div class="card-text">
-        <div class="fee-text">{{ recommendedFees[type].p75 }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p75" ></app-stacks-fiat></span>
+        <!-- <div class="fee-text">{{ recommendedFees[type].p75 }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p75" ></app-stacks-fiat></span> -->
+        <div class="fee-text">{{ recommendedFees.halfHourFee }} <span i18n="shared.sat-vbyte|sat/vB">uSTX/B</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees.economyFee * 140" ></app-stacks-fiat></span>
+
       </div>
     </div>
     <div class="item">
       <div class="card-text">
-        <div class="fee-text">{{ recommendedFees[type].p95 | number: feeRounding }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p95" ></app-stacks-fiat></span>
+        <!-- <div class="fee-text">{{ recommendedFees[type].p95 | number: feeRounding }} <span i18n="shared.sat-vbyte|sat/vB">uSTX</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees[type].p95" ></app-stacks-fiat></span> -->
+        <div class="fee-text">{{ recommendedFees.fastestFee }} <span i18n="shared.sat-vbyte|sat/vB">uSTX/B</span></div> <span class="fiat"><app-stacks-fiat i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom" [value]="recommendedFees.economyFee * 140" ></app-stacks-fiat></span>
       </div>
     </div>
   </div>

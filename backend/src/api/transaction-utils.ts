@@ -80,7 +80,8 @@ class TransactionUtils {
       firstSeen: 1,
     }, transaction);
     if (transaction.tx_status === 'pending') {
-      transactionExtended['firstSeen'] = Math.round((new Date().getTime() / 1000));
+      // transactionExtended['firstSeen'] = Math.round((new Date().getTime() / 1000));
+      transactionExtended['firstSeen'] = transaction.receipt_time;
     }
     return transactionExtended;
   }

@@ -119,14 +119,7 @@ class StacksApi {
     return data.block;
   }
   public async $getVerboseTransactions(transactionIds: string[]): Promise<CustomTransactionList | undefined> {
-    // I want to build a string that resets on increments of 50
-    // add the transaction id to the query string 
-    // if the counter is evenly divided by 50
-      // make the query
-      // add the response to result
-      // reset the query string to ''
-      // continue to iterate
-
+    // this is a super janky way of splitting up the query strings. Will refactor for an await Promise.all(pendingPromises) solution
     if (transactionIds.length > 50 && transactionIds.length <= 100) {
       try {
         let query = '';
@@ -200,16 +193,6 @@ class StacksApi {
         console.log('error in $getVerbose-->', error);
       }
     }
-    // let query = '';
-    // for (let i = 0; i < transactionIds.length; i++) {
-    //   if (i === transactionIds.length - 1) {
-    //     query = query + 'tx_id=' + transactionIds[i];
-    //   } else {
-    //     query = query + 'tx_id=' + transactionIds[i] + '&';
-    //   }
-    // }
-    // const { data } = await axios.get<CustomTransactionList>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`);
-    // return data;
   }
   public async $getStacksFees(): Promise<MempoolTransactionStatsResponse> {
     const { data } = await axios.get<MempoolTransactionStatsResponse>('https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/mempool/stats');

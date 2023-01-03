@@ -8,10 +8,10 @@
       </div>
       <div class="block-body">
         <div [attr.data-cy]="'bitcoin-block-' + i + '-fees'" class="fees">
-          ~{{ block?.extras?.medianFee / 1000 | number:feeRounding }} <ng-container i18n="shared.sat-vbyte|uSTX/vB">kSTX/vB</ng-container>
+          ~{{ block?.extras?.medianFee | number:feeRounding }} <ng-container i18n="shared.sat-vbyte|uSTX/vB">uSTX/B</ng-container>
         </div>
         <div [attr.data-cy]="'bitcoin-block-' + i + '-fee-span'" class="fee-span">
-          {{ block?.extras?.feeRange[0] / 1000 | number:feeRounding }} - {{ block?.extras?.feeRange[block?.extras?.feeRange.length - 1] / 1000 | number:feeRounding }} <ng-container i18n="shared.sat-vbyte|uSTX/vB">kSTX/vB</ng-container>
+          {{ block?.extras?.feeRange[0] | number:feeRounding }} - {{ block?.extras?.feeRange[block?.extras?.feeRange.length - 1] | number:feeRounding }} <ng-container i18n="shared.sat-vbyte|uSTX/vB">uSTX/B</ng-container>
         </div>
         <div [attr.data-cy]="'bitcoin-block-' + i + '-total-fees'" *ngIf="showMiningInfo" class="block-size">
           <app-amount [satoshis]="block.extras?.totalFees ?? 0" digitsInfo="1.2-3" [noFiat]="true"></app-amount>

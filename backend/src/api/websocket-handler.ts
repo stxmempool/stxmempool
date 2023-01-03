@@ -277,7 +277,11 @@ class WebsocketHandler {
     const mempoolInfo = stacksMempool.getMempoolInfo();
     const vBytesPerSecond = stacksMempool.getVBytesPerSecond();
     const da = difficultyAdjustment.getDifficultyAdjustment();
-    const recommendedFees = await feeApi.$processStacksFees();
+    // replace for the demo
+    const recommendedFees = feeApi.getRecommendedFee();
+
+    mempoolInfo.size = mBlocks[0].nTx;
+    // const recommendedFees = await feeApi.$processStacksFees();
 
     // const rbfTransactions = Common.findRbfTransactions(newTransactions, deletedTransactions);
     this.wss.clients.forEach(async (client) => {
@@ -491,9 +495,15 @@ class WebsocketHandler {
     }
     const mBlocks = stacksMempoolBlocks.getMempoolBlocks();
     const mBlockDeltas = stacksMempoolBlocks.getMempoolBlockDeltas();
+    const mempoolInfo = stacksMempool.getMempoolInfo();
+    // for demo purposes
+    mempoolInfo.size = mBlocks[0].nTx;
+
 
     const da = difficultyAdjustment.getDifficultyAdjustment();
-    const fees = await feeApi.$processStacksFees();
+    // const fees = await feeApi.$processStacksFees();
+    const fees = feeApi.getRecommendedFee();
+
 
     this.wss.clients.forEach((client) => {
       if (client.readyState !== WebSocket.OPEN) {
@@ -506,7 +516,7 @@ class WebsocketHandler {
       
       const response = {
         'block': block,
-        'mempoolInfo': memPool.getMempoolInfo(),
+        'mempoolInfo': mempoolInfo,
         'da': da,
         'fees': fees,
       };

@@ -8,9 +8,6 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MultiSelectSearchFilter } from '../components/ngx-bootstrap-multiselect/search-filter.pipe';
 import { AutofocusDirective } from '../components/ngx-bootstrap-multiselect/autofocus.directive';
 import { OffClickDirective } from '../components/ngx-bootstrap-multiselect/off-click.directive';
-import { DashboardComponent } from '../dashboard/dashboard.component';
-import { MempoolBlockComponent } from '../components/mempool-block/mempool-block.component';
-import { GraphsModule } from '../graphs/graphs.module';
 import { StacksBlockchainComponent } from '../stacks/stacks-blockchain/stacks-blockchain.component';
 import { StacksDashboardComponent } from '../stacks/stacks-dashboard/stacks-dashboard.component';
 import { StacksStartComponent } from '../stacks/stacks-start/stacks-start.component';
@@ -31,6 +28,8 @@ import { StacksMempoolBlockComponent } from '../stacks/stacks-mempool-block/stac
 import { StacksFeeDistributionGraphComponent } from '../stacks/stacks-fee-distribution-graph/stacks-fee-distribution-graph.component';
 import { StacksMempoolBlockOverviewComponent } from '../stacks/stacks-mempool-block-overview/stacks-mempool-block-overview.component';
 import { BasicSimpleComponent } from '../stacks/simple-chart/basic-simple.component';
+import { StacksTransactionComponent } from '../stacks/stacks-transaction/stacks-transaction.component';
+import { BytesPipe } from '../shared/pipes/bytes-pipe/bytes.pipe';
 
 @NgModule({
   declarations: [
@@ -53,11 +52,11 @@ import { BasicSimpleComponent } from '../stacks/simple-chart/basic-simple.compon
     StacksMempoolBlockComponent,
     StacksFeeDistributionGraphComponent,
     StacksMempoolBlockOverviewComponent,
-    BasicSimpleComponent
+    BasicSimpleComponent,
+    StacksTransactionComponent
   ],
   imports: [
     CommonModule,
-    // GraphsModule,
     StacksRoutingModule,
     SharedModule,
     FontAwesomeModule,
@@ -70,6 +69,7 @@ import { BasicSimpleComponent } from '../stacks/simple-chart/basic-simple.compon
     MultiSelectSearchFilter,
     AutofocusDirective,
     OffClickDirective,
+    BytesPipe
   ],
   exports: [
     NgxEchartsModule,
