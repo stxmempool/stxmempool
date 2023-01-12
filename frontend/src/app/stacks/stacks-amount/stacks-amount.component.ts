@@ -15,7 +15,9 @@ export class StacksAmountComponent implements OnInit, OnDestroy {
 
   stateSubscription: Subscription;
 
+  // @Input() satoshis: number | string;
   @Input() satoshis: number;
+
   @Input() digitsInfo = '1.8-8';
   @Input() noFiat = false;
   @Input() addPlus = false;
@@ -25,6 +27,9 @@ export class StacksAmountComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    // if (this.satoshis === typeof 'string') {
+    //   this.satoshis = Number(this.satoshis);
+    // }
     this.viewFiat$ = this.stateService.viewFiat$.asObservable();
     this.conversions$ = this.stateService.conversions$.asObservable();
     this.stateSubscription = this.stateService.networkChanged$.subscribe((network) => this.network = network);

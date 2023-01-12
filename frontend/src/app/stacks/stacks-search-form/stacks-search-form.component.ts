@@ -8,16 +8,17 @@ import { debounceTime, distinctUntilChanged, switchMap, catchError, map, startWi
 import { ElectrsApiService } from '../../services/electrs-api.service';
 import { RelativeUrlPipe } from '../../shared/pipes/relative-url/relative-url.pipe';
 import { ApiService } from '../../services/api.service';
-import { SearchResultsComponent } from './search-results/search-results.component';
+import { StacksSearchResultsComponent } from './search-results/stacks-search-results.component';
 import { c32addressDecode } from 'c32check';
+import { StacksApiService } from '../stacks-api.service';
 
 @Component({
-  selector: 'app-search-form',
-  templateUrl: './search-form.component.html',
-  styleUrls: ['./search-form.component.scss'],
+  selector: 'app-stacks-search-form',
+  templateUrl: './stacks-search-form.component.html',
+  styleUrls: ['./stacks-search-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchFormComponent implements OnInit {
+export class StacksSearchFormComponent implements OnInit {
   network = '';
   assets: object = {};
   isSearching = false;
@@ -51,7 +52,7 @@ export class SearchFormComponent implements OnInit {
   click$ = new Subject<string>();
 
   @Output() searchTriggered = new EventEmitter();
-  @ViewChild('searchResults') searchResults: SearchResultsComponent;
+  @ViewChild('searchResults') searchResults: StacksSearchResultsComponent;
   @HostListener('keydown', ['$event']) keydown($event): void {
     this.handleKeyDown($event);
   }
@@ -65,6 +66,7 @@ export class SearchFormComponent implements OnInit {
     private apiService: ApiService,
     private relativeUrlPipe: RelativeUrlPipe,
     private elementRef: ElementRef,
+    private stacksApiService: StacksApiService
   ) { }
 
   ngOnInit(): void {
@@ -105,12 +107,14 @@ export class SearchFormComponent implements OnInit {
         this.isTypeaheading$.next(true);
         if (!this.stateService.env.LIGHTNING) {
           return zip(
-            this.electrsApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
+            // this.electrsApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
+            this.stacksApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
+
             [{ nodes: [], channels: [] }],
           );
         }
         return zip(
-          this.electrsApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
+          this.stacksApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
           this.apiService.lightningSearch$(text).pipe(catchError(() => of({
             nodes: [],
             channels: [],

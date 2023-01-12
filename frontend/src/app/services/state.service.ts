@@ -165,7 +165,10 @@ export class StateService {
       this.networkChanged$.next(this.env.BASE_MODULE);
     }
 
-    this.blockVSize = this.env.BLOCK_WEIGHT_UNITS / 4;
+    // this.blockVSize = this.env.BLOCK_WEIGHT_UNITS / 4;
+    //CREATE CONDITIONAL FOR STACKS
+    this.blockVSize = 15000;
+
 
     const savedTimePreference = this.storageService.getValue('time-preference-ltr');
     const rtlLanguage = (this.locale.startsWith('ar') || this.locale.startsWith('fa') || this.locale.startsWith('he'));

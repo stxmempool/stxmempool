@@ -11,7 +11,9 @@ import { StateService } from '../../services/state.service';
 export class StacksFiatComponent implements OnInit {
   conversions$: Observable<any>;
 
+  // @Input() value: number | string;
   @Input() value: number;
+
   @Input() digitsInfo = '1.2-2';
   // @Input() digitsInfo = '1.0-1';
 
@@ -21,6 +23,9 @@ export class StacksFiatComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // if (this.value === typeof 'string') {
+    //   this.value = Number(this.value);
+    // }
     this.conversions$ = this.stateService.conversions$.asObservable();
   }
 

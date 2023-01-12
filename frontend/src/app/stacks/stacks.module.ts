@@ -30,6 +30,11 @@ import { StacksMempoolBlockOverviewComponent } from '../stacks/stacks-mempool-bl
 import { BasicSimpleComponent } from '../stacks/simple-chart/basic-simple.component';
 import { StacksTransactionComponent } from '../stacks/stacks-transaction/stacks-transaction.component';
 import { BytesPipe } from '../shared/pipes/bytes-pipe/bytes.pipe';
+import { StacksAddressComponent } from './stacks-address/stacks-address.component';
+import { StacksSearchFormComponent } from './stacks-search-form/stacks-search-form.component';
+import { StacksSearchResultsComponent } from './stacks-search-form/search-results/stacks-search-results.component';
+
+
 
 @NgModule({
   declarations: [
@@ -53,7 +58,10 @@ import { BytesPipe } from '../shared/pipes/bytes-pipe/bytes.pipe';
     StacksFeeDistributionGraphComponent,
     StacksMempoolBlockOverviewComponent,
     BasicSimpleComponent,
-    StacksTransactionComponent
+    StacksTransactionComponent,
+    StacksAddressComponent,
+    StacksSearchFormComponent,
+    StacksSearchResultsComponent
   ],
   imports: [
     CommonModule,

@@ -124,7 +124,7 @@
                 <td *ngIf="stateService.env.MINING_DASHBOARD" class="table-cell-mined" ><app-time-since [time]="block.timestamp" [fastRender]="true"></app-time-since></td>
                 <td *ngIf="!stateService.env.MINING_DASHBOARD" class="table-cell-mined">
                   <!-- <a class="clear-link" [routerLink]="[('/mining/pool/' + block.extras.pool.slug) | relativeUrl]"> -->
-                  <a class="clear-link" [routerLink]="[('/mining/pool/' + block.minerAddress) | relativeUrl]">
+                  <a class="clear-link" [routerLink]="[('/address/' + block.minerAddress) | relativeUrl]">
 
                     <!-- <img width="22" height="22" src="{{ block.extras.pool['logo'] }}"
                       onError="this.src = '/resources/mining-pools/default.svg'"> -->

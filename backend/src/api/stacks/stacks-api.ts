@@ -6,12 +6,15 @@ import {
   Transaction,
   MempoolTransaction,
   RosettaBlock,
+  AddressBalanceResponse,
+  AddressTransactionsListResponse,
   RosettaTransaction,
   BlockListResponse,
   TransactionList
 } from '@stacks/stacks-blockchain-api-types';
 import { StacksTransactionCostsAndFees, CustomTransactionList } from "./stacks-api.interface";
 import logger from '../../logger';
+import stacksMempool from './stacks-mempool';
 
 class StacksApi {
   protected network_identifier: { blockchain: string, network: string } = {
@@ -202,6 +205,29 @@ class StacksApi {
   public async $getBlockByHash(hash: string): Promise<Block> {
     const { data } = await axios.get<Block>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/block/${hash}`);
     return data;
+  }
+
+  public async $getAddress(address: string): Promise<AddressBalanceResponse> {
+    const { data } = await axios.get<AddressBalanceResponse>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/address/${address}/balances`);
+    return data;
+  }
+
+  public async $getAddressTransactions(address: string): Promise<(Transaction | MempoolTransaction)[]> {
+    const { data } = await axios.get<AddressTransactionsListResponse>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/address/${address}/transactions`);
+    return data.results;
+  }
+  public async $getAddressPrefix(prefix: string): Promise<string[]> {
+    const found: { [address: string]: string } = {};
+    const mp = stacksMempool.getMempool();
+    for (const tx in mp) {
+      if(mp[tx].sender_address.includes(prefix)) {
+        found[mp[tx].sender_address] = '';
+        if (Object.keys(found).length >= 10) {
+          return Object.keys(found);
+        }
+      } 
+    }
+    return Object.keys(found);
   }
 }
 

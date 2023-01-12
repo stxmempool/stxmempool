@@ -7,7 +7,7 @@ import { StateService } from '../services/state.service';
 import { WebsocketResponse } from '../interfaces/websocket.interface';
 import { Outspend } from '../interfaces/electrs.interface';
 import { StacksBlockExtended, StacksTransactionStripped } from './stacks.interfaces';
-import { Transaction } from '@stacks/stacks-blockchain-api-types';
+import { Transaction, AddressBalanceResponse, MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
 @Injectable({
   providedIn: 'root'
 })
@@ -36,6 +36,20 @@ export class StacksApiService {
   }
   getTransaction$(txId: string): Observable<Transaction> {
     return this.httpClient.get<Transaction>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/tx/' + txId);
+  }
+  // Address Component
+  // getAddress$(address: string): Observable<Address> {
+  getAddress$(address: string): Observable<AddressBalanceResponse> {
+    return this.httpClient.get<AddressBalanceResponse>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address);
+  }
+  getAddressTransactions$(address: string): Observable<(MempoolTransaction | Transaction)[]> {
+    return this.httpClient.get<(MempoolTransaction | Transaction)[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address + '/txs');
+  }
+  getAddressesByPrefix$(prefix: string): Observable<string[]> {
+    if (prefix.toLowerCase().indexOf('bc1') === 0) {
+      prefix = prefix.toLowerCase();
+    }
+    return this.httpClient.get<string[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address-prefix/' + prefix);
   }
 
   list2HStatistics$(): Observable<OptimizedMempoolStats[]> {

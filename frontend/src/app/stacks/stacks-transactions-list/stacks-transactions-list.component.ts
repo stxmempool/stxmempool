@@ -223,6 +223,9 @@ export class StacksTransactionsListComponent implements OnInit {
   trackByIndexFn(index: number): number {
     return index;
   }
+  convertStrToNum(string: string): number {
+    return Number(string);
+  }
 
   formatHex(num: number): string {
     const str = num.toString(16);

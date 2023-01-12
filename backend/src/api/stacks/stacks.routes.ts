@@ -20,6 +20,10 @@ class StacksRoutes {
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/block/:hash/summary', this.getStrippedBlockTransactions)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/block/:hash/txs/:index', this.getBlockTransactions)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/tx/:txId', this.getTransaction)
+      .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address', this.getAddress)
+      .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address/txs', this.getAddressTransactions)
+      .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address-prefix/:prefix', this.getAddressPrefix)
+
       ;
 
   }
@@ -86,6 +90,7 @@ class StacksRoutes {
       res.status(500).send(e instanceof Error ? e.message : e);
     }
   }
+
   private async getTransaction(req: Request, res: Response) {
     try {
       const transaction = await transactionUtils.$getStacksMempoolTransactionExtended(req.params.txId);
@@ -96,6 +101,50 @@ class StacksRoutes {
         statusCode = 404;
       }
       res.status(statusCode).send(e instanceof Error ? e.message : e);
+    }
+  }
+  
+  private async getAddress(req: Request, res: Response) {
+    // if (config.MEMPOOL.BACKEND === 'none') {
+    //   res.status(405).send('Address lookups cannot be used with bitcoind as backend.');
+    //   return;
+    // }
+
+    try {
+      const addressData = await stacksApi.$getAddress(req.params.address);
+      res.json(addressData);
+    } catch (e) {
+      if (e instanceof Error && e.message && (e.message.indexOf('too long') > 0 || e.message.indexOf('confirmed status') > 0)) {
+        return res.status(413).send(e instanceof Error ? e.message : e);
+      }
+      res.status(500).send(e instanceof Error ? e.message : e);
+    }
+  }
+
+  private async getAddressTransactions(req: Request, res: Response) {
+    // if (config.MEMPOOL.BACKEND === 'none') {
+    //   res.status(405).send('Address lookups cannot be used with bitcoind as backend.');
+    //   return;
+    // }
+
+    try {
+      // const transactions = await stacksApi.$getAddressTransactions(req.params.address, req.params.txId);
+      const transactions = await stacksApi.$getAddressTransactions(req.params.address);
+      res.json(transactions);
+    } catch (e) {
+      if (e instanceof Error && e.message && (e.message.indexOf('too long') > 0 || e.message.indexOf('confirmed status') > 0)) {
+        return res.status(413).send(e instanceof Error ? e.message : e);
+      }
+      res.status(500).send(e instanceof Error ? e.message : e);
+    }
+  }
+
+  private async getAddressPrefix(req: Request, res: Response) {
+    try {
+      const blockHash = await stacksApi.$getAddressPrefix(req.params.prefix);
+      res.send(blockHash);
+    } catch (e) {
+      res.status(500).send(e instanceof Error ? e.message : e);
     }
   }
 

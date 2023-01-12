@@ -120,7 +120,9 @@
 
                     <!-- <span placement="bottom" class="badge" > -->
                       <!-- [class]="block.extras.pool.name === 'Unknown' ? 'badge-secondary' : 'badge-primary'"> -->
+                    <a placement="bottom" [routerLink]="['/address' | relativeUrl, block.minerAddress]">
                       {{ block.minerAddress | shortenString: 16 }}
+                    </a>
                   <!-- </span> -->
                   </td>
                 </tr>
@@ -260,7 +262,7 @@
             #blockGraphActual
             [isLoading]="isLoadingOverview"
             [resolution]="75"
-            [blockLimit]="stateService.blockVSize"
+            [blockLimit]="15000"
             [orientation]="'top'"
             [flip]="false"
             (txClickEvent)="onTxClick($event)"

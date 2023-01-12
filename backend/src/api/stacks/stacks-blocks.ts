@@ -285,6 +285,7 @@ class StacksBlocks {
         vsize: tx.vsize,
         fee: tx.feeRateAsNumber,
         type: tx.tx_type,
+        execution_cost_read_count: tx.execution_cost_read_count,
       };
     });
     return {

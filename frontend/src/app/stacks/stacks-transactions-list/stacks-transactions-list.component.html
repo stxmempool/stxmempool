@@ -128,6 +128,16 @@
                         </span>
                       </a>
                     </ng-container>
+                    <ng-container *ngSwitchCase="tx.tx_type === 'poison_microblock'">
+                      <p>Poison Microblock</p>
+                      <p>Broadcast By:</p><a class="shortable-address" *ngIf="tx.sender_address" [routerLink]="['/address/' | relativeUrl, tx.sender_address]" title="{{ tx.sender_address }}">
+                        <span class="d-block d-lg-none">{{ tx.sender_address | shortenString : 16 }}</span>
+                        <span class="d-none d-lg-inline-flex justify-content-start">
+                          <span class="addr-left flex-grow-1" [style]="tx.sender_address.length > 40 ? 'max-width: 235px' : ''">{{ tx.sender_address }}</span>
+                          <span *ngIf="tx.sender_address.length > 40" class="addr-right">{{ tx.sender_address | capAddress: 40: 10 }}</span>
+                        </span>
+                      </a>
+                    </ng-container>
                     <!-- Get Rid of this eventually -->
                     <!-- Do we need a poison microblock???? -->
                     <ng-container *ngSwitchDefault>{{tx.tx_type}}</ng-container>
@@ -256,15 +266,28 @@
                   </ng-container>
                   <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
                     <p>Function Name: <span>{{ tx.contract_call?.function_name }}</span></p>
-                    <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="tx.feeRateAsNumber"></app-stacks-fiat></span></p>
                     <p>Contract Name: <span>{{ parseContractName(tx.contract_call?.contract_id) | titlecase }}</span></p>
+                    <!-- <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="tx.feeRateAsNumber"></app-stacks-fiat></span></p> -->
+                    <p>Fees: <app-stacks-amount [satoshis]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
                   </ng-container>
                   <ng-container *ngSwitchCase="tx.tx_type === 'token_transfer'">
                     <p>Amount Sent <app-stacks-amount [satoshis]="convertStringToInt(tx.token_transfer.amount)"></app-stacks-amount></p>
-                    <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount></p>
+                    <!-- <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount></p> -->
+                    <p>Fees: <app-stacks-amount [satoshis]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
                   </ng-container>
                   <ng-container *ngSwitchCase="tx.tx_type === 'smart_contract'">
-                    <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount></p>
+                    <!-- <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount></p> -->
+                    <p>Fees: <app-stacks-amount [satoshis]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
+                  </ng-container>
+                  <ng-container *ngSwitchCase="tx.tx_type === 'poison_microblock'">
+                    <p>Microblock Header 1: <span>{{ tx.poison_microblock?.microblock_header_1 | shortenString:16 }}</span></p>
+                    <p>Microblock Header 2: <span>{{ tx.poison_microblock?.microblock_header_1 | shortenString:16 }}</span></p>
+                    <!-- <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="tx.feeRateAsNumber"></app-stacks-fiat></span></p> -->
+                    <p>Fees: <app-stacks-amount [satoshis]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
                   </ng-container>
                   <ng-container *ngSwitchDefault>{{tx.tx_type}}</ng-container>
                 </div>

@@ -86,6 +86,16 @@ export type MinedStacksTransactionExtended = Transaction & {
       type: string;
     }[];
   };
+  poison_microblock?: {
+    /**
+     * Hex encoded microblock header
+     */
+    microblock_header_1: string;
+    /**
+     * Hex encoded microblock header
+     */
+    microblock_header_2: string;
+  };
   feeRateAsNumber: number;
   firstSeen?: number;
   vsize: number;

@@ -89,6 +89,8 @@ export class ElectrsApiService {
     if (prefix.toLowerCase().indexOf('bc1') === 0) {
       prefix = prefix.toLowerCase();
     }
-    return this.httpClient.get<string[]>(this.apiBaseUrl + this.apiBasePath + '/api/address-prefix/' + prefix);
+    // return this.httpClient.get<string[]>(this.apiBaseUrl + this.apiBasePath + '/api/address-prefix/' + prefix);
+    return this.httpClient.get<string[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address-prefix/' + prefix);
+
   }
 }

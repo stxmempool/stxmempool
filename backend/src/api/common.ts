@@ -86,6 +86,7 @@ export class Common {
       vsize: tx.vsize,
       // place holder value
       type: tx.tx_type,
+      execution_cost_read_count: tx.execution_cost_read_count || 0,
     };
   }
 
