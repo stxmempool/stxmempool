@@ -212,9 +212,14 @@ class StacksApi {
     return data;
   }
 
-  public async $getAddressTransactions(address: string): Promise<(Transaction | MempoolTransaction)[]> {
+  // public async $getAddressTransactions(address: string): Promise<(Transaction | MempoolTransaction)[]> {
+  public async $getAddressTransactions(address: string): Promise<{ total: number, transactions: (Transaction | MempoolTransaction)[]}> {
     const { data } = await axios.get<AddressTransactionsListResponse>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/address/${address}/transactions`);
-    return data.results;
+    // return data.results;
+    return {
+      total: data.total,
+      transactions: data.results,
+    };
   }
   public async $getAddressPrefix(prefix: string): Promise<string[]> {
     const found: { [address: string]: string } = {};
@@ -228,6 +233,9 @@ class StacksApi {
       } 
     }
     return Object.keys(found);
+  }
+  public async $getAddressTotalNumberOfTransactions(address: string) {
+    const { data } = await axios.get(`https://stacks-node-api.mainnet.stacks.co/extended/v1/address/${address}/transactions`)
   }
 }
 

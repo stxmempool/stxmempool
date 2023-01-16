@@ -35,6 +35,7 @@ export default class TxView implements TransactionStripped {
   vsize: number;
   value: number;
   feerate: number;
+  type: 'token_transfer' | 'smart_contract' | 'contract_call' | 'poison_microblock' | 'coinbase';
   status?: 'found' | 'missing' | 'fresh' | 'added' | 'censored' | 'selected';
   context?: 'projected' | 'actual';
 

@@ -2,7 +2,10 @@ import { Component, ComponentRef, ViewChild, HostListener, Input, Output, EventE
   OnInit, OnDestroy, OnChanges, ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { StateService } from '../../services/state.service';
 import { MempoolBlockDelta, TransactionStripped } from '../../interfaces/websocket.interface';
-import { BlockOverviewGraphComponent } from '../../components/block-overview-graph/block-overview-graph.component';
+import { StacksTransactionStripped, StacksMempoolBlockDelta } from '../stacks.interfaces';
+// import { BlockOverviewGraphComponent } from '../../components/block-overview-graph/block-overview-graph.component';
+import { StacksBlockOverviewGraphComponent } from '../stacks-block-overview-graph/stacks-block-overview-graph.component';
+
 import { Subscription, BehaviorSubject, merge, of } from 'rxjs';
 import { switchMap, filter } from 'rxjs/operators';
 import { WebsocketService } from '../../services/websocket.service';
@@ -18,7 +21,7 @@ export class StacksMempoolBlockOverviewComponent implements OnInit, OnDestroy, O
   @Input() index: number;
   @Output() txPreviewEvent = new EventEmitter<TransactionStripped | void>();
 
-  @ViewChild('blockGraph') blockGraph: BlockOverviewGraphComponent;
+  @ViewChild('blockGraph') blockGraph: StacksBlockOverviewGraphComponent;
 
   lastBlockHeight: number;
   blockIndex: number;
@@ -78,7 +81,9 @@ export class StacksMempoolBlockOverviewComponent implements OnInit, OnDestroy, O
     this.websocketService.stopTrackMempoolBlock();
   }
 
-  replaceBlock(transactionsStripped: TransactionStripped[]): void {
+  // replaceBlock(transactionsStripped: TransactionStripped[]): void {
+  replaceBlock(transactionsStripped: StacksTransactionStripped[]): void {
+
     const blockMined = (this.stateService.latestBlockHeight > this.lastBlockHeight);
     if (this.blockIndex !== this.index) {
       const direction = (this.blockIndex == null || this.index < this.blockIndex) ? this.poolDirection : this.chainDirection;
@@ -92,7 +97,9 @@ export class StacksMempoolBlockOverviewComponent implements OnInit, OnDestroy, O
     this.isLoading$.next(false);
   }
 
-  updateBlock(delta: MempoolBlockDelta): void {
+  // updateBlock(delta: MempoolBlockDelta): void {
+  updateBlock(delta: StacksMempoolBlockDelta): void {
+
     const blockMined = (this.stateService.latestBlockHeight > this.lastBlockHeight);
 
     if (this.blockIndex !== this.index) {
@@ -107,7 +114,7 @@ export class StacksMempoolBlockOverviewComponent implements OnInit, OnDestroy, O
     this.isLoading$.next(false);
   }
 
-  onTxClick(event: TransactionStripped): void {
+  onTxClick(event: StacksTransactionStripped): void {
     const url = new RelativeUrlPipe(this.stateService).transform(`/tx/${event.txid}`);
     this.router.navigate([url]);
   }

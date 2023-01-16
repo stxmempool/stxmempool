@@ -103,3 +103,8 @@ export type MinedStacksTransactionExtended = Transaction & {
   effectiveFeePerVsize: number;
   deleteAfter?: number;
 }
+
+export interface StacksMempoolBlockDelta {
+  added: StacksTransactionStripped[],
+  removed: string[];
+}

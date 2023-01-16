@@ -100,8 +100,14 @@ export class StateService {
   // mempoolBlocks$ = new ReplaySubject<MempoolBlock[]>(1);
   mempoolBlocks$ = new ReplaySubject<any[]>(1);
 
-  mempoolBlockTransactions$ = new Subject<TransactionStripped[]>();
-  mempoolBlockDelta$ = new Subject<MempoolBlockDelta>();
+  // THIS WILL HAVE TO BE CHANGED WHEN WE GET CLOSER TO CHOOSING HOW TO REPRESENT THE MEMPOOL, WILL IT BE A STATIC BLOCK?
+
+  // mempoolBlockTransactions$ = new Subject<TransactionStripped[]>();
+  // mempoolBlockDelta$ = new Subject<MempoolBlockDelta>();
+  
+  mempoolBlockTransactions$ = new Subject<any[]>();
+  mempoolBlockDelta$ = new Subject<any>();
+
   txReplaced$ = new Subject<ReplacedTransaction>();
   utxoSpent$ = new Subject<object>();
   difficultyAdjustment$ = new ReplaySubject<DifficultyAdjustment>(1);

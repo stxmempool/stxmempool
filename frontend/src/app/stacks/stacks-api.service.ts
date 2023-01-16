@@ -56,6 +56,12 @@ export class StacksApiService {
   searchStacksApi$(id: string): Observable<SearchSuccessResult> {
     return this.httpClient.get<SearchSuccessResult>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/search/${id}`);
   }
+  getBlockHashFromHeight$(height: number): Observable<string> {
+    return this.httpClient.get(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/block-height/' + height, {responseType: 'text'});
+  }
+  getTotalNumberOfAddressTransactions$(address: string): Observable<number> {
+    return this.httpClient.get<number>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address + '/total');
+  }
   list2HStatistics$(): Observable<OptimizedMempoolStats[]> {
     console.log('Base Path', this.apiBasePath);
     return this.httpClient.get<OptimizedMempoolStats[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/statistics/2h');

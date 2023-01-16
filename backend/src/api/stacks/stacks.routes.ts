@@ -22,8 +22,9 @@ class StacksRoutes {
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/tx/:txId', this.getTransaction)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address', this.getAddress)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address/txs', this.getAddressTransactions)
+      .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address/total', this.getTotalNumberOfAddressTransactions)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address-prefix/:prefix', this.getAddressPrefix)
-
+      .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/block-height/:height', this.getBlockHashByHeight)
       ;
 
   }
@@ -122,6 +123,15 @@ class StacksRoutes {
     }
   }
 
+  private async getTotalNumberOfAddressTransactions(req: Request, res: Response) {
+    try {
+      const total = await stacksApi.$getAddressTotalNumberOfTransactions(req.params.address);
+      res.json(total);
+    } catch (e) {
+      res.status(500).send(e instanceof Error ? e.message : e);
+      
+    }
+  }
   private async getAddressTransactions(req: Request, res: Response) {
     // if (config.MEMPOOL.BACKEND === 'none') {
     //   res.status(405).send('Address lookups cannot be used with bitcoind as backend.');
@@ -144,6 +154,16 @@ class StacksRoutes {
     try {
       const blockHash = await stacksApi.$getAddressPrefix(req.params.prefix);
       res.send(blockHash);
+    } catch (e) {
+      res.status(500).send(e instanceof Error ? e.message : e);
+    }
+  }
+
+  public async getBlockHashByHeight(req: Request, res: Response) {
+    try {
+      const height = parseInt(req.params.height);
+      const block = await stacksApi.$getBlockByHeight(height);
+      res.send(block.hash);
     } catch (e) {
       res.status(500).send(e instanceof Error ? e.message : e);
     }

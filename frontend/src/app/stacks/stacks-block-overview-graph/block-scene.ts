@@ -2,6 +2,8 @@ import { FastVertexArray } from './fast-vertex-array';
 import TxView from './tx-view';
 import { TransactionStripped } from '../../interfaces/websocket.interface';
 import { Position, Square, ViewUpdateParams } from './sprite-types';
+import { StacksTransactionStripped } from '../stacks.interfaces';
+
 
 export default class BlockScene {
   scene: { count: number, offset: { x: number, y: number}};
@@ -59,7 +61,9 @@ export default class BlockScene {
   }
 
   // set up the scene with an initial set of transactions, without any transition animation
-  setup(txs: TransactionStripped[]) {
+  // setup(txs: TransactionStripped[]) {
+  setup(txs: StacksTransactionStripped[]) {
+    
     // clean up any old transactions
     Object.values(this.txs).forEach(tx => {
       tx.destroy();
@@ -82,7 +86,9 @@ export default class BlockScene {
   }
 
   // Animate new block entering scene
-  enter(txs: TransactionStripped[], direction) {
+  // enter(txs: TransactionStripped[], direction) {
+  enter(txs: StacksTransactionStripped[], direction) {
+
     this.replace(txs, direction);
   }
 
@@ -100,7 +106,9 @@ export default class BlockScene {
   }
 
   // Reset layout and replace with new set of transactions
-  replace(txs: TransactionStripped[], direction: string = 'left', sort: boolean = true): void {
+  // replace(txs: TransactionStripped[], direction: string = 'left', sort: boolean = true): void {
+  replace(txs: StacksTransactionStripped[], direction: string = 'left', sort: boolean = true): void {
+
     const startTime = performance.now();
     const nextIds = {};
     const remove = [];
@@ -142,7 +150,9 @@ export default class BlockScene {
     this.updateAll(startTime, 200, direction);
   }
 
-  update(add: TransactionStripped[], remove: string[], direction: string = 'left', resetLayout: boolean = false): void {
+  // update(add: TransactionStripped[], remove: string[], direction: string = 'left', resetLayout: boolean = false): void {
+  update(add: StacksTransactionStripped[], remove: string[], direction: string = 'left', resetLayout: boolean = false): void {
+
     const startTime = performance.now();
     const removed = this.removeBatch(remove, startTime, direction);
 

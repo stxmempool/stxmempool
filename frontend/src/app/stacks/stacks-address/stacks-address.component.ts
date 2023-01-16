@@ -32,7 +32,7 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
   // transactions: Transaction[];
   // transactions: MinedStacksTransactionExtended[];
   transactions: any[];
-
+  txCount$: Observable<number>;
 
   isLoadingTransactions = true;
   retryLoadMore = false;
@@ -69,6 +69,20 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.stateService.networkChanged$.subscribe((network) => this.network = network);
     this.websocketService.want(['blocks']);
+    // .pipe(
+    //   switchMap(() => this.stacksApiService.getTotalNumberOfAddressTransactions$(this.addressString)
+    //   .pipe(
+    //     catchError((err) => {
+    //       this.isLoadingAddress = false;
+    //       this.error = err;
+    //       console.log(err);
+    //       return of(null);
+    //     })
+    //   ))
+    // ).pipe(total => this.txCount = total)
+   
+    // Rewrite this to pipe in the total number of transactions
+    // this.txCount$ = this.stacksApiService.getTotalNumberOfAddressTransactions$(this.addressString);
 
     this.addressLoadingStatus$ = this.route.paramMap
       .pipe(
@@ -110,7 +124,7 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
                   return of(null);
                 })
               )
-            )
+            ),
           );
         })
       )
@@ -141,10 +155,12 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
           return this.stacksApiService.getAddressTransactions$(this.addressString);
 
         }),
-        switchMap((transactions: any[]) => {
+        // switchMap((transactions: any[]) => {
+        switchMap((transactions: StacksTransactionExtended[]) => {
+
           this.tempTransactions = transactions;
           if (transactions.length) {
-            this.lastTransactionTxId = transactions[transactions.length - 1].txid;
+            this.lastTransactionTxId = transactions[transactions.length - 1].tx_id;
             this.loadedConfirmedTxCount += transactions.filter((tx) => tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition').length;
           }
 
@@ -154,7 +170,7 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
             // if (!tx.status.confirmed) {
             if (!(tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition')) {
 
-              fetchTxs.push(tx.txid);
+              fetchTxs.push(tx.tx_id);
               this.timeTxIndexes.push(index);
             }
           });
@@ -236,9 +252,12 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
   }
 
   loadMore() {
+    console.log('this.isLoadingTransactions-->', this.isLoadingTransactions, 'this.totalConfirmedTxCount-->', this.totalConfirmedTxCount, 'this.loadedConfirmedTxCount-->', this.loadedConfirmedTxCount);
+
     if (this.isLoadingTransactions || !this.totalConfirmedTxCount || this.loadedConfirmedTxCount >= this.totalConfirmedTxCount) {
       return;
     }
+
     this.isLoadingTransactions = true;
     this.retryLoadMore = false;
     this.electrsApiService.getAddressTransactionsFromHash$(this.address.address, this.lastTransactionTxId)
