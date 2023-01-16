@@ -43,7 +43,7 @@
       <div class="card graph-card">
         <div class="card-body pl-0">
           <div style="padding-left: 1.25rem;">
-            <ng-container *ngTemplateOutlet="stateService.network === 'liquid' ? lbtcPegs : mempoolTable; context: { $implicit: mempoolInfoData }"></ng-container>
+            <ng-container *ngTemplateOutlet="mempoolTable; context: { $implicit: mempoolInfoData }"></ng-container>
             <hr>
           </div>
           <ng-template [ngIf]="(network$ | async) !== 'liquid'" [ngIfElse]="liquidPegs">
@@ -60,9 +60,7 @@
             </ng-container>
           </ng-template>
           <ng-template #liquidPegs>
-            <!-- <app-lbtc-pegs-graph [data]="liquidPegsMonth$ | async"></app-lbtc-pegs-graph> -->
-            <!-- TAKE THIS SHIT OUT -->
-            <p>Liquid enabled</p>
+            <p>Set network to Stacks</p>
           </ng-template>
         </div>
       </div>
@@ -73,24 +71,6 @@
         <div class="card-body">
           <ng-container *ngTemplateOutlet="stateService.network === 'liquid' ? mempoolTable : txPerSecond; context: { $implicit: mempoolInfoData }"></ng-container>
           <hr>
-          <!-- <div class="mempool-graph" *ngIf="stateService.network === 'liquid'; else mempoolGraph">
-            <table class="table table-borderless table-striped" *ngIf="(featuredAssets$ | async) as featuredAssets else loadingAssetsTable">
-              <tbody>
-                <tr *ngFor="let group of featuredAssets">
-                  <td class="asset-icon">
-                    <a [routerLink]="['/assets/asset/' | relativeUrl, group.asset]">
-                      <img class="assetIcon" [src]="'/api/v1/asset/' + group.asset + '/icon'">
-                    </a>
-                  </td>
-                  <td class="asset-title">
-                    <a [routerLink]="['/assets/asset/' | relativeUrl, group.asset]">{{ group.name }}</a>
-                  </td>
-                  <td class="circulating-amount"><app-asset-circulation [assetId]="group.asset"></app-asset-circulation></td>
-                </tr>
-              </tbody>
-            </table>
-          </div> -->
-          <!-- <ng-template #mempoolGraph> -->
             <div class="mempool-graph" *ngIf="{ value: (mempoolStats$ | async) } as mempoolStats">
               <app-stacks-incoming-transactions-graph
                 [left]="50"
@@ -98,7 +78,6 @@
                 [windowPreferenceOverride]="'2h'"
                 ></app-stacks-incoming-transactions-graph>
             </div>
-          <!-- </ng-template> -->
         </div>
       </div>
     </div>
@@ -123,12 +102,7 @@
                 <td class="table-cell-height" ><a [routerLink]="['/block' | relativeUrl, block.id]" [state]="{ data: { block: block } }">{{ block.height }}</a></td>
                 <td *ngIf="stateService.env.MINING_DASHBOARD" class="table-cell-mined" ><app-time-since [time]="block.timestamp" [fastRender]="true"></app-time-since></td>
                 <td *ngIf="!stateService.env.MINING_DASHBOARD" class="table-cell-mined">
-                  <!-- <a class="clear-link" [routerLink]="[('/mining/pool/' + block.extras.pool.slug) | relativeUrl]"> -->
                   <a class="clear-link" [routerLink]="[('/address/' + block.minerAddress) | relativeUrl]">
-
-                    <!-- <img width="22" height="22" src="{{ block.extras.pool['logo'] }}"
-                      onError="this.src = '/resources/mining-pools/default.svg'"> -->
-                    <!-- <span class="pool-name">{{ block.extras.pool.name }}</span> -->
                     <span class="pool-name">{{ block.minerAddress | shortenString: 12 }}</span>
 
                   </a>
@@ -136,8 +110,6 @@
                 <td class="table-cell-transaction-count">{{ block.tx_count | number }}</td>
                 <td class="table-cell-size">
                   <div class="progress">
-                    <!-- <div class="progress-bar progress-mempool {{ network$ | async }}" role="progressbar" [ngStyle]="{'width': (block.weight / stateService.env.BLOCK_WEIGHT_UNITS)*100 + '%' }">&nbsp;</div> -->
-                    <!-- <div class="progress-bar progress-mempool {{ network$ | async }}" role="progressbar" [ngStyle]="{'width': (block.size / stateService.env.BLOCK_WEIGHT_UNITS)*100 + '%' }">&nbsp;</div> -->
                     <div class="progress-bar progress-mempool {{ network$ | async }}" role="progressbar" [ngStyle]="{'width': (block.execution_cost_read_count / 15000)*100 + '%' }">&nbsp;</div>
 
                     <div class="progress-text" [innerHTML]="block.size | bytes: 2"></div>
@@ -156,18 +128,14 @@
           <table class="table latest-transactions">
             <thead>
               <th class="table-cell-txid" i18n="dashboard.latest-transactions.txid">TXID</th>
-              <!-- <th class="table-cell-satoshis" i18n="dashboard.latest-transactions.amount">Amount</th> -->
               <th class="table-cell-satoshis" i18n="dashboard.latest-transactions.amount">Transaction Type</th>
-              <!-- <th class="table-cell-fiat" *ngIf="(network$ | async) === ''" i18n="dashboard.latest-transactions.USD">USD</th> -->
               <th class="table-cell-fees" i18n="transaction.fee|Transaction fee">Fee</th>
             </thead>
             <tbody>
               <tr *ngFor="let transaction of transactions$ | async; let i = index;">
                 <td class="table-cell-txid"><a [routerLink]="['/tx' | relativeUrl, transaction.txid]">{{ transaction.txid | shortenString : 10 }}</a></td>
-                <!-- <td class="table-cell-satoshis"><app-amount *ngIf="(network$ | async) !== 'liquid' && (network$ | async) !== 'liquidtestnet'; else liquidAmount" [satoshis]="transaction.value" digitsInfo="1.2-4" [noFiat]="true"></app-amount><ng-template #liquidAmount i18n="shared.confidential">Confidential</ng-template></td> -->
                 <td class="table-cell-mined">{{ convertTxType(transaction.type) | titlecase }}</td>
 
-                <!-- <td class="table-cell-fiat" *ngIf="(network$ | async) === ''" ><app-fiat [value]="transaction.value" digitsInfo="1.0-0"></app-fiat></td> -->
                 <td class="table-cell-fees">{{ transaction.fee / transaction.vsize | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">uSTX/B</span></td>
               </tr>
             </tbody>
@@ -176,16 +144,6 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <app-language-selector></app-language-selector>
-
-  <div class="terms-of-service">
-    <a [routerLink]="['/terms-of-service']" i18n="shared.terms-of-service|Terms of Service">Terms of Service</a>
-    |
-    <a [routerLink]="['/privacy-policy']" i18n="shared.privacy-policy|Privacy Policy">Privacy Policy</a>
-    |
-    <a [routerLink]="['/tx/push' | relativeUrl]" i18n="shared.broadcast-transaction|Broadcast Transaction">Broadcast Transaction</a>
   </div>
 
 </div>
@@ -252,17 +210,6 @@
           <div class="progress-text">&lrm;<span [innerHTML]="mempoolInfoData.value.memPoolInfo.usage | bytes"></span> / <span [innerHTML]="mempoolInfoData.value.memPoolInfo.maxmempool | bytes"></span></div>
         </div>
       </div>
-    </div>
-  </div>
-</ng-template>
-
-<ng-template #lbtcPegs let-mempoolInfoData>
-  <div class="mempool-info-data">
-    <div class="item">
-      <h5 class="card-title" i18n="dashboard.lbtc-pegs-in-circulation">L-BTC in circulation</h5>
-      <ng-container *ngIf="(liquidPegsMonth$ | async) as liquidPegsMonth; else loadingTransactions">
-        <p class="card-text">{{ liquidPegsMonth.series.slice(-1)[0] | number: '1.2-2' }} <span>L-BTC</span></p>
-      </ng-container>
     </div>
   </div>
 </ng-template>

@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { StateService } from '../services/state.service';
 import { WebsocketResponse } from '../interfaces/websocket.interface';
 import { Outspend } from '../interfaces/electrs.interface';
-import { StacksBlockExtended, StacksTransactionStripped } from './stacks.interfaces';
+import { StacksBlockExtended, StacksTransactionStripped, MinedStacksTransactionExtended } from './stacks.interfaces';
 import { Transaction, AddressBalanceResponse, MempoolTransaction, SearchSuccessResult } from '@stacks/stacks-blockchain-api-types';
 @Injectable({
   providedIn: 'root'
@@ -31,8 +31,10 @@ export class StacksApiService {
       this.apiBasePath = network ? '/' + network : '';
     });
   }
-  getBlockTransactions$(hash: string, index: number = 0): Observable<Transaction[]> {
-    return this.httpClient.get<Transaction[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/block/' + hash + '/txs/' + index);
+  // getBlockTransactions$(hash: string, index: number = 0): Observable<Transaction[]> {
+  getBlockTransactions$(hash: string, index: number = 0): Observable<MinedStacksTransactionExtended[]> {
+
+    return this.httpClient.get<MinedStacksTransactionExtended[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/block/' + hash + '/txs/' + index);
   }
   getTransaction$(txId: string): Observable<Transaction> {
     return this.httpClient.get<Transaction>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/tx/' + txId);

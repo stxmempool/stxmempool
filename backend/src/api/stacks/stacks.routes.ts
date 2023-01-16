@@ -33,9 +33,10 @@ class StacksRoutes {
     return response.data.results;;
   }
   private async getStrippedBlockTransactions(req: Request, res: Response) {
+    console.log('getStrippedBlock triggered');
     try {
       const transactions = await stacksBlocks.$getStrippedBlockTransactions(req.params.hash);
-
+      console.log('transactions-->', transactions);
       res.setHeader('Expires', new Date(Date.now() + 1000 * 3600 * 24 * 30).toUTCString());
       res.json(transactions);
     } catch (e) {

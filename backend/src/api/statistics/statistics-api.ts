@@ -296,7 +296,6 @@ class StatisticsApi {
     let stacksEnabled: string;
     configuration.STACKS.ENABLED ? stacksEnabled = 'stacks_' : stacksEnabled = ''; 
     try {
-      // const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM statistics ORDER BY statistics.added DESC LIMIT 120`;
       const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM ${stacksEnabled}statistics ORDER BY ${stacksEnabled}statistics.added DESC LIMIT 120`;
 
       const [rows] = await DB.query({ sql: query, timeout: this.queryTimeout });
@@ -311,7 +310,6 @@ class StatisticsApi {
     let stacksEnabled: string;
     configuration.STACKS.ENABLED ? stacksEnabled = 'stacks_' : stacksEnabled = ''; 
     try {
-      // const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM statistics ORDER BY statistics.added DESC LIMIT 1440`;
       const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM ${stacksEnabled}statistics ORDER BY ${stacksEnabled}statistics.added DESC LIMIT 1440`;
 
       const [rows] = await DB.query({ sql: query, timeout: this.queryTimeout });

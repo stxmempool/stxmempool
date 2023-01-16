@@ -1,5 +1,6 @@
 import { Component, ElementRef, ViewChild, HostListener, Input, Output, EventEmitter, NgZone, AfterViewInit, OnDestroy, OnChanges } from '@angular/core';
 import { TransactionStripped } from '../../interfaces/websocket.interface';
+import { StacksTransactionStripped } from '../stacks.interfaces';
 import { FastVertexArray } from './fast-vertex-array';
 import BlockScene from './block-scene';
 import TxSprite from './tx-sprite';
@@ -95,7 +96,9 @@ export class StacksBlockOverviewGraphComponent implements AfterViewInit, OnDestr
   }
 
   // initialize the scene without any entry transition
+  // setup(transactions: TransactionStripped[]): void {
   setup(transactions: TransactionStripped[]): void {
+
     if (this.scene) {
       this.scene.setup(transactions);
       this.readyNextFrame = true;

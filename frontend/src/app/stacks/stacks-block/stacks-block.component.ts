@@ -3,16 +3,19 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { ElectrsApiService } from '../../services/electrs-api.service';
 import { switchMap, tap, throttleTime, catchError, map, shareReplay, startWith, pairwise, filter } from 'rxjs/operators';
-import { Transaction, Vout } from '../../interfaces/electrs.interface';
 import { Observable, of, Subscription, asyncScheduler, EMPTY, combineLatest } from 'rxjs';
 import { StateService } from '../../services/state.service';
 import { SeoService } from '../../services/seo.service';
 import { WebsocketService } from '../../services/websocket.service';
 import { RelativeUrlPipe } from '../../shared/pipes/relative-url/relative-url.pipe';
-import { BlockAudit, BlockExtended, TransactionStripped } from '../../interfaces/node-api.interface';
-// import { StacksBlockExtended, StacksTransactionStripped} from '../stacks.interfaces';
+import { BlockAudit, TransactionStripped } from '../../interfaces/node-api.interface';
+import { StacksBlockExtended, StacksTransactionStripped, StacksTransactionExtended, MinedStacksTransactionExtended} from '../stacks.interfaces';
+import { Transaction } from '@stacks/stacks-blockchain-api-types';
+
 import { ApiService } from '../../services/api.service';
-import { BlockOverviewGraphComponent } from '../../components/block-overview-graph/block-overview-graph.component';
+// import { BlockOverviewGraphComponent } from '../../components/block-overview-graph/block-overview-graph.component';
+import { StacksBlockOverviewGraphComponent } from '../stacks-block-overview-graph/stacks-block-overview-graph.component';
+
 import { detectWebGL } from '../../shared/graphs.utils';
 import { StacksApiService } from '../stacks-api.service';
 
@@ -32,20 +35,28 @@ import { StacksApiService } from '../stacks-api.service';
 export class StacksBlockComponent implements OnInit, OnDestroy {
   network = '';
   // block: BlockExtended;
-  block: any;
+  // block: any;
+  block: StacksBlockExtended;
+
   blockAudit: BlockAudit = undefined;
   blockHeight: number;
   lastBlockHeight: number;
   nextBlockHeight: number;
   blockHash: string;
   isLoadingBlock = true;
-  latestBlock: BlockExtended;
-  latestBlocks: BlockExtended[] = [];
+  // latestBlock: BlockExtended;
+  // latestBlocks: BlockExtended[] = [];
+  latestBlock: StacksBlockExtended;
+  latestBlocks: StacksBlockExtended[] = [];
   // transactions: Transaction[];
-  transactions: any[];
+  transactions: MinedStacksTransactionExtended[];
+
+  // transactions: StacksTransactionExtended[];
   
   isLoadingTransactions = true;
+  // strippedTransactions: StacksTransactionStripped[];
   strippedTransactions: TransactionStripped[];
+
   overviewTransitionDirection: string;
   isLoadingOverview = true;
   error: any;
@@ -84,8 +95,8 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
   timeLtr: boolean;
   childChangeSubscription: Subscription;
 
-  @ViewChildren('blockGraphProjected') blockGraphProjected: QueryList<BlockOverviewGraphComponent>;
-  @ViewChildren('blockGraphActual') blockGraphActual: QueryList<BlockOverviewGraphComponent>;
+  @ViewChildren('blockGraphProjected') blockGraphProjected: QueryList<StacksBlockOverviewGraphComponent>;
+  @ViewChildren('blockGraphActual') blockGraphActual: QueryList<StacksBlockOverviewGraphComponent>;
 
   constructor(
     private route: ActivatedRoute,
@@ -122,7 +133,7 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
       );
     
 
-    this.blocksSubscription = this.stateService.blocks$
+    this.blocksSubscription = this.stateService.stacksBlocks$
       .subscribe(([block]) => {
         this.latestBlock = block;
         this.latestBlocks.unshift(block);
@@ -167,7 +178,9 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
         } else {
           this.isLoadingBlock = true;
           this.isLoadingOverview = true;
-          let blockInCache: BlockExtended;
+          // let blockInCache: BlockExtended;
+          let blockInCache: StacksBlockExtended;
+
           if (isBlockHeight) {
             blockInCache = this.latestBlocks.find((block) => block.height === parseInt(blockHash, 10));
             if (blockInCache) {
@@ -215,7 +228,9 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
           );
         }
       }),
-      tap((block: BlockExtended) => {
+      // tap((block: BlockExtended) => {
+      tap((block: StacksBlockExtended) => {
+      
         if (block.height > 0) {
           // Preload previous block summary (execute the http query so the response will be cached)
           this.unsubscribeNextBlockSubscriptions();
@@ -223,7 +238,9 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
             // this.nextBlockSubscription = this.apiService.getBlock$(block.previousblockhash).subscribe();
             this.nextBlockSubscription = this.stacksApiService.getBlock$(block.previousblockhash).subscribe();
 
-            this.nextBlockTxListSubscription = this.electrsApiService.getBlockTransactions$(block.previousblockhash).subscribe();
+            // this.nextBlockTxListSubscription = this.electrsApiService.getBlockTransactions$(block.previousblockhash).subscribe();
+            this.nextBlockTxListSubscription = this.stacksApiService.getBlockTransactions$(block.previousblockhash).subscribe();
+
             this.apiService.getBlockAudit$(block.previousblockhash);
           }, 100);
         }
@@ -261,10 +278,12 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
         }))
       ),
     )
-    .subscribe((transactions: Transaction[]) => {
-      if (this.fees === undefined && transactions[0]) {
-        this.fees = transactions[0].vout.reduce((acc: number, curr: Vout) => acc + curr.value, 0) / 100000000 - this.blockSubsidy;
-      }
+    // .subscribe((transactions: Transaction[]) => {
+    .subscribe((transactions: MinedStacksTransactionExtended[]) => {
+
+      // if (this.fees === undefined && transactions[0]) {
+      //   this.fees = transactions[0].vout.reduce((acc: number, curr: Vout) => acc + curr.value, 0) / 100000000 - this.blockSubsidy;
+      // }
       this.transactions = transactions;
       this.isLoadingTransactions = false;
     },
@@ -278,7 +297,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
       this.overviewSubscription = block$.pipe(
         startWith(null),
         pairwise(),
-        // switchMap(([prevBlock, block]) => this.apiService.getStrippedBlockTransactions$(block.id)
         switchMap(([prevBlock, block]) => this.stacksApiService.getStrippedBlockTransactions$(block.id)
 
           .pipe(
@@ -296,7 +314,9 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
           )
         ),
       )
+      // .subscribe(({transactions, direction}: {transactions: TransactionStripped[], direction: string}) => {
       .subscribe(({transactions, direction}: {transactions: TransactionStripped[], direction: string}) => {
+
         this.strippedTransactions = transactions;
         this.isLoadingOverview = false;
         this.setupBlockGraphs();
