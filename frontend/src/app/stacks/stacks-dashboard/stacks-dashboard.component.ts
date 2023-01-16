@@ -8,8 +8,7 @@ import { StateService } from '../../services/state.service';
 import { WebsocketService } from '../../services/websocket.service';
 import { SeoService } from '../../services/seo.service';
 import { StorageService } from '../../services/storage.service';
-// this is trash, make a set of interfaces for frontend
-import { StacksBlockExtended, StacksTransactionStripped } from '../../../../../backend/src/api/stacks/stacks-api.interface';
+import { StacksBlockExtended, StacksTransactionStripped } from '../stacks.interfaces';
 
 interface MempoolBlocksData {
   blocks: number;

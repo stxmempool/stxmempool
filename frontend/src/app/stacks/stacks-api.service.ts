@@ -7,7 +7,7 @@ import { StateService } from '../services/state.service';
 import { WebsocketResponse } from '../interfaces/websocket.interface';
 import { Outspend } from '../interfaces/electrs.interface';
 import { StacksBlockExtended, StacksTransactionStripped } from './stacks.interfaces';
-import { Transaction, AddressBalanceResponse, MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
+import { Transaction, AddressBalanceResponse, MempoolTransaction, SearchSuccessResult } from '@stacks/stacks-blockchain-api-types';
 @Injectable({
   providedIn: 'root'
 })
@@ -51,7 +51,9 @@ export class StacksApiService {
     }
     return this.httpClient.get<string[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address-prefix/' + prefix);
   }
-
+  searchStacksApi$(id: string): Observable<SearchSuccessResult> {
+    return this.httpClient.get<SearchSuccessResult>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/search/${id}`);
+  }
   list2HStatistics$(): Observable<OptimizedMempoolStats[]> {
     console.log('Base Path', this.apiBasePath);
     return this.httpClient.get<OptimizedMempoolStats[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/statistics/2h');

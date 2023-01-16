@@ -3,7 +3,7 @@
     <div class="search-box-container mr-2">
       <!-- <input (focus)="focus$.next($any($event).target.value)" (click)="click$.next($any($event).target.value)" formControlName="searchText" type="text" class="form-control" i18n-placeholder="search-form.searchbar-placeholder" placeholder="Explore the full Bitcoin ecosystem"> -->
       <input (focus)="focus$.next($any($event).target.value)" (click)="click$.next($any($event).target.value)" formControlName="searchText" type="text" class="form-control" i18n-placeholder="search-form.searchbar-placeholder" placeholder="Explore the Stacks ecosystem">
-      <app-search-results #searchResults [hidden]="dropdownHidden" [results]="typeAhead$ | async" (selectedResult)="selectedResult($event)"></app-search-results>
+      <app-stacks-search-results #searchResults [hidden]="dropdownHidden" [results]="typeAhead$ | async" (selectedResult)="selectedResult($event)"></app-stacks-search-results>
     </div>
     <div>
       <button [disabled]="isSearching" type="submit" class="btn btn-block btn-primary">

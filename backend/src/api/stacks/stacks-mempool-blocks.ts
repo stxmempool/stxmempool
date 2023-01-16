@@ -228,7 +228,7 @@ class StacksMempoolBlocks {
   public async updateProjection() {
     const projectedBlockRaw = await this.runProjection();
     // const newTransactions: StacksTransactionExtended[] = [];
-    // console.log('projectedBlockRaw-->', projectedBlockRaw);
+    console.log('projectedBlockRaw-->', projectedBlockRaw);
     if (projectedBlockRaw.tx_ids.length === 1 && projectedBlockRaw.blockDetails) {
       this.mempoolProjectedBlock.blockDetails = projectedBlockRaw.blockDetails;
       //@ts-ignore

@@ -58,7 +58,9 @@ export default class TxView implements TransactionStripped {
     // this.vsize = tx.vsize;
     // this.vsize = 100;
 
-    this.vsize = typeof tx.execution_cost_read_count === 'number' ? tx.execution_cost_read_count : tx.vsize;
+    // this.vsize = typeof tx.execution_cost_read_count === 'number' ? tx.execution_cost_read_count : tx.vsize;
+    this.vsize = typeof tx.execution_cost_read_count === 'number' ? tx.execution_cost_read_count : 0;
+
 
     // this.value = tx.value;
     this.value = tx.type;
