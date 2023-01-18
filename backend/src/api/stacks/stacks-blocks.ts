@@ -108,13 +108,14 @@ class StacksBlocks {
     if(txsVerbose) {
       for (let i = 0; i < txIds.length; i++) {
         // if (mempool[txIds[i]]) {
-        if (mempool[txsVerbose[txIds[i]].result.tx_id]) {
+        // if (mempool[txsVerbose[txIds[i]].result.tx_id]) {
 
-          // We update blocks before the mempool (index.ts), therefore we can
-          // optimize here by directly fetching txs in the "outdated" mempool
-          transactions.push(mempool[txIds[i]]);
-          transactionsFound++;
-        } else if (config.MEMPOOL.BACKEND === 'none' || !stacksMempool.hasPriority() || i === 0) {
+        //   // We update blocks before the mempool (index.ts), therefore we can
+        //   // optimize here by directly fetching txs in the "outdated" mempool
+        //   transactions.push(mempool[txIds[i]]);
+        //   transactionsFound++;
+        // } else if (config.MEMPOOL.BACKEND === 'none' || !stacksMempool.hasPriority() || i === 0) {
+        if (config.MEMPOOL.BACKEND === 'none' || !stacksMempool.hasPriority() || i === 0) {
           // Otherwise we fetch the tx data through backend services (esplora, electrum, core rpc...)
           if (!quiet && (i % (Math.round((txIds.length) / 10)) === 0 || i + 1 === txIds.length)) { // Avoid log spam
             logger.debug(`Indexing tx ${i + 1} of ${txIds.length} in block #${block.height}`);

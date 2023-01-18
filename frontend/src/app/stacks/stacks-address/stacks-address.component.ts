@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { ElectrsApiService } from '../../services/electrs-api.service';
 import { switchMap, filter, catchError, map, tap } from 'rxjs/operators';
-import { Address, Transaction } from '../../interfaces/electrs.interface';
+// import { Address, Transaction } from '../../interfaces/electrs.interface';
 import { WebsocketService } from '../../services/websocket.service';
 import { StateService } from '../../services/state.service';
 import { AudioService } from '../../services/audio.service';
@@ -11,7 +11,7 @@ import { StacksApiService } from '../stacks-api.service';
 import { of, merge, Subscription, Observable } from 'rxjs';
 import { SeoService } from '../../services/seo.service';
 import { AddressInformation } from '../../interfaces/node-api.interface';
-import { AddressTransactionsListResponse, AddressBalanceResponse } from '@stacks/stacks-blockchain-api-types';
+import { AddressTransactionsListResponse, AddressBalanceResponse, MempoolTransaction, Transaction } from '@stacks/stacks-blockchain-api-types';
 import { StacksTransactionExtended, MinedStacksTransactionExtended } from '../stacks.interfaces';
 
 
@@ -148,7 +148,7 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
         }),
         switchMap((address) => {
           this.address = address;
-          this.updateChainStats();
+          // this.updateChainStats();
           this.isLoadingAddress = false;
           this.isLoadingTransactions = true;
           // return this.electrsApiService.getAddressTransactions$(address.address);
@@ -156,17 +156,19 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
 
         }),
         // switchMap((transactions: any[]) => {
-        switchMap((transactions: StacksTransactionExtended[]) => {
-
-          this.tempTransactions = transactions;
-          if (transactions.length) {
-            this.lastTransactionTxId = transactions[transactions.length - 1].tx_id;
-            this.loadedConfirmedTxCount += transactions.filter((tx) => tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition').length;
+        // switchMap((transactions: StacksTransactionExtended[]) => {
+        switchMap((addressData: { total: number, transactions: (Transaction | MempoolTransaction)[]}) => {
+          this.txCount = addressData.total;
+          // this.updateChainStats();
+          this.tempTransactions = addressData.transactions;
+          if (addressData.transactions.length) {
+            this.lastTransactionTxId = addressData.transactions[addressData.transactions.length - 1].tx_id;
+            this.loadedConfirmedTxCount += addressData.transactions.filter((tx) => tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition').length;
           }
 
           const fetchTxs: string[] = [];
           this.timeTxIndexes = [];
-          transactions.forEach((tx, index) => {
+          addressData.transactions.forEach((tx, index) => {
             // if (!tx.status.confirmed) {
             if (!(tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition')) {
 
@@ -252,19 +254,20 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
   }
 
   loadMore() {
-    console.log('this.isLoadingTransactions-->', this.isLoadingTransactions, 'this.totalConfirmedTxCount-->', this.totalConfirmedTxCount, 'this.loadedConfirmedTxCount-->', this.loadedConfirmedTxCount);
+    // console.log('this.isLoadingTransactions-->', this.isLoadingTransactions, 'this.totalConfirmedTxCount-->', this.totalConfirmedTxCount, 'this.loadedConfirmedTxCount-->', this.loadedConfirmedTxCount, 'txCount-->', this.txCount);
 
-    if (this.isLoadingTransactions || !this.totalConfirmedTxCount || this.loadedConfirmedTxCount >= this.totalConfirmedTxCount) {
+    // if (this.isLoadingTransactions || !this.totalConfirmedTxCount || this.loadedConfirmedTxCount >= this.totalConfirmedTxCount) {
+    if (this.isLoadingTransactions || !this.txCount || this.loadedConfirmedTxCount >= this.txCount) {
       return;
     }
-
+    // console.log('made it past conditional');
     this.isLoadingTransactions = true;
     this.retryLoadMore = false;
-    this.electrsApiService.getAddressTransactionsFromHash$(this.address.address, this.lastTransactionTxId)
-      .subscribe((transactions: Transaction[]) => {
-        this.lastTransactionTxId = transactions[transactions.length - 1].txid;
-        this.loadedConfirmedTxCount += transactions.length;
-        this.transactions = this.transactions.concat(transactions);
+    this.stacksApiService.getMoreAddressTransactions$(this.addressString, this.loadedConfirmedTxCount)
+      .subscribe((response: { total: number, transactions: (Transaction | MempoolTransaction)[]}) => {
+        this.lastTransactionTxId = response.transactions[response.transactions.length - 1].tx_id;
+        this.loadedConfirmedTxCount += response.transactions.length;
+        this.transactions = this.transactions.concat(response.transactions);
         this.isLoadingTransactions = false;
       },
       (error) => {

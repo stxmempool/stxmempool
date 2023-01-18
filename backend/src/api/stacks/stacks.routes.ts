@@ -22,6 +22,7 @@ class StacksRoutes {
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/tx/:txId', this.getTransaction)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address', this.getAddress)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address/txs', this.getAddressTransactions)
+      .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address/txs/:offset', this.getAddressTransactions)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address/total', this.getTotalNumberOfAddressTransactions)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address-prefix/:prefix', this.getAddressPrefix)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/block-height/:height', this.getBlockHashByHeight)
@@ -140,7 +141,7 @@ class StacksRoutes {
 
     try {
       // const transactions = await stacksApi.$getAddressTransactions(req.params.address, req.params.txId);
-      const transactions = await stacksApi.$getAddressTransactions(req.params.address);
+      const transactions = await stacksApi.$getAddressTransactions(req.params.address, req.params.offset);
       res.json(transactions);
     } catch (e) {
       if (e instanceof Error && e.message && (e.message.indexOf('too long') > 0 || e.message.indexOf('confirmed status') > 0)) {

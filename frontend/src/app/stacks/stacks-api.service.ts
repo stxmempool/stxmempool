@@ -33,7 +33,6 @@ export class StacksApiService {
   }
   // getBlockTransactions$(hash: string, index: number = 0): Observable<Transaction[]> {
   getBlockTransactions$(hash: string, index: number = 0): Observable<MinedStacksTransactionExtended[]> {
-
     return this.httpClient.get<MinedStacksTransactionExtended[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/block/' + hash + '/txs/' + index);
   }
   getTransaction$(txId: string): Observable<Transaction> {
@@ -44,8 +43,12 @@ export class StacksApiService {
   getAddress$(address: string): Observable<AddressBalanceResponse> {
     return this.httpClient.get<AddressBalanceResponse>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address);
   }
-  getAddressTransactions$(address: string): Observable<(MempoolTransaction | Transaction)[]> {
-    return this.httpClient.get<(MempoolTransaction | Transaction)[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address + '/txs');
+  // getAddressTransactions$(address: string): Observable<(MempoolTransaction | Transaction)[]> {
+  getAddressTransactions$(address: string): Observable<{ total: number, transactions: (Transaction | MempoolTransaction)[]}> {
+    return this.httpClient.get<{ total: number, transactions: (Transaction | MempoolTransaction)[]}>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address + '/txs');
+  }
+  getMoreAddressTransactions$(address: string, offset: number): Observable<{ total: number, transactions: (Transaction | MempoolTransaction)[]}> {
+    return this.httpClient.get<{ total: number, transactions: (Transaction | MempoolTransaction)[]}>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address + '/txs/' + offset);
   }
   getAddressesByPrefix$(prefix: string): Observable<string[]> {
     if (prefix.toLowerCase().indexOf('bc1') === 0) {

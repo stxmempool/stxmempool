@@ -64,7 +64,9 @@ export class StacksTransactionsListComponent implements OnInit, OnChanges {
   @Output() loadMore = new EventEmitter();
 
   // latestBlock$: Observable<BlockExtended>;
-  latestBlock$: Observable<StacksBlockExtended>;
+  // latestBlock$: Observable<StacksBlockExtended>;
+  latestBlock$: Observable<any>;
+
 
   outspendsSubscription: Subscription;
   refreshOutspends$: ReplaySubject<string[]> = new ReplaySubject();
@@ -84,8 +86,8 @@ export class StacksTransactionsListComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit(): void {
-    // this.latestBlock$ = this.stateService.blocks$.pipe(map(([block]) => block));
-    this.latestBlock$ = this.stateService.stacksBlocks$.pipe(map(([block]) => block));
+    this.latestBlock$ = this.stateService.blocks$.pipe(map(([block]) => block));
+    // this.latestBlock$ = this.stateService.stacksBlocks$.pipe(map(([block]) => block));
 
     this.stateService.networkChanged$.subscribe((network) => this.network = network);
 

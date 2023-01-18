@@ -56,6 +56,8 @@ export default class TxView implements TransactionStripped {
     // this.txid = tx.type;
 
     this.fee = tx.fee;
+    // this.fee = tx.execution_cost_read_count;
+
     // this.vsize = tx.vsize;
     // this.vsize = 100;
 
@@ -66,6 +68,8 @@ export default class TxView implements TransactionStripped {
     // this.value = tx.value;
     this.value = tx.type;
     this.feerate = tx.fee / tx.vsize;
+    // this.feerate = tx.vsize;
+
     this.status = tx.status;
     this.initialised = false;
     this.vertexArray = vertexArray;

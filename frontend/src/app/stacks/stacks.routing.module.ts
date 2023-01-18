@@ -31,9 +31,6 @@ import { StacksAddressComponent } from './stacks-address/stacks-address.componen
 
 
 
-
-
-
 const routes: Routes = [
   {
     path: '',

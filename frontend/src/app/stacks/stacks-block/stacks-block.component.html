@@ -75,7 +75,7 @@
                   <tr>
                     <td i18n="block.total-fees|Total fees in a block">Total fees</td>
                     <td *ngIf="network !== 'liquid' && network !== 'liquidtestnet'; else liquidTotalFees">
-                      <app-stacks-amount [satoshis]="block.extras.totalFees" digitsInfo="1.2-3" [noFiat]="true"></app-stacks-amount>
+                      <app-stacks-amount [uSTX]="block.extras.totalFees" digitsInfo="1.2-3" [noFiat]="true"></app-stacks-amount>
                       <span class="fiat">
                         <app-stacks-fiat [value]="block.extras.totalFees" digitsInfo="1.0-0"></app-stacks-fiat>
                       </span>
@@ -90,7 +90,7 @@
                   <tr *ngIf="network !== 'liquid' && network !== 'liquidtestnet'">
                     <td i18n="block.subsidy-and-fees|Total subsidy and fees in a block">Subsidy + fees:</td>
                     <td>
-                      <app-stacks-amount [satoshis]="block.extras.reward + block.extras.totalFees" digitsInfo="1.2-3" [noFiat]="true"></app-stacks-amount>
+                      <app-stacks-amount [uSTX]="block.extras.reward + block.extras.totalFees" digitsInfo="1.2-3" [noFiat]="true"></app-stacks-amount>
                       <span class="fiat">
                         <app-stacks-fiat [value]="(blockSubsidy + fees) * 100000000" digitsInfo="1.0-0"></app-stacks-fiat>
                       </span>
@@ -261,7 +261,7 @@
           <app-stacks-block-overview-graph
             #blockGraphActual
             [isLoading]="isLoadingOverview"
-            [resolution]="75"
+            [resolution]="45"
             [blockLimit]="15000"
             [orientation]="'top'"
             [flip]="false"
