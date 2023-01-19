@@ -65,6 +65,8 @@ class DatabaseMigration {
 
     logger.debug('MIGRATIONS: Current state.schema_version ' + databaseSchemaVersion);
     logger.debug('MIGRATIONS: Latest DatabaseMigration.version is ' + DatabaseMigration.currentVersion);
+    await this.$executeQuery(this.getCreateStacksBlocksTableQuery(), await this.$checkIfTableExists('stacks_blocks'));
+    await this.$executeQuery(this.getCreateStacksBlocksSummariesTableQuery(), await this.$checkIfTableExists('stacks_blocks_summaries'));
     if (databaseSchemaVersion >= DatabaseMigration.currentVersion) {
       logger.debug('MIGRATIONS: Nothing to do.');
       return;
@@ -106,6 +108,10 @@ class DatabaseMigration {
     await this.$executeQuery(this.getCreateElementsTableQuery(), await this.$checkIfTableExists('elements_pegs'));
     await this.$executeQuery(this.getCreateStatisticsQuery(), await this.$checkIfTableExists('statistics'));
     await this.$executeQuery(this.getCreateStacksStatisticsQuery(), await this.$checkIfTableExists('stacks_statistics'));
+    await this.$executeQuery(this.getCreateStacksBlocksTableQuery(), await this.$checkIfTableExists('stacks_blocks'));
+    await this.$executeQuery(this.getCreateStacksBlocksSummariesTableQuery(), await this.$checkIfTableExists('stacks_blocks_summaries'));
+
+
     if (databaseSchemaVersion < 2 && this.statisticsAddedIndexed === false) {
       await this.$executeQuery(`CREATE INDEX added ON statistics (added);`);
       await this.updateToSchemaVersion(2);
@@ -766,6 +772,33 @@ class DatabaseMigration {
       FOREIGN KEY (pool_id) REFERENCES pools (id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`;
   }
+  private getCreateStacksBlocksTableQuery(): string {
+    return `CREATE TABLE IF NOT EXISTS stacks_blocks (
+      height integer unsigned NOT NULL DEFAULT "0",
+      hash varchar(66) NOT NULL,
+      blockTimestamp timestamp NOT NULL DEFAULT 0,
+      burn_block_hash varchar(66) NOT NULL,
+      size integer unsigned NOT NULL DEFAULT "0",
+      miner_address varchar(100) NOT NULL,
+      tx_count smallint unsigned NOT NULL DEFAULT "0",
+      transactions JSON NOT NULL,
+      fees BIGINT UNSIGNED NOT NULL DEFAULT "0",
+      fee_span json NOT NULL,
+      median_fee BIGINT UNSIGNED NOT NULL DEFAULT "0",
+      reward double unsigned NOT NULL DEFAULT "0",
+      parent_block_hash varchar(66) NOT NULL DEFAULT "",
+      avg_fee BIGINT UNSIGNED NOT NULL DEFAULT "0",
+      avg_fee_rate BIGINT UNSIGNED NOT NULL DEFAULT "0",
+      execution_cost_read_count INT UNSIGNED NOT NULL DEFAULT "0",
+      execution_cost_read_length INT UNSIGNED NOT NULL DEFAULT "0",
+      execution_cost_runtime INT UNSIGNED NOT NULL DEFAULT "0",
+      execution_cost_write_count INT UNSIGNED NOT NULL DEFAULT "0",
+      execution_cost_write_length INT UNSIGNED NOT NULL DEFAULT "0",
+      PRIMARY KEY (height),
+      INDEX (hash),
+      INDEX (blockTimestamp)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`;
+  }
 
   private getCreateDailyStatsTableQuery(): string {
     return `CREATE TABLE IF NOT EXISTS hashrates (
@@ -790,6 +823,16 @@ class DatabaseMigration {
     return `CREATE TABLE IF NOT EXISTS blocks_summaries (
       height int(10) unsigned NOT NULL,
       id varchar(65) NOT NULL,
+      transactions JSON NOT NULL,
+      template NULL,
+      PRIMARY KEY (id),
+      INDEX (height)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`;
+  }
+  private getCreateStacksBlocksSummariesTableQuery(): string {
+    return `CREATE TABLE IF NOT EXISTS stacks_blocks_summaries (
+      height int(10) unsigned NOT NULL,
+      id varchar(66) NOT NULL,
       transactions JSON NOT NULL,
       PRIMARY KEY (id),
       INDEX (height)

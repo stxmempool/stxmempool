@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import {
   Block,
   MempoolTransactionListResponse,
@@ -122,6 +122,33 @@ class StacksApi {
     return data.block;
   }
   public async $getVerboseTransactions(transactionIds: string[]): Promise<CustomTransactionList | undefined> {
+  // public async $getVerboseTransactions(transactionIds: string[]): Promise<any> {
+
+    // a solution to get around API rate limiting and query string limits
+    const preparedStrings = transactionIds.map(tx => 'tx_id=' + tx + '&');
+    const chunkSize  = 50;
+    const queryArray: string[][] = [];
+    // const promiseArray: AxiosResponse<CustomTransactionList> []= [];
+    const promiseArray: any = [];
+
+    for (let i = 0; i < preparedStrings.length; i += chunkSize) {
+      queryArray.push(preparedStrings.slice(i, i + chunkSize));
+    }
+    try {
+      for (let i = 0; i < queryArray.length; i++) {
+        const query = queryArray[i].join('');
+        promiseArray.push(axios.get(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`));
+      }
+      const result: AxiosResponse<CustomTransactionList>[] = await Promise.all(promiseArray);
+      let obj: CustomTransactionList = {};
+      for (let i = 0; i < result.length; i++) {
+        obj = {...obj, ...result[i].data};
+      }
+      return obj;
+    } catch (error) {
+      console.log('error in $getVerbose-->', error);
+    }
+    /*
     // this is a super janky way of splitting up the query strings. Will refactor for an await Promise.all(pendingPromises) solution
     if (transactionIds.length > 50 && transactionIds.length <= 100) {
       try {
@@ -196,6 +223,7 @@ class StacksApi {
         console.log('error in $getVerbose-->', error);
       }
     }
+    */
   }
   public async $getStacksFees(): Promise<MempoolTransactionStatsResponse> {
     const { data } = await axios.get<MempoolTransactionStatsResponse>('https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/mempool/stats');

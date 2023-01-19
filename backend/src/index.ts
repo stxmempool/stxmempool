@@ -182,7 +182,7 @@ class Server {
       // await poolsUpdater.updatePoolsJson();
       // await blocks.$updateBlocks();
       // await memPool.$updateMempool();
-      // indexer.$run();
+      indexer.$run();
       // await stacksMempoolBlocks.updateProjection();
       await stacksMempool.$updateStacksMempool();
       await stacksBlocks.$updateBlocks();

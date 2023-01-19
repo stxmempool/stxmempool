@@ -197,6 +197,12 @@ export class Common {
       config.MEMPOOL.BLOCKS_SUMMARIES_INDEXING === true
     );
   }
+  static stacksBlocksSummariesIndexingEnabled(): boolean {
+    return (
+      Common.indexingEnabled() &&
+      config.STACKS.BLOCKS_SUMMARIES_INDEXING === true
+    );
+  }
 
   static cpfpIndexingEnabled(): boolean {
     return (
