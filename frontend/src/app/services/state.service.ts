@@ -176,7 +176,7 @@ export class StateService {
       this.networkChanged$.next(this.env.BASE_MODULE);
     }
     if (this.env.STACKS_ENABLED) {
-      this.blockVSize = 15000;
+      this.blockVSize = 1000000;
     } else {
       this.blockVSize = this.env.BLOCK_WEIGHT_UNITS / 4;
     }

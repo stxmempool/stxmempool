@@ -55,7 +55,7 @@ class StacksMempoolBlocks {
     transactions: []
   }
 
-  constructor() {}
+  // constructor() {}
 
   getMempoolBlocks(): StacksMempoolBlock[] {
     return this.mempoolBlocks.map((block) => {
@@ -83,7 +83,7 @@ class StacksMempoolBlocks {
   public getMempoolBlocksWithTransactions(): StacksMempoolBlockWithTransactions[] {
     return this.mempoolBlocks;
   }
-  public getProjectedBlockWithTransactions() {
+  public getProjectedBlockWithTransactions(): ProjectedMempoolBlock {
     return this.mempoolProjectedBlock;
   }
   
@@ -133,7 +133,6 @@ class StacksMempoolBlocks {
       +----------------------+--------------+-----------------+
     */
     const mempoolBlockDeltas: any[] = [];
-    let blockWeight = 0;
     // let blockRuntime = 0;
     // let blockReadCount = 0;
     // let blockReadLength = 0;

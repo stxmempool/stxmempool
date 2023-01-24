@@ -1,18 +1,15 @@
-import { config } from 'process';
-import configuration from '../../config';
+import config from '../../config';
 import DB from '../../database';
 import logger from '../../logger';
 import { Statistic, OptimizedStatistic } from '../../mempool.interfaces';
 
 class StatisticsApi {
   protected queryTimeout = 120000;
+  protected stacksEnabled = config.STACKS.ENABLED ? 'stacks_' : '';
 
   public async $createZeroedStatistic(): Promise<number | undefined> {
-    let stacksEnabled: string;
-    configuration.STACKS.ENABLED ? stacksEnabled = 'stacks_' : stacksEnabled = ''; 
     try {
-      // const query = `INSERT INTO statistics(
-      const query = `INSERT INTO ${stacksEnabled}statistics(
+      const query = `INSERT INTO ${this.stacksEnabled}statistics(
               added,
               unconfirmed_transactions,
               tx_per_second,
@@ -69,11 +66,8 @@ class StatisticsApi {
   }
 
   public async $create(statistics: Statistic): Promise<number | undefined> {
-    let stacksEnabled: string;
-    configuration.STACKS.ENABLED ? stacksEnabled = 'stacks_' : stacksEnabled = ''; 
     try {
-      // const query = `INSERT INTO statistics(
-      const query = `INSERT INTO ${stacksEnabled}statistics(
+      const query = `INSERT INTO ${this.stacksEnabled}statistics(
               added,
               unconfirmed_transactions,
               tx_per_second,
@@ -176,9 +170,7 @@ class StatisticsApi {
     }
   }
 
-  private getQueryForDaysAvg(div: number, interval: string) {
-    let stacksEnabled: string;
-    configuration.STACKS.ENABLED ? stacksEnabled = 'stacks_' : stacksEnabled = ''; 
+  private getQueryForDaysAvg(div: number, interval: string): string {
     return `SELECT
       UNIX_TIMESTAMP(added) as added,
       CAST(avg(vbytes_per_second) as DOUBLE) as vbytes_per_second,
@@ -220,15 +212,13 @@ class StatisticsApi {
       CAST(avg(vsize_1600) as DOUBLE) as vsize_1600,
       CAST(avg(vsize_1800) as DOUBLE) as vsize_1800,
       CAST(avg(vsize_2000) as DOUBLE) as vsize_2000 \
-      FROM ${stacksEnabled}statistics \
+      FROM ${this.stacksEnabled}statistics \
       WHERE added BETWEEN DATE_SUB(NOW(), INTERVAL ${interval}) AND NOW() \
       GROUP BY UNIX_TIMESTAMP(added) DIV ${div} \
       ORDER BY statistics.added DESC;`;
   }
 
-  private getQueryForDays(div: number, interval: string) {
-    let stacksEnabled: string;
-    configuration.STACKS.ENABLED ? stacksEnabled = 'stacks_' : stacksEnabled = ''; 
+  private getQueryForDays(div: number, interval: string): string {
     return `SELECT
       UNIX_TIMESTAMP(added) as added,
       CAST(avg(vbytes_per_second) as DOUBLE) as vbytes_per_second,
@@ -270,18 +260,15 @@ class StatisticsApi {
       vsize_1600,
       vsize_1800,
       vsize_2000 \
-      FROM ${stacksEnabled}statistics \
+      FROM ${this.stacksEnabled}statistics \
       WHERE added BETWEEN DATE_SUB(NOW(), INTERVAL ${interval}) AND NOW() \
       GROUP BY UNIX_TIMESTAMP(added) DIV ${div} \
       ORDER BY statistics.added DESC;`;
   }
 
   public async $get(id: number): Promise<OptimizedStatistic | undefined> {
-    let stacksEnabled: string;
-    configuration.STACKS.ENABLED ? stacksEnabled = 'stacks_' : stacksEnabled = ''; 
     try {
-      // const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM statistics WHERE id = ?`;
-      const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM ${stacksEnabled}statistics WHERE id = ?`;
+      const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM ${this.stacksEnabled}statistics WHERE id = ?`;
 
       const [rows] = await DB.query(query, [id]);
       if (rows[0]) {
@@ -293,10 +280,8 @@ class StatisticsApi {
   }
 
   public async $list2H(): Promise<OptimizedStatistic[]> {
-    let stacksEnabled: string;
-    configuration.STACKS.ENABLED ? stacksEnabled = 'stacks_' : stacksEnabled = ''; 
     try {
-      const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM ${stacksEnabled}statistics ORDER BY ${stacksEnabled}statistics.added DESC LIMIT 120`;
+      const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM ${this.stacksEnabled}statistics ORDER BY ${this.stacksEnabled}statistics.added DESC LIMIT 120`;
 
       const [rows] = await DB.query({ sql: query, timeout: this.queryTimeout });
       return this.mapStatisticToOptimizedStatistic(rows as Statistic[]);
@@ -306,11 +291,9 @@ class StatisticsApi {
     }
   }
 
-  public async $list24H(): Promise<OptimizedStatistic[]> {
-    let stacksEnabled: string;
-    configuration.STACKS.ENABLED ? stacksEnabled = 'stacks_' : stacksEnabled = ''; 
+  public async $list24H(): Promise<OptimizedStatistic[]> { 
     try {
-      const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM ${stacksEnabled}statistics ORDER BY ${stacksEnabled}statistics.added DESC LIMIT 1440`;
+      const query = `SELECT *, UNIX_TIMESTAMP(added) as added FROM ${this.stacksEnabled}statistics ORDER BY ${this.stacksEnabled}statistics.added DESC LIMIT 1440`;
 
       const [rows] = await DB.query({ sql: query, timeout: this.queryTimeout });
       return this.mapStatisticToOptimizedStatistic(rows as Statistic[]);

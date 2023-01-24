@@ -8,6 +8,7 @@ import {
   AddressBalanceResponse,
   AddressTransactionsListResponse,
   BlockListResponse,
+  CoreNodeFeeResponse
 } from '@stacks/stacks-blockchain-api-types';
 import { CustomTransactionList } from './stacks-api.interface';
 import logger from '../../logger';
@@ -85,7 +86,7 @@ class StacksApi {
       }
     };
     let result = '';
-    const { data } = await axios.post<{ block: RosettaBlock}>('https://stacks-node-api.mainnet.stacks.co/rosetta/v1/block', payload);
+    const { data } = await axios.post<{ block: RosettaBlock}>(`${this.apiUrl}/rosetta/v1/block`, payload);
     data.block.transactions.forEach(transaction => {
       if (transaction.operations[0].type === 'coinbase') {
         result = transaction.transaction_identifier.hash;
@@ -117,14 +118,34 @@ class StacksApi {
         obj = {...obj, ...result[i].data};
       }
       return obj;
-    } catch (error) {
-      logger.debug(`error in $getVerboseTransactions--> ${error}`);
+    } catch (e) {
+      logger.err(`Cannot fetch all verbose block transactions. Reason: ` + (e instanceof Error ? e.message : e));
     }
   }
+
+  public async $getStacksMempoolTransactions(): Promise<string[]> {
+    // const response = await axios.post('https://stacks-node-api.mainnet.stacks.co/rosetta/v1/mempool',
+    // const response = await axios.post('http://localhost:3999/rosetta/v1/mempool', 
+    const response = await axios.post(`${this.apiUrl}/rosetta/v1/mempool`,
+    {
+      network_identifier: {
+        blockchain: 'stacks',
+        network: 'mainnet'
+    }
+    });
+    const transactionArray: string[] = response.data.transaction_identifiers.map(({ hash }) => hash);
+    return transactionArray;
+  }
+
   // This may be unused for production
   public async $getStacksFees(): Promise<MempoolTransactionStatsResponse> {
     const { data } = await axios.get<MempoolTransactionStatsResponse>('https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/mempool/stats');
     return data;
+  }
+
+  public async $getMinFee(): Promise<number> {
+    const { data } = await axios.get<CoreNodeFeeResponse>(`${this.apiUrl}/v2/fees/transfer`);
+    return Number(data);
   }
 
   public async $getBlockByHash(hash: string): Promise<Block> {

@@ -38,15 +38,7 @@ import fundingTxFetcher from './tasks/lightning/sync-tasks/funding-tx-fetcher';
 import forensicsService from './tasks/lightning/forensics.service';
 import stacksMempool from './api/stacks/stacks-mempool';
 import stacksBlocks from './api/stacks/stacks-blocks';
-import stacksApi from './api/stacks/stacks-api';
 import stacksRoutes from './api/stacks/stacks.routes';
-
-import { execFile } from 'child_process';
-// import * as fs from 'fs';
-import * as fs from 'fs';
-
-import { join } from 'path';
-import stacksMempoolBlocks from './api/stacks/stacks-mempool-blocks';
 
 class Server {
   private wss: WebSocket.Server | undefined;
@@ -140,11 +132,11 @@ class Server {
 
     fiatConversion.startService();
     
-
     this.setUpHttpApiRoutes();
-    // if (config.MEMPOOL.ENABLED) {
+
+    if (config.MEMPOOL.ENABLED || config.STACKS.ENABLED) {
       this.runMainUpdateLoop();
-    // }
+    }
 
     if (config.BISQ.ENABLED) {
       bisq.startBisqService();
@@ -169,24 +161,27 @@ class Server {
 
   async runMainUpdateLoop(): Promise<void> {
     try {
-      // try {
-      //   await memPool.$updateMemPoolInfo();
-      // } catch (e) {
-      //   const msg = `updateMempoolInfo: ${(e instanceof Error ? e.message : e)}`;
-      //   if (config.MEMPOOL.USE_SECOND_NODE_FOR_MINFEE) {
-      //     logger.warn(msg);
-      //   } else {
-      //     logger.debug(msg);
-      //   }
-      // }
-      // await poolsUpdater.updatePoolsJson();
-      // await blocks.$updateBlocks();
-      // await memPool.$updateMempool();
-      indexer.$run();
-      // await stacksMempoolBlocks.updateProjection();
-      await stacksMempool.$updateStacksMempool();
-      await stacksBlocks.$updateBlocks();
-
+      if (config.STACKS.ENABLED) {
+        indexer.$run();
+        // await stacksMempoolBlocks.updateProjection();
+        await stacksMempool.$updateStacksMempool();
+        await stacksBlocks.$updateBlocks();
+      } else {
+        try {
+          await memPool.$updateMemPoolInfo();
+        } catch (e) {
+          const msg = `updateMempoolInfo: ${(e instanceof Error ? e.message : e)}`;
+          if (config.MEMPOOL.USE_SECOND_NODE_FOR_MINFEE) {
+            logger.warn(msg);
+          } else {
+            logger.debug(msg);
+          }
+        }
+        await poolsUpdater.updatePoolsJson();
+        await blocks.$updateBlocks();
+        await memPool.$updateMempool();
+        indexer.$run();
+      }
 
       setTimeout(this.runMainUpdateLoop.bind(this), config.MEMPOOL.POLL_RATE_MS);
       this.currentBackendRetryInterval = 5;
@@ -194,6 +189,7 @@ class Server {
       const loggerMsg = `runMainLoop error: ${(e instanceof Error ? e.message : e)}. Retrying in ${this.currentBackendRetryInterval} sec.`;
       if (this.currentBackendRetryInterval > 5) {
         logger.warn(loggerMsg);
+        stacksMempool.setOutOfSync();
         mempool.setOutOfSync();
       } else {
         logger.debug(loggerMsg);
@@ -265,7 +261,7 @@ class Server {
       nodesRoutes.initRoutes(this.app);
       channelsRoutes.initRoutes(this.app);
     }
-    if (config.STACKS.ENABLED) {
+    if (config.STACKS.ENABLED && !config.MEMPOOL.ENABLED) {
       statisticsRoutes.initRoutes(this.app);
       stacksRoutes.initRoutes(this.app);
     }

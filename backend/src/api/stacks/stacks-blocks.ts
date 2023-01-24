@@ -5,9 +5,8 @@ import bitcoinClient from '../bitcoin/bitcoin-client';
 import BitcoinApi from '../bitcoin/bitcoin-api';
 import loadingIndicators from '../loading-indicators';
 import transactionUtils from '../transaction-utils';
-import { VbytesPerSecond } from '../../mempool.interfaces';
-import { Block, MempoolTransactionListResponse, Transaction, MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
-import { BlockExtension, CustomTransactionList, StacksBlockExtended, StacksTransactionExtended, StacksBlockSummary, StacksTransactionDataWithSize, StacksTransactionStripped } from './stacks-api.interface';
+import { Block } from '@stacks/stacks-blockchain-api-types';
+import { StacksBlockExtended, StacksTransactionExtended, StacksBlockSummary, StacksTransactionStripped } from './stacks-api.interface';
 import StacksBlocksRepository from '../../repositories/StacksBlocksRepository';
 import { prepareStacksBlock } from '../../utils/blocks-utils';
 import StacksBlocksSummariesRepository from '../../repositories/StacksBlocksSummariesRepository';
@@ -15,7 +14,6 @@ import { Common } from '../common';
 import logger from '../../logger';
 import stacksMempool from './stacks-mempool';
 import indexer from '../../indexer';
-import { AxiosResponse } from 'axios';
 
 class StacksBlocks {
   private blocks: StacksBlockExtended[] = [];
@@ -27,14 +25,12 @@ class StacksBlocks {
   private previousDifficultyRetarget = 0;
   public initialBlocks: Block[] = [];;
   public stacksBlockTip: number = 0;
-  private counter: number = 1;
   private genesisDate: Date = new Date('2021-01-14T17:28:24.000Z');
 
   private newBlockCallbacks: ((block: StacksBlockExtended, txIds: string[], transactions: StacksTransactionExtended[]) => void)[] = [];
   private newAsyncBlockCallbacks: ((block: StacksBlockExtended, txIds: string[], transactions: StacksTransactionExtended[]) => Promise<void>)[] = [];
-  constructor() {}
+  // constructor() {}
 
-  /*  NON ASYNC FUNCTIONS   */
   public getBlocks(): StacksBlockExtended[] {
     return this.blocks;
   }
@@ -86,60 +82,59 @@ class StacksBlocks {
     const txsVerbose = await stacksApi.$getVerboseTransactions(txIds);
     const promiseArray: Promise<StacksTransactionExtended>[] = [];
 
-    const mempool = stacksMempool.getMempool();
-    let transactionsFound = 0;
+    const transactionsFound = 0;
     let transactionsFetched = 0;
+    // Find coinbase transaction and return an array containing that transaction
+    if (onlyCoinbase && txsVerbose) {
+      for (const tx in txsVerbose) {
+        if (txsVerbose[tx].result.tx_type === 'coinbase') {
+          return [await transactionUtils.$getStacksTransactionExtended(tx, txsVerbose[tx].result)];
+        }
+      }
+    }
+    // In the mempool.space variation they use transactions from the mempool cache. However, STX transactions in the mempool do not have
+    // execution costs. So we query the transactions again to get the new data.
+    // Currently, most STX blocks exceed their execution limits around 200 transactions, which is a tenth of a typical BTC block
     if(txsVerbose) {
-      
-      for (let i = 0; i < txIds.length; i++) {
-        // if (mempool[txIds[i]]) {
-        // if (mempool[txsVerbose[txIds[i]].result.tx_id]) {
-
-        //   // We update blocks before the mempool (index.ts), therefore we can
-        //   // optimize here by directly fetching txs in the "outdated" mempool
-        //   transactions.push(mempool[txIds[i]]);
-        //   transactionsFound++;
-        // } else if (config.MEMPOOL.BACKEND === 'none' || !stacksMempool.hasPriority() || i === 0) {
-        if (config.MEMPOOL.BACKEND === 'none' || !stacksMempool.hasPriority() || i === 0) {
-          // Otherwise we fetch the tx data through backend services (esplora, electrum, core rpc...)
-          if (!quiet && (i % (Math.round((txIds.length) / 10)) === 0 || i + 1 === txIds.length)) { // Avoid log spam
-            logger.debug(`Indexing tx ${i + 1} of ${txIds.length} in block #${block.height}`);
-          }
-          try {
-            const tx = await transactionUtils.$getStacksTransactionExtended(txsVerbose[txIds[i]].result.tx_id, txsVerbose[txIds[i]].result);
-            transactions.push(tx);
+      // Algo for optimized query speed but will be rate limited unless you have a dedicated API node
+      if (config.STACKS.DEDICATED_API) {
+        try {
+          for (let i = 0; i < txIds.length; i++) {
+            if (!quiet && (i % (Math.round((txIds.length) / 10)) === 0 || i + 1 === txIds.length)) { // Avoid log spam
+              logger.debug(`Indexing tx ${i + 1} of ${txIds.length} in block #${block.height}`);
+            }
+            promiseArray.push(transactionUtils.$getStacksTransactionExtended(txsVerbose[txIds[i]].result.tx_id, txsVerbose[txIds[i]].result));
             transactionsFetched++;
-          } catch (e) {
-            if (i === 0) {
-              const msg = `Cannot fetch coinbase tx ${txIds[i]}. Reason: ` + (e instanceof Error ? e.message : e); 
-              logger.err(msg);
-              throw new Error(msg);
-            } else {
-              logger.err(`Cannot fetch tx ${txIds[i]}. Reason: ` + (e instanceof Error ? e.message : e));
+          }
+          return await Promise.all(promiseArray);
+        } catch (e) {
+          logger.err(`Cannot fetch tx. Reason: ` + (e instanceof Error ? e.message : e));
+        }
+      } else {
+        for (let i = 0; i < txIds.length; i++) {
+
+          if (config.MEMPOOL.BACKEND === 'none' || !stacksMempool.hasPriority() || i === 0) {
+            
+            if (!quiet && (i % (Math.round((txIds.length) / 10)) === 0 || i + 1 === txIds.length)) { // Avoid log spam
+              logger.debug(`Indexing tx ${i + 1} of ${txIds.length} in block #${block.height}`);
+            }
+            try {
+              const tx = await transactionUtils.$getStacksTransactionExtended(txsVerbose[txIds[i]].result.tx_id, txsVerbose[txIds[i]].result);
+              transactions.push(tx);
+              transactionsFetched++;
+            } catch (e) {
+              if (i === 0) {
+                const msg = `Cannot fetch coinbase tx ${txIds[i]}. Reason: ` + (e instanceof Error ? e.message : e); 
+                logger.err(msg);
+                throw new Error(msg);
+              } else {
+                logger.err(`Cannot fetch tx ${txIds[i]}. Reason: ` + (e instanceof Error ? e.message : e));
+              }
             }
           }
         }
-        // TODO WRITE CUSTOM FUNCTION TO RETIREVE COINBASE TRANSACTION
-        if (onlyCoinbase === true) {
-          break; // Fetch the first transaction and exit
-        }
       }
-      
 
-      /* Algo for optimal queries but will be rate limited unless you have a dedicated API node
-      try {
-        for (let i = 0; i < txIds.length; i++) {
-          if (!quiet && (i % (Math.round((txIds.length) / 10)) === 0 || i + 1 === txIds.length)) { // Avoid log spam
-            logger.debug(`Indexing tx ${i + 1} of ${txIds.length} in block #${block.height}`);
-          }
-          promiseArray.push(transactionUtils.$getStacksTransactionExtended(txsVerbose[txIds[i]].result.tx_id, txsVerbose[txIds[i]].result));
-          transactionsFetched++;
-        }
-        return await Promise.all(promiseArray);
-      } catch (e) {
-        logger.err(`Cannot fetch tx. Reason: ` + (e instanceof Error ? e.message : e));
-      }
-      */
     }
       if (!quiet) {
         logger.debug(`${transactionsFound} of ${txIds.length} found in mempool. ${transactionsFetched} fetched through backend service.`);
@@ -169,7 +164,7 @@ class StacksBlocks {
   }
 
   private async $getBlockExtended (block: Block, transactions: StacksTransactionExtended[]): Promise<StacksBlockExtended> {
-    // this range length is ued to build the feeRange
+    // this range length is used to build the feeRange
     const rangeLength = 8;
     const minerAddress = transactions.filter(transaction => transaction.tx_type === 'coinbase');
     const blockExtended: StacksBlockExtended = Object.assign({
@@ -227,7 +222,7 @@ class StacksBlocks {
       blockExtended.extras.avgFeeRate = transactions.map(tx => tx.feePerVsize).reduce((acc, curr) => acc + curr) / filteredFeeArray.length;
 
     }
-    // console.log('block Height-->', blockExtended.height, 'blockExtended-->', blockExtended);
+
     return blockExtended;
   }
 
@@ -385,7 +380,7 @@ class StacksBlocks {
     }
   }
 
-  public async $updateBlocks() {
+  public async $updateBlocks(): Promise<void> {
     let fastForwarded = false;
     const blockHeightTip = await stacksApi.$getBlockHeightTip();
     this.currentBTCHeight = await bitcoinApi.$getBlockHeightTip();
@@ -507,7 +502,7 @@ class StacksBlocks {
    */
   public async $indexBlock (height: number): Promise<StacksBlockExtended> {
     const dbBlock = await StacksBlocksRepository.$getBlockByHeight(height);
-    if (dbBlock != null) {
+    if (dbBlock !== null) {
       return prepareStacksBlock(dbBlock);
     }
     const block = await stacksApi.$getBlockByHeight(height);
@@ -524,27 +519,22 @@ class StacksBlocks {
     if (blockByHash) {
       return blockByHash;
     }
-    //This will be if I create my own DB to index
+
      // Block has already been indexed
      if (Common.indexingEnabled()) {
       const dbBlock = await StacksBlocksRepository.$getBlockByHash(hash);
-      if (dbBlock != null) {
+      if (dbBlock !== null) {
         return prepareStacksBlock(dbBlock);
       }
     }
 
-    // TODO Delete
-    // Not Bitcoin network, return the block as it
-    // if (['mainnet', 'testnet', 'signet'].includes(config.MEMPOOL.NETWORK) === false) {
-    //   return await bitcoinApi.$getBlock(hash);
-    // }
     
     const block = await stacksApi.$getBlockByHash(hash);
     const transactions = await this.$getTransactionsExtended(block, false);
     const blockExtended = await this.$getBlockExtended(block, transactions);
 
     if (Common.indexingEnabled()) {
-      await StacksBlocksRepository.$saveBlockInDatabase(blockExtended)
+      await StacksBlocksRepository.$saveBlockInDatabase(blockExtended);
     }
 
     return prepareStacksBlock(blockExtended);
@@ -605,7 +595,7 @@ class StacksBlocks {
       } else if (Common.indexingEnabled()) {
         block = await this.$indexBlock(currentHeight);
         returnBlocks.push(block);
-      } else if (nextHash != null) {
+      } else if (nextHash !== null) {
         const nextBlock = await stacksApi.$getBlockByHash(nextHash);
         const transactions = await this.$getTransactionsExtended(nextBlock, false);
         const blockExtended = await this.$getBlockExtended(nextBlock, transactions);

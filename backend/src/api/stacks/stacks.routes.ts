@@ -1,7 +1,5 @@
-import axios from 'axios';
 import { Application, Request, Response } from 'express';
-import { Block, MempoolTransactionListResponse, Transaction, MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
-import { StacksBlockExtended, StacksTransactionExtended } from './stacks-api.interface';
+import { StacksTransactionExtended } from './stacks-api.interface';
 
 import config from '../../config';
 import stacksBlocks from './stacks-blocks';
@@ -13,9 +11,8 @@ import stacksApi from './stacks-api';
 
 class StacksRoutes {
 
-  public initRoutes(app: Application) {
+  public initRoutes(app: Application): void {
     app
-      .get(config.MEMPOOL.API_URL_PREFIX + 'assets/icons', this.$getBlocks)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/block/:hash', this.getBlock)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/block/:hash/summary', this.getStrippedBlockTransactions)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/block/:hash/txs/:index', this.getBlockTransactions)
@@ -28,23 +25,18 @@ class StacksRoutes {
       ;
 
   }
-  public async $getBlocks() {
-    const response = await axios.get('https://stacks-node-api.mainnet.stacks.co/extended/v1/block?limit=1');
-    // const response = await axios.get('https://stacks-node-api.mainnet.stacks.co/extended/v1/block?limit=10');
-    return response.data.results;;
-  }
-  private async getStrippedBlockTransactions(req: Request, res: Response) {
-    console.log('getStrippedBlock triggered');
+
+  private async getStrippedBlockTransactions(req: Request, res: Response): Promise<void> {
     try {
       const transactions = await stacksBlocks.$getStrippedBlockTransactions(req.params.hash);
-      console.log('transactions-->', transactions);
       res.setHeader('Expires', new Date(Date.now() + 1000 * 3600 * 24 * 30).toUTCString());
       res.json(transactions);
     } catch (e) {
       res.status(500).send(e instanceof Error ? e.message : e);
     }
   }
-  private async getBlock(req: Request, res: Response) {
+
+  private async getBlock(req: Request, res: Response): Promise<void> {
     try {
       const block = await stacksBlocks.$getBlock(req.params.hash);
 
@@ -56,7 +48,7 @@ class StacksRoutes {
       } else if (blockAge > 30 * day) {
         cacheDuration = 10 * day;
       } else {
-        cacheDuration = 600
+        cacheDuration = 600;
       }
 
       res.setHeader('Expires', new Date(Date.now() + 1000 * cacheDuration).toUTCString());
@@ -65,7 +57,8 @@ class StacksRoutes {
       res.status(500).send(e instanceof Error ? e.message : e);
     }
   }
-  private async getBlockTransactions(req: Request, res: Response) {
+
+  private async getBlockTransactions(req: Request, res: Response): Promise<void> {
     try {
       loadingIndicators.setProgress('blocktxs-' + req.params.hash, 0);
 
@@ -93,7 +86,7 @@ class StacksRoutes {
     }
   }
 
-  private async getTransaction(req: Request, res: Response) {
+  private async getTransaction(req: Request, res: Response): Promise<void> {
     try {
       const transaction = await transactionUtils.$getStacksMempoolTransactionExtended(req.params.txId);
       res.json(transaction);
@@ -106,12 +99,7 @@ class StacksRoutes {
     }
   }
   
-  private async getAddress(req: Request, res: Response) {
-    // if (config.MEMPOOL.BACKEND === 'none') {
-    //   res.status(405).send('Address lookups cannot be used with bitcoind as backend.');
-    //   return;
-    // }
-
+  private async getAddress(req: Request, res: Response): Promise<void | Response> {
     try {
       const addressData = await stacksApi.$getAddress(req.params.address);
       res.json(addressData);
@@ -123,14 +111,8 @@ class StacksRoutes {
     }
   }
 
-  private async getAddressTransactions(req: Request, res: Response) {
-    // if (config.MEMPOOL.BACKEND === 'none') {
-    //   res.status(405).send('Address lookups cannot be used with bitcoind as backend.');
-    //   return;
-    // }
-
+  private async getAddressTransactions(req: Request, res: Response): Promise<void | Response> {
     try {
-      // const transactions = await stacksApi.$getAddressTransactions(req.params.address, req.params.txId);
       const transactions = await stacksApi.$getAddressTransactions(req.params.address, req.params.offset);
       res.json(transactions);
     } catch (e) {
@@ -141,7 +123,7 @@ class StacksRoutes {
     }
   }
 
-  private async getAddressPrefix(req: Request, res: Response) {
+  private async getAddressPrefix(req: Request, res: Response): Promise<void> {
     try {
       const blockHash = await stacksApi.$getAddressPrefix(req.params.prefix);
       res.send(blockHash);
@@ -150,7 +132,7 @@ class StacksRoutes {
     }
   }
 
-  public async getBlockHashByHeight(req: Request, res: Response) {
+  public async getBlockHashByHeight(req: Request, res: Response): Promise<void> {
     try {
       const height = parseInt(req.params.height);
       const block = await stacksApi.$getBlockByHeight(height);
