@@ -15,6 +15,7 @@ import { Common } from '../common';
 import logger from '../../logger';
 import stacksMempool from './stacks-mempool';
 import indexer from '../../indexer';
+import { AxiosResponse } from 'axios';
 
 class StacksBlocks {
   private blocks: StacksBlockExtended[] = [];
@@ -83,11 +84,13 @@ class StacksBlocks {
     const transactions: StacksTransactionExtended[] = [];
     const txIds = block.txs;
     const txsVerbose = await stacksApi.$getVerboseTransactions(txIds);
+    const promiseArray: Promise<StacksTransactionExtended>[] = [];
 
     const mempool = stacksMempool.getMempool();
     let transactionsFound = 0;
     let transactionsFetched = 0;
     if(txsVerbose) {
+      
       for (let i = 0; i < txIds.length; i++) {
         // if (mempool[txIds[i]]) {
         // if (mempool[txsVerbose[txIds[i]].result.tx_id]) {
@@ -121,11 +124,26 @@ class StacksBlocks {
           break; // Fetch the first transaction and exit
         }
       }
+      
+
+      /* Algo for optimal queries but will be rate limited unless you have a dedicated API node
+      try {
+        for (let i = 0; i < txIds.length; i++) {
+          if (!quiet && (i % (Math.round((txIds.length) / 10)) === 0 || i + 1 === txIds.length)) { // Avoid log spam
+            logger.debug(`Indexing tx ${i + 1} of ${txIds.length} in block #${block.height}`);
+          }
+          promiseArray.push(transactionUtils.$getStacksTransactionExtended(txsVerbose[txIds[i]].result.tx_id, txsVerbose[txIds[i]].result));
+          transactionsFetched++;
+        }
+        return await Promise.all(promiseArray);
+      } catch (e) {
+        logger.err(`Cannot fetch tx. Reason: ` + (e instanceof Error ? e.message : e));
+      }
+      */
     }
       if (!quiet) {
         logger.debug(`${transactionsFound} of ${txIds.length} found in mempool. ${transactionsFetched} fetched through backend service.`);
       }
-    
       return transactions;
   }
   /**
@@ -182,10 +200,6 @@ class StacksBlocks {
       return blockExtended;
     } else {
 
-      // const feeArray = await this.$processRosettaBlock(blockExtended.height, blockExtended.hash);
-      // const stats = await bitcoinClient.getBlockStats(block.id, [
-      //   'feerate_percentiles', 'minfeerate', 'maxfeerate', 'totalfee', 'avgfee', 'avgfeerate'
-      // ]);
       // remove the 0 fee of a coinbase transacation
       // const feeArray = transactions.map(tx => tx.feeRateAsNumber);
 
@@ -534,19 +548,6 @@ class StacksBlocks {
     }
 
     return prepareStacksBlock(blockExtended);
-  }
-
-  // TODO delete
-  public async $processRosettaBlock(blockHeight: number, blockHash: string): Promise<number[]> {
-    const rosettaBlock = await stacksApi.$getRosettaBlock(blockHeight, blockHash);
-    const allBlockFees = rosettaBlock.transactions.map(transaction => {
-      if (transaction.operations[0].type === 'fee') {
-        return Math.abs(Number(transaction.operations[0].amount?.value));
-      } else {
-        return 0;
-      }
-    });
-    return allBlockFees;
   }
   
   public async $getStrippedBlockTransactions(hash: string, skipMemoryCache = false, skipDBLookup = false): Promise<StacksTransactionStripped[] | undefined> {

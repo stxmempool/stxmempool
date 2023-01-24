@@ -133,6 +133,8 @@ interface IConfig {
     MEMPOOL_BLOCKS_AMOUNT: number;
     BLOCKS_SUMMARIES_INDEXING: boolean;
     INDEXING_BLOCKS_AMOUNT: number;
+    DEDICATED_API: boolean;
+    DEDICATED_API_URL: string;
   },
 }
 
@@ -267,6 +269,8 @@ const defaults: IConfig = {
     'MEMPOOL_BLOCKS_AMOUNT': 8,
     'BLOCKS_SUMMARIES_INDEXING': true,
     'INDEXING_BLOCKS_AMOUNT': 11000, // 0 = disable indexing, -1 = index all blocks
+    'DEDICATED_API': false,
+    'DEDICATED_API_URL': 'http://localhost:3999'
   },
 };
 

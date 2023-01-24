@@ -117,7 +117,7 @@
     "BISQ_ONION": "http://bisqmktse2cabavbr2xjq7xw3h6g5ottemo5rolfcwt6aly6tp5fdryd.onion/api"
   },
   "STACKS": {
-    "ENABLED": true,
+    "ENABLED": false,
     "BLOCK_MAX_RUNTIME": 5000000000,
     "BLOCK_MAX_READ_COUNT": 15000,
     "BLOCK_MAX_READ_LENGTH": 100000000,
@@ -125,6 +125,10 @@
     "BLOCK_MAX_WRITE_LENGTH": 15000000,
     "BLOCK_MAX_SIZE": 2000000,
     "INITIAL_BLOCKS_AMOUNT": 8,
-    "MEMPOOL_BLOCKS_AMOUNT": 8
+    "MEMPOOL_BLOCKS_AMOUNT": 8,
+    "BLOCKS_SUMMARIES_INDEXING": false,
+    "INDEXING_BLOCKS_AMOUNT": 11000,
+    "DEDICATED_API": false,
+    "DEDICATED_API_URL": "http://localhost:3999"
   }
 }

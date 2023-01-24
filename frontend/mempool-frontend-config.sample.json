@@ -5,6 +5,7 @@
   "LIQUID_TESTNET_ENABLED": false,
   "BISQ_ENABLED": false,
   "BISQ_SEPARATE_BACKEND": false,
+  "STACKS_ENABLED": true,
   "ITEMS_PER_PAGE": 10,
   "KEEP_BLOCKS_AMOUNT": 8,
   "NGINX_PROTOCOL": "http",

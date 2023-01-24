@@ -23,7 +23,6 @@ class StacksRoutes {
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address', this.getAddress)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address/txs', this.getAddressTransactions)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address/txs/:offset', this.getAddressTransactions)
-      .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address/:address/total', this.getTotalNumberOfAddressTransactions)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/address-prefix/:prefix', this.getAddressPrefix)
       .get(config.MEMPOOL.API_URL_PREFIX + 'stacks/block-height/:height', this.getBlockHashByHeight)
       ;
@@ -124,15 +123,6 @@ class StacksRoutes {
     }
   }
 
-  private async getTotalNumberOfAddressTransactions(req: Request, res: Response) {
-    try {
-      const total = await stacksApi.$getAddressTotalNumberOfTransactions(req.params.address);
-      res.json(total);
-    } catch (e) {
-      res.status(500).send(e instanceof Error ? e.message : e);
-      
-    }
-  }
   private async getAddressTransactions(req: Request, res: Response) {
     // if (config.MEMPOOL.BACKEND === 'none') {
     //   res.status(405).send('Address lookups cannot be used with bitcoind as backend.');
@@ -167,26 +157,6 @@ class StacksRoutes {
       res.send(block.hash);
     } catch (e) {
       res.status(500).send(e instanceof Error ? e.message : e);
-    }
-  }
-
-  public async $getTransactionData(transaction) {
-    try {
-      const { data } = await axios.get(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/${transaction}`);
-      return {
-        fee_rate: Number(data.fee_rate),
-      }
-    } catch (error) {
-      console.log('Error in $getTransactionData-->', error);
-    }
-  }
-
-  public async $getTransactionFee(transaction) {
-    try {
-      const { data } = await axios.get(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/${transaction}`);
-      return Number(data.fee_rate);
-    } catch (error) {
-      console.log(error);
     }
   }
   

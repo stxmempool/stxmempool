@@ -69,21 +69,7 @@ export class StacksAddressComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.stateService.networkChanged$.subscribe((network) => this.network = network);
     this.websocketService.want(['blocks']);
-    // .pipe(
-    //   switchMap(() => this.stacksApiService.getTotalNumberOfAddressTransactions$(this.addressString)
-    //   .pipe(
-    //     catchError((err) => {
-    //       this.isLoadingAddress = false;
-    //       this.error = err;
-    //       console.log(err);
-    //       return of(null);
-    //     })
-    //   ))
-    // ).pipe(total => this.txCount = total)
    
-    // Rewrite this to pipe in the total number of transactions
-    // this.txCount$ = this.stacksApiService.getTotalNumberOfAddressTransactions$(this.addressString);
-
     this.addressLoadingStatus$ = this.route.paramMap
       .pipe(
         switchMap(() => this.stateService.loadingIndicators$),

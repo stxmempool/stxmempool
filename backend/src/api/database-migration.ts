@@ -824,7 +824,6 @@ class DatabaseMigration {
       height int(10) unsigned NOT NULL,
       id varchar(65) NOT NULL,
       transactions JSON NOT NULL,
-      template NULL,
       PRIMARY KEY (id),
       INDEX (height)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`;
@@ -834,6 +833,7 @@ class DatabaseMigration {
       height int(10) unsigned NOT NULL,
       id varchar(66) NOT NULL,
       transactions JSON NOT NULL,
+      template JSON DEFAULT NULL,
       PRIMARY KEY (id),
       INDEX (height)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`;
