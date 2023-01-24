@@ -50,15 +50,28 @@ class Indexer {
     console.log('this.indexerRunning === true-->', this.indexerRunning === true);
     console.log('stacksMempool.hasPriority()',  stacksMempool.hasPriority());
 
-    // if (!Common.indexingEnabled() || this.runIndexer === false ||
-    //   this.indexerRunning === true || mempool.hasPriority() || stacksMempool.hasPriority()
-    // ) {
-    if (!Common.indexingEnabled() || this.runIndexer === false ||
-      this.indexerRunning === true || stacksMempool.hasPriority()
-    ) {
-      console.log('didnot make it past conditional');
-      return;
+    if (config.STACKS.ENABLED) {
+      if (!Common.indexingEnabled() || this.runIndexer === false ||
+        this.indexerRunning === true || stacksMempool.hasPriority()
+      ) {
+        console.log('did not make it past STACKS conditional');
+        return;
+      }
     }
+    if (config.MEMPOOL.ENABLED) {
+      if (!Common.indexingEnabled() || this.runIndexer === false ||
+        this.indexerRunning === true || mempool.hasPriority()
+      ) {
+        console.log('did not make it past MEMPOOL conditional');
+        return;
+      }
+    }
+    // if (!Common.indexingEnabled() || this.runIndexer === false ||
+    //   this.indexerRunning === true || stacksMempool.hasPriority()
+    // ) {
+    //   console.log('didnot make it past conditional');
+    //   return;
+    // }
 
     // Do not attempt to index anything unless Bitcoin Core is fully synced
     const blockchainInfo = await bitcoinClient.getBlockchainInfo();
