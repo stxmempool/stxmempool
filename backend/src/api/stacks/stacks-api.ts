@@ -21,7 +21,7 @@ class StacksApi {
     network: 'mainnet'
   };
   protected apiUrl = config.STACKS.DEDICATED_API ? config.STACKS.DEDICATED_API_URL : 'https://stacks-node-api.mainnet.stacks.co';
-  constructor () {}
+  // constructor () {}
 
   public async $getTransaction(txId: string): Promise<Transaction | MempoolTransaction> {
     // const { data } = await axios.get(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/${txId}`);

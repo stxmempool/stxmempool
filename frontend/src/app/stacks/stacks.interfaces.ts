@@ -7,7 +7,7 @@ export interface BlockExtension {
   avgFee?: number;
   avgFeeRate?: number;
   usd?: number | null;
-  reward: number;
+  reward: number; 
 }
 
 export interface StacksBlockExtended extends Block {
