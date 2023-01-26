@@ -35,6 +35,7 @@ export function prepareBlock(block: any): BlockExtended {
 
 // export function prepareStacksBlock(block: any): StacksBlockExtended {
 export function prepareStacksBlock(block: any): StacksBlockExtended {
+  console.log('block in prepareStacksBlock-->', block.fee_span, 'or-->', block.feeRange);
 
   return <StacksBlockExtended>{
     id: block.id ?? block.hash, // hash for indexed block
@@ -45,7 +46,7 @@ export function prepareStacksBlock(block: any): StacksBlockExtended {
     previousblockhash: block.previousblockhash,
     extras: {
       medianFee: block.medianFee ?? block.median_fee ?? block.extras?.medianFee,
-      feeRange: block.feeRange ?? block.fee_span,
+      feeRange: block.extras?.feeRange ?? block.fee_span,
       reward: block.reward ?? block?.extras?.reward,
       totalFees: block.totalFees ?? block?.fees ?? block?.extras?.totalFees,
       avgFee: block?.extras?.avgFee ?? block.avg_fee,

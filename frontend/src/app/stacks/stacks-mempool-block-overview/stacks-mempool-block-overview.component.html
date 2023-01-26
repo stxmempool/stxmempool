@@ -10,8 +10,8 @@
 <app-stacks-block-overview-graph
   #blockGraph
   [isLoading]="isLoading$ | async"
-  [resolution]="75"
-  [blockLimit]="stateService.blockVSize"
+  [resolution]="45"
+  [blockLimit]="2000000"
   [orientation]="timeLtr ? 'right' : 'left'"
   [flip]="true"
   (txClickEvent)="onTxClick($event)"

@@ -197,8 +197,7 @@ class StacksBlockRepository {
           ++idx;
           continue;
         }
-
-        if (blocks[idx].previous_block_hash !== blocks[idx - 1].hash) {
+        if (blocks[idx].parent_block_hash !== blocks[idx - 1].hash) {
           logger.warn(`Chain divergence detected at block ${blocks[idx - 1].height}`);
           await this.$deleteBlocksFrom(blocks[idx - 1].height);
           await StacksBlocksSummariesRepository.$deleteBlocksFrom(blocks[idx - 1].height);

@@ -19,24 +19,17 @@
         <div class="col-md">
           <table class="table table-borderless table-striped">
             <tbody>
-              <!-- <ng-template [ngIf]="!address.electrum"> -->
                 <tr>
                   <td i18n="address.total-received">Total received</td>
-                  <!-- <td *ngIf="address.chain_stats.funded_txo_sum !== undefined; else confidentialTd"><app-amount [satoshis]="received" [noFiat]="true"></app-amount></td> -->
                   <td><app-stacks-amount [uSTX]="address.stx.total_received" [noFiat]="true"></app-stacks-amount></td>
-                  <!-- <td>{{address.stx.total_received}}</td> -->
-
                 </tr>
                 <tr>
                   <td i18n="address.total-sent">Total sent</td>
-                  <!-- <td *ngIf="address.chain_stats.spent_txo_sum !== undefined; else confidentialTd"><app-amount [satoshis]="sent" [noFiat]="true"></app-amount></td> -->
                   <td><app-stacks-amount [uSTX]="address.stx.total_sent" [noFiat]="true"></app-stacks-amount></td>
 
                 </tr>
-              <!-- </ng-template> -->
               <tr>
                 <td i18n="address.balance">Balance</td>
-                <!-- <td *ngIf="address.chain_stats.funded_txo_sum !== undefined; else confidentialTd"><app-amount [satoshis]="received - sent" [noFiat]="true"></app-amount> <span class="fiat"><app-fiat [value]="received - sent"></app-fiat></span></td> -->
                 <td><app-stacks-amount [uSTX]="address.stx.balance" [noFiat]="true"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="address.stx.balance"></app-stacks-fiat></span></td>
               </tr>
               <tr *ngIf="address.stx.total_miner_rewards_received !== '0'">

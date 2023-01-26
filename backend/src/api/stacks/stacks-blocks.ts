@@ -549,8 +549,10 @@ class StacksBlocks {
       }
     }
     // Check if it's indexed in db
+    console.log('Common.stacksBlocksSummariesIndexingEnabled()-->', Common.stacksBlocksSummariesIndexingEnabled());
     if (skipDBLookup === false && Common.stacksBlocksSummariesIndexingEnabled() === true) {
       const indexedSummary = await StacksBlocksSummariesRepository.$getByBlockId(hash);
+      console.log('indexedSummary-->', indexedSummary);
       if (indexedSummary !== undefined && indexedSummary?.transactions?.length) {
         return indexedSummary.transactions;
       }

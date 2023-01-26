@@ -8,7 +8,7 @@ import { StateService } from '../../services/state.service';
 import { SeoService } from '../../services/seo.service';
 import { WebsocketService } from '../../services/websocket.service';
 import { RelativeUrlPipe } from '../../shared/pipes/relative-url/relative-url.pipe';
-import { BlockAudit, TransactionStripped } from '../../interfaces/node-api.interface';
+import { BlockAudit, BlockExtended, TransactionStripped } from '../../interfaces/node-api.interface';
 import { StacksBlockExtended, StacksTransactionStripped, StacksTransactionExtended, MinedStacksTransactionExtended} from '../stacks.interfaces';
 import { Transaction } from '@stacks/stacks-blockchain-api-types';
 
@@ -35,8 +35,8 @@ import { StacksApiService } from '../stacks-api.service';
 export class StacksBlockComponent implements OnInit, OnDestroy {
   network = '';
   // block: BlockExtended;
-  // block: any;
-  block: StacksBlockExtended;
+  block: any;
+  // block: StacksBlockExtended;
 
   // blockAudit: BlockAudit = undefined;
   blockHeight: number;
@@ -46,8 +46,10 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
   isLoadingBlock = true;
   // latestBlock: BlockExtended;
   // latestBlocks: BlockExtended[] = [];
-  latestBlock: StacksBlockExtended;
-  latestBlocks: StacksBlockExtended[] = [];
+  latestBlock: any;
+  latestBlocks: any[] = [];
+  // latestBlock: StacksBlockExtended;
+  // latestBlocks: StacksBlockExtended[] = [];
   // transactions: Transaction[];
   transactions: MinedStacksTransactionExtended[];
 
@@ -133,7 +135,7 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
       );
     
 
-    this.blocksSubscription = this.stateService.stacksBlocks$
+    this.blocksSubscription = this.stateService.blocks$
       .subscribe(([block]) => {
         this.latestBlock = block;
         this.latestBlocks.unshift(block);
@@ -178,8 +180,8 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
         } else {
           this.isLoadingBlock = true;
           this.isLoadingOverview = true;
-          // let blockInCache: BlockExtended;
-          let blockInCache: StacksBlockExtended;
+          let blockInCache: BlockExtended;
+          // let blockInCache: StacksBlockExtended;
 
           if (isBlockHeight) {
             blockInCache = this.latestBlocks.find((block) => block.height === parseInt(blockHash, 10));
@@ -280,7 +282,9 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
       ),
     )
     // .subscribe((transactions: Transaction[]) => {
-    .subscribe((transactions: MinedStacksTransactionExtended[]) => {
+    // .subscribe((transactions: MinedStacksTransactionExtended[]) => {
+    .subscribe((transactions: any[]) => {
+
 
       // if (this.fees === undefined && transactions[0]) {
       //   this.fees = transactions[0].vout.reduce((acc: number, curr: Vout) => acc + curr.value, 0) / 100000000 - this.blockSubsidy;

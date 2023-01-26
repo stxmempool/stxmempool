@@ -91,6 +91,8 @@ export class StateService {
   networkChanged$ = new ReplaySubject<string>(1);
   lightningChanged$ = new ReplaySubject<boolean>(1);
   blocks$: ReplaySubject<[BlockExtended, boolean]>;
+  // blocks$: ReplaySubject<[BlockExtended, boolean]>;
+
   stacksBlocks$: ReplaySubject<[StacksBlockExtended, boolean]>;
 
   transactions$ = new ReplaySubject<TransactionStripped>(6);

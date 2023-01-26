@@ -33,11 +33,7 @@
       </tr>
       <tr>
         <td class="td-width" i18n="transaction.vsize|Transaction Virtual Size">Size</td>
-        <td [innerHTML]="'&lrm;' + (vsize | bytes: 2)"></td>
-      </tr>
-      <tr>
-        <td class="td-width" i18n="transaction.vsize|Transaction Virtual Size">Size</td>
-        <td [innerHTML]="'&lrm;' + (vsize | bytes: 2)"></td>
+        <td [innerHTML]="'&lrm;' + (size | bytes: 2)"></td>
       </tr>
       <!-- <tr *ngIf="tx && tx.status && tx.status.length">
         <td class="td-width" i18n="transaction.audit-status">Audit status</td>

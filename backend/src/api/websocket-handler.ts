@@ -327,6 +327,7 @@ class WebsocketHandler {
     
     mempoolInfo.size = mBlocks[0].nTx;
     mempoolInfo.mempoolminfee = await stacksApi.$getMinFee();
+    mempoolInfo.usage = mBlocks.map(block => block.blockSize).reduce((acc, curr) => acc + curr);
     // const recommendedFees = await feeApi.$processStacksFees();
 
     // const rbfTransactions = Common.findRbfTransactions(newTransactions, deletedTransactions);
