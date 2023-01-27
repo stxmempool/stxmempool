@@ -791,7 +791,7 @@ class DatabaseMigration {
       avg_fee_rate BIGINT UNSIGNED NOT NULL DEFAULT "0",
       execution_cost_read_count INT UNSIGNED NOT NULL DEFAULT "0",
       execution_cost_read_length INT UNSIGNED NOT NULL DEFAULT "0",
-      execution_cost_runtime INT UNSIGNED NOT NULL DEFAULT "0",
+      execution_cost_runtime BIGINT UNSIGNED NOT NULL DEFAULT "0",
       execution_cost_write_count INT UNSIGNED NOT NULL DEFAULT "0",
       execution_cost_write_length INT UNSIGNED NOT NULL DEFAULT "0",
       PRIMARY KEY (height),

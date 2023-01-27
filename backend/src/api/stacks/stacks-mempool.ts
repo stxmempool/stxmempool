@@ -113,7 +113,7 @@ class StacksMempool {
     if (!this.inSync) {
       loadingIndicators.setProgress('mempool', Object.keys(this.mempoolCache).length / transactions.length * 100);
     }
-    // Experimental algo to speed up intitial mempool sync but will hit rate limits quickly
+    // Experimental algo to speed up intitial mempool sync but will quickly hit rate limits
     if (config.STACKS.DEDICATED_API) {
       try {
         const promiseArray: Promise<StacksTransactionExtended>[] = [];
@@ -137,7 +137,7 @@ class StacksMempool {
           });
         }
         hasChange = true;
-        newTransactions.concat(resolvedPromises);
+        newTransactions.push(...resolvedPromises);
       } catch (e) {
         logger.debug('Error finding transaction in Stacks mempool: ' + (e instanceof Error ? e.message : e));
       }

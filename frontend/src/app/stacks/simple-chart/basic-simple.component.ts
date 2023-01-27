@@ -98,7 +98,6 @@ export class BasicSimpleComponent implements OnChanges {
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx) => idx * 5,
     };
-    console.log(this.options);
     this.showGraph = true;
   }
 }

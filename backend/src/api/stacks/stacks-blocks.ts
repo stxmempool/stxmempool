@@ -218,8 +218,14 @@ class StacksBlocks {
       blockExtended.extras.feeRange = Common.getFeesInRange(transactions, rangeLength);
 
       blockExtended.extras.totalFees = feeArray.reduce((acc, curr) => acc + curr);
-      blockExtended.extras.avgFee = blockExtended.extras.totalFees / transactions.length;
-      blockExtended.extras.avgFeeRate = transactions.map(tx => tx.feePerVsize).reduce((acc, curr) => acc + curr) / filteredFeeArray.length;
+      // this conditional prevents a rare case where there is a block with transactions but they have a feerate of zero. (See block height 3000)
+      if (blockExtended.extras.totalFees === 0) {
+        blockExtended.extras.avgFee = 0;
+        blockExtended.extras.avgFeeRate = 0;
+      } else {
+        blockExtended.extras.avgFee = blockExtended.extras.totalFees / transactions.length;
+        blockExtended.extras.avgFeeRate = transactions.map(tx => tx.feePerVsize).reduce((acc, curr) => acc + curr) / filteredFeeArray.length;
+      }
 
     }
 
