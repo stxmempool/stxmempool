@@ -26,7 +26,7 @@ import { StacksAmountComponent } from '../stacks/stacks-amount/stacks-amount.com
 import { StacksMempoolBlockComponent } from '../stacks/stacks-mempool-block/stacks-mempool-block.component';
 import { StacksFeeDistributionGraphComponent } from '../stacks/stacks-fee-distribution-graph/stacks-fee-distribution-graph.component';
 import { StacksMempoolBlockOverviewComponent } from '../stacks/stacks-mempool-block-overview/stacks-mempool-block-overview.component';
-import { BasicSimpleComponent } from '../stacks/simple-chart/basic-simple.component';
+import { ExecutionCostsGraph } from '../stacks/execution-costs-graph/execution-costs-graph.component';
 import { StacksTransactionComponent } from '../stacks/stacks-transaction/stacks-transaction.component';
 import { BytesPipe } from '../shared/pipes/bytes-pipe/bytes.pipe';
 import { StacksAddressComponent } from './stacks-address/stacks-address.component';
@@ -55,7 +55,7 @@ import { StacksSearchResultsComponent } from './stacks-search-form/search-result
     StacksMempoolBlockComponent,
     StacksFeeDistributionGraphComponent,
     StacksMempoolBlockOverviewComponent,
-    BasicSimpleComponent,
+    ExecutionCostsGraph,
     StacksTransactionComponent,
     StacksAddressComponent,
     StacksSearchFormComponent,

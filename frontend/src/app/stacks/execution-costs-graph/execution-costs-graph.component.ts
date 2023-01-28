@@ -1,11 +1,11 @@
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-basic-simple',
-  templateUrl: './basic-simple.component.html',
-  styleUrls: ['./basic-simple.component.scss'],
+  selector: 'app-execution-costs-graph',
+  templateUrl: './execution-costs-graph.component.html',
+  styleUrls: ['./execution-costs-graph.component.scss'],
 })
-export class BasicSimpleComponent implements OnChanges {
+export class ExecutionCostsGraph implements OnChanges {
   @Input() readCount: number;
   @Input() readLength: number;
   @Input() runtime: number;

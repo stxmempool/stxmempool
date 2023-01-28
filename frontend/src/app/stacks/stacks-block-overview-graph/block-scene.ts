@@ -219,7 +219,6 @@ export default class BlockScene {
     };
 
     // Set the scale of the visualization (with a 5% margin)
-    console.log('blockLimit-->', blockLimit, 'Math.pow(resolution / 1.02, 2)-->', Math.pow(resolution / 1.02, 2), 'resolution-->', resolution, 'blockLimit / Math.pow(resolution / 1.02, 2)-->', blockLimit / Math.pow(resolution / 1.02, 2), );
     this.vbytesPerUnit = blockLimit / Math.pow(resolution / 1.02, 2);
     this.gridWidth = resolution;
     this.gridHeight = resolution;

@@ -78,7 +78,6 @@ export class StacksTransactionComponent implements OnInit, AfterViewInit, OnDest
     private route: ActivatedRoute,
     private router: Router,
     private relativeUrlPipe: RelativeUrlPipe,
-    private electrsApiService: ElectrsApiService,
     private stateService: StateService,
     private websocketService: WebsocketService,
     private audioService: AudioService,
@@ -112,59 +111,6 @@ export class StacksTransactionComponent implements OnInit, AfterViewInit, OnDest
       this.inputIndex = (!isNaN(vin) && vin >= 0) ? vin : null;
       this.outputIndex = (!isNaN(vout) && vout >= 0) ? vout : null;
     });
-
-    // this.fetchCpfpSubscription = this.fetchCpfp$
-    //   .pipe(
-    //     switchMap((txId) =>
-    //       this.apiService
-    //         .getCpfpinfo$(txId)
-    //         .pipe(retryWhen((errors) => errors.pipe(
-    //           mergeMap((error) => {
-    //             if (!this.tx?.status || this.tx.status.confirmed) {
-    //               return throwError(error);
-    //             } else {
-    //               return of(null);
-    //             }
-    //           }),
-    //           delay(2000)
-    //         )))
-    //     ),
-    //     catchError(() => {
-    //       return of(null);
-    //     })
-    //   )
-    //   .subscribe((cpfpInfo) => {
-    //     if (!cpfpInfo || !this.tx) {
-    //       this.cpfpInfo = null;
-    //       return;
-    //     }
-    //     if (cpfpInfo.effectiveFeePerVsize) {
-    //       this.tx.effectiveFeePerVsize = cpfpInfo.effectiveFeePerVsize;
-    //     } else {
-    //       const lowerFeeParents = cpfpInfo.ancestors.filter(
-    //         (parent) => parent.fee / (parent.weight / 4) < this.tx.feePerVsize
-    //       );
-    //       let totalWeight =
-    //         this.tx.weight +
-    //         lowerFeeParents.reduce((prev, val) => prev + val.weight, 0);
-    //       let totalFees =
-    //         this.tx.fee +
-    //         lowerFeeParents.reduce((prev, val) => prev + val.fee, 0);
-
-    //       if (cpfpInfo?.bestDescendant) {
-    //         totalWeight += cpfpInfo?.bestDescendant.weight;
-    //         totalFees += cpfpInfo?.bestDescendant.fee;
-    //       }
-
-    //       this.tx.effectiveFeePerVsize = totalFees / (totalWeight / 4);
-    //     }
-    //     if (!this.tx.status.confirmed) {
-    //       this.stateService.markBlock$.next({
-    //         txFeePerVSize: this.tx.effectiveFeePerVsize,
-    //       });
-    //     }
-    //     this.cpfpInfo = cpfpInfo;
-    //   });
 
     this.subscription = this.route.paramMap
       .pipe(
@@ -411,12 +357,6 @@ export class StacksTransactionComponent implements OnInit, AfterViewInit, OnDest
   }
 
   setFlowEnabled() {
-    // console.log(this.tx);
-    // if((this.tx.tx_status === 'success' || this.tx.tx_status === 'abort_by_response' || this.tx.tx_status === 'abort_by_post_condition') && (this.tx.tx_type !== 'coinbase' && this.tx.tx_type !== 'token_transfer')) {
-    //   this.flowEnabled = true;
-    // } else {
-    //   this.flowEnabled = false;
-    // }
     this.flowEnabled = (this.overrideFlowPreference != null ? this.overrideFlowPreference : !this.hideFlow);
   }
 
@@ -456,7 +396,6 @@ export class StacksTransactionComponent implements OnInit, AfterViewInit, OnDest
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-    // this.fetchCpfpSubscription.unsubscribe();
     this.txReplacedSubscription.unsubscribe();
     this.blocksSubscription.unsubscribe();
     this.queryParamsSubscription.unsubscribe();

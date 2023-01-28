@@ -7,9 +7,6 @@
   </ng-template>
   <ng-template #default>
     &lrm;{{ addPlus && uSTX >= 0 ? '+' : '' }}{{ uSTX / 1000000 | number : digitsInfo }}
-    <span class="symbol"><ng-template [ngIf]="network === 'liquid'">L-</ng-template>
-    <ng-template [ngIf]="network === 'liquidtestnet'">tL-</ng-template>
-    <ng-template [ngIf]="network === 'testnet'">t</ng-template>
-    <ng-template [ngIf]="network === 'signet'">s</ng-template>STX</span>
+    <span class="symbol">STX</span>
   </ng-template>
 </ng-template>

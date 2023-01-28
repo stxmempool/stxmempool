@@ -98,7 +98,6 @@ export class StacksBlockOverviewGraphComponent implements AfterViewInit, OnDestr
   }
 
   // initialize the scene without any entry transition
-  // setup(transactions: TransactionStripped[]): void {
   setup(transactions: StacksTransactionStripped[]): void {
 
     if (this.scene) {
@@ -108,7 +107,6 @@ export class StacksBlockOverviewGraphComponent implements AfterViewInit, OnDestr
     }
   }
 
-  // enter(transactions: TransactionStripped[], direction: string): void {
   enter(transactions: StacksTransactionStripped[], direction: string): void {
 
     if (this.scene) {
@@ -124,7 +122,6 @@ export class StacksBlockOverviewGraphComponent implements AfterViewInit, OnDestr
     }
   }
 
-  // replace(transactions: TransactionStripped[], direction: string, sort: boolean = true): void {
     replace(transactions: StacksTransactionStripped[], direction: string, sort: boolean = true): void {
   
     if (this.scene) {
@@ -133,7 +130,6 @@ export class StacksBlockOverviewGraphComponent implements AfterViewInit, OnDestr
     }
   }
 
-  // update(add: TransactionStripped[], remove: string[], direction: string = 'left', resetLayout: boolean = false): void {
   update(add: StacksTransactionStripped[], remove: string[], direction: string = 'left', resetLayout: boolean = false): void {
 
     if (this.scene) {

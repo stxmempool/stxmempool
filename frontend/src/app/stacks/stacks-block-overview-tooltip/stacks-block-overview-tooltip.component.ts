@@ -1,5 +1,4 @@
 import { Component, ElementRef, ViewChild, Input, OnChanges, ChangeDetectionStrategy } from '@angular/core';
-import { TransactionStripped } from '../../interfaces/websocket.interface';
 import { Position } from '../../components/block-overview-graph/sprite-types.js';
 import { StacksTransactionStripped } from '../stacks.interfaces';
 
@@ -9,7 +8,6 @@ import { StacksTransactionStripped } from '../stacks.interfaces';
   styleUrls: ['./stacks-block-overview-tooltip.component.scss'],
 })
 export class StacksBlockOverviewTooltipComponent implements OnChanges {
-  // @Input() tx: TransactionStripped | void;
   @Input() tx: StacksTransactionStripped | void;
 
   @Input() cursorPosition: Position;

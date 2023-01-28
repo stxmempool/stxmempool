@@ -15,8 +15,6 @@ export class StacksAmountComponent implements OnInit, OnDestroy {
 
   stateSubscription: Subscription;
 
-  // @Input() satoshis: number | string;
-  // @Input() satoshis: number;
   @Input() uSTX: number;
 
 

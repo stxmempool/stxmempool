@@ -176,8 +176,6 @@ export class StacksIncomingTransactionsGraphComponent implements OnInit, OnChang
               width: 2,
             },
             data: [{
-              // yAxis: 1667,
-              // yAxis: 116,
               yAxis: 50,
               label: {
                 show: false,
@@ -192,79 +190,32 @@ export class StacksIncomingTransactionsGraphComponent implements OnInit, OnChang
         top: 50,
         right: 10,
         pieces: [{
-          // original
-          // gt: 0,
-          // lte: 50,
-
           gt: 0,
-
-          // step desc
-          // lte: 116,
-          
-          // I think 50 is proper baseline so far
           lte: 50,
           color: '#7CB342'
         },
         {
-          // original 50%
-          // gt: 50,
-          // lte: 100,
-
-          // 83% step asc
           gt: 50,
           lte: 60,
-
-          // 80% step desc
-          // gt: 116,
-          // lte: 140,
           color: '#FDD835'
         },
         {
-          // original 66%
-          // gt: 100,
-          // lte: 150,
-
-          // 80% step asc
           gt: 60,
           lte: 75,
-          
-          // 80% step desc
-          // gt: 140,
-          // lte: 176,
           color: '#FFB300'
         },
         {
-          // original 75%
-          // gt: 150,
-          // lte: 200,
-
-          // 83% step asc
           gt: 75,
           lte: 90,
-
-          // 83% step desc
-          // gt: 176,
-          // lte: 212,
           color: '#FB8C00'
         },
         {
-          // original 80%
-          // gt: 200,
-
-          // 85% step asc
           gt: 90,
           lte: 105,
-
-          //85% step desc
-          // gt: 212.5,
-          // lte: 250,
           color: '#F4511E'
         },
         {
-          // original
-          // gt: 250,
           gt: 105,
-
           color: '#D81B60'
         }],
         outOfRange: {

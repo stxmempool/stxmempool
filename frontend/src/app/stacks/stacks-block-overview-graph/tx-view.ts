@@ -55,24 +55,20 @@ export default class TxView implements StacksTransactionStripped {
   constructor(tx: any, vertexArray: FastVertexArray) {
     this.context = tx.context;
     this.txid = tx.txid;
-    // this.txid = tx.type;
-
     this.fee = tx.fee;
-    // this.fee = tx.execution_cost_read_count;
-
-    // this.vsize = tx.vsize;
-    // this.vsize = 100;
-
+    // In the original mempool.space the transactions are rendered based on vsize. Here, when applicable, we render based on 
+    // read_count (the most common block capacity bottleneck). For mempool transactions, we render based on size of the transcation
+    // because read_count is not yet known
     this.vsize = tx.execution_cost_read_count !== 0 ? tx.execution_cost_read_count : tx.vsize;
-    // this.vsize = typeof tx.execution_cost_read_count === 'number' ? tx.execution_cost_read_count : 0;
+    // This is purely for the tooltip
     this.size = tx.vsize;
     this.execution_cost_read_count = tx.execution_cost_read_count;
 
 
     // this.value = tx.value;
+    // We replace value with type for the tooltip, as a contract call, etc. does not have value
     this.value = tx.type;
     this.feerate = tx.fee / tx.vsize;
-    // this.feerate = tx.vsize;
 
     this.initialised = false;
     this.vertexArray = vertexArray;
@@ -174,27 +170,7 @@ export default class TxView implements StacksTransactionStripped {
   getColor(): Color {
     const feeLevelIndex = feeLevels.findIndex((feeLvl) => Math.max(1, this.feerate) < feeLvl) - 1;
     const feeLevelColor = feeColors[feeLevelIndex] || feeColors[mempoolFeeColors.length - 1];
-    // Block audit
-    // switch(this.status) {
-      // case 'censored':
-      //   return auditColors.censored;
-      // case 'missing':
-      //   return auditColors.missing;
-      // case 'fresh':
-      //   return auditColors.missing;
-      // case 'added':
-      //   return auditColors.added;
-      // case 'selected':
-      //   return auditColors.selected;
-      // case 'found':
-      //   if (this.context === 'projected') {
-      //     return auditFeeColors[feeLevelIndex] || auditFeeColors[mempoolFeeColors.length - 1];
-      //   } else {
-      //     return feeLevelColor;
-      //   }
-      // default:
         return feeLevelColor;
-    // }
   }
 }
 

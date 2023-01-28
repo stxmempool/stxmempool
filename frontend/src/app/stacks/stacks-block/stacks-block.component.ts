@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { ElectrsApiService } from '../../services/electrs-api.service';
 import { switchMap, tap, throttleTime, catchError, map, shareReplay, startWith, pairwise, filter } from 'rxjs/operators';
 import { Observable, of, Subscription, asyncScheduler, EMPTY, combineLatest } from 'rxjs';
 import { StateService } from '../../services/state.service';
@@ -11,9 +10,6 @@ import { RelativeUrlPipe } from '../../shared/pipes/relative-url/relative-url.pi
 import { BlockAudit, BlockExtended, TransactionStripped } from '../../interfaces/node-api.interface';
 import { StacksBlockExtended, StacksTransactionStripped, StacksTransactionExtended, MinedStacksTransactionExtended} from '../stacks.interfaces';
 import { Transaction } from '@stacks/stacks-blockchain-api-types';
-
-import { ApiService } from '../../services/api.service';
-// import { BlockOverviewGraphComponent } from '../../components/block-overview-graph/block-overview-graph.component';
 import { StacksBlockOverviewGraphComponent } from '../stacks-block-overview-graph/stacks-block-overview-graph.component';
 
 import { detectWebGL } from '../../shared/graphs.utils';
@@ -36,7 +32,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
   network = '';
   // block: BlockExtended;
   block: any;
-  // block: StacksBlockExtended;
 
   // blockAudit: BlockAudit = undefined;
   blockHeight: number;
@@ -48,16 +43,10 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
   // latestBlocks: BlockExtended[] = [];
   latestBlock: any;
   latestBlocks: any[] = [];
-  // latestBlock: StacksBlockExtended;
-  // latestBlocks: StacksBlockExtended[] = [];
-  // transactions: Transaction[];
   transactions: MinedStacksTransactionExtended[];
-
-  // transactions: StacksTransactionExtended[];
   
   isLoadingTransactions = true;
   strippedTransactions: StacksTransactionStripped[];
-  // strippedTransactions: TransactionStripped[];
 
   overviewTransitionDirection: string;
   isLoadingOverview = true;
@@ -104,12 +93,10 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private location: Location,
     private router: Router,
-    // private electrsApiService: ElectrsApiService,
     public stateService: StateService,
     private seoService: SeoService,
     private websocketService: WebsocketService,
     private relativeUrlPipe: RelativeUrlPipe,
-    // private apiService: ApiService,
     private stacksApiService: StacksApiService
   ) {
     this.webGlEnabled = detectWebGL();
@@ -181,7 +168,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
           this.isLoadingBlock = true;
           this.isLoadingOverview = true;
           let blockInCache: BlockExtended;
-          // let blockInCache: StacksBlockExtended;
 
           if (isBlockHeight) {
             blockInCache = this.latestBlocks.find((block) => block.height === parseInt(blockHash, 10));
@@ -196,7 +182,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
                   this.location.replaceState(
                     this.router.createUrlTree([(this.network ? '/' + this.network : '') + '/block/', hash]).toString()
                   );
-                  // return this.apiService.getBlock$(hash).pipe(
                   return this.stacksApiService.getBlock$(hash).pipe(
                     catchError((err) => {
                       this.error = err;
@@ -219,7 +204,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
           if (blockInCache) {
             return of(blockInCache);
           }
-          // return this.apiService.getBlock$(blockHash).pipe(
             return this.stacksApiService.getBlock$(blockHash).pipe(
 
             catchError((err) => {
@@ -231,20 +215,16 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
           );
         }
       }),
-      // tap((block: BlockExtended) => {
       tap((block: StacksBlockExtended) => {
       
         if (block.height > 0) {
           // Preload previous block summary (execute the http query so the response will be cached)
           this.unsubscribeNextBlockSubscriptions();
           setTimeout(() => {
-            // this.nextBlockSubscription = this.apiService.getBlock$(block.previousblockhash).subscribe();
             this.nextBlockSubscription = this.stacksApiService.getBlock$(block.previousblockhash).subscribe();
 
-            // this.nextBlockTxListSubscription = this.electrsApiService.getBlockTransactions$(block.previousblockhash).subscribe();
             this.nextBlockTxListSubscription = this.stacksApiService.getBlockTransactions$(block.previousblockhash).subscribe();
 
-            // this.apiService.getBlockAudit$(block.previousblockhash);
           }, 100);
         }
         this.updateAuditDataMissingFromBlockHeight(block.height);
@@ -271,7 +251,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
       shareReplay(1)
     );
     this.transactionSubscription = block$.pipe(
-      // switchMap((block) => this.electrsApiService.getBlockTransactions$(block.id)
       switchMap((block) => this.stacksApiService.getBlockTransactions$(block.id)
 
         .pipe(
@@ -282,13 +261,7 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
       ),
     )
     // .subscribe((transactions: Transaction[]) => {
-    // .subscribe((transactions: MinedStacksTransactionExtended[]) => {
     .subscribe((transactions: any[]) => {
-
-
-      // if (this.fees === undefined && transactions[0]) {
-      //   this.fees = transactions[0].vout.reduce((acc: number, curr: Vout) => acc + curr.value, 0) / 100000000 - this.blockSubsidy;
-      // }
       this.transactions = transactions;
       this.isLoadingTransactions = false;
     },
@@ -319,7 +292,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
           )
         ),
       )
-      // .subscribe(({transactions, direction}: {transactions: TransactionStripped[], direction: string}) => {
       .subscribe(({transactions, direction}: {transactions: StacksTransactionStripped[], direction: string}) => {
 
         this.strippedTransactions = transactions;
@@ -332,96 +304,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
       });
     }
 
-    // if (this.indexingAvailable) {
-    //   this.auditSubscription = block$.pipe(
-    //     startWith(null),
-    //     pairwise(),
-    //     switchMap(([prevBlock, block]) => this.apiService.getBlockAudit$(block.id)
-    //       .pipe(
-    //         catchError((err) => {
-    //           this.overviewError = err;
-    //           return of([]);
-    //         })
-    //       )
-    //     ),
-    //     filter((response) => response != null),
-    //     map((response) => {
-    //       const blockAudit = response.body;
-    //       const inTemplate = {};
-    //       const inBlock = {};
-    //       const isAdded = {};
-    //       const isCensored = {};
-    //       const isMissing = {};
-    //       const isSelected = {};
-    //       const isFresh = {};
-    //       this.numMissing = 0;
-    //       this.numUnexpected = 0;
-
-    //       if (blockAudit?.template) {
-    //         for (const tx of blockAudit.template) {
-    //           inTemplate[tx.txid] = true;
-    //         }
-    //         for (const tx of blockAudit.transactions) {
-    //           inBlock[tx.txid] = true;
-    //         }
-    //         for (const txid of blockAudit.addedTxs) {
-    //           isAdded[txid] = true;
-    //         }
-    //         for (const txid of blockAudit.missingTxs) {
-    //           isCensored[txid] = true;
-    //         }
-    //         for (const txid of blockAudit.freshTxs || []) {
-    //           isFresh[txid] = true;
-    //         }
-    //         // set transaction statuses
-    //         for (const tx of blockAudit.template) {
-    //           tx.context = 'projected';
-    //           if (isCensored[tx.txid]) {
-    //             tx.status = 'censored';
-    //           } else if (inBlock[tx.txid]) {
-    //             tx.status = 'found';
-    //           } else {
-    //             tx.status = isFresh[tx.txid] ? 'fresh' : 'missing';
-    //             isMissing[tx.txid] = true;
-    //             this.numMissing++;
-    //           }
-    //         }
-    //         for (const [index, tx] of blockAudit.transactions.entries()) {
-    //           tx.context = 'actual';
-    //           if (index === 0) {
-    //             tx.status = null;
-    //           } else if (isAdded[tx.txid]) {
-    //             tx.status = 'added';
-    //           } else if (inTemplate[tx.txid]) {
-    //             tx.status = 'found';
-    //           } else {
-    //             tx.status = 'selected';
-    //             isSelected[tx.txid] = true;
-    //             this.numUnexpected++;
-    //           }
-    //         }
-    //         for (const tx of blockAudit.transactions) {
-    //           inBlock[tx.txid] = true;
-    //         }
-    //         this.auditEnabled = true;
-    //       } else {
-    //         this.auditEnabled = false;
-    //         this.auditDataMissing = true;
-    //       }
-    //       return blockAudit;
-    //     }),
-    //     catchError((err) => {
-    //       console.log(err);
-    //       this.error = err;
-    //       this.isLoadingOverview = false;
-    //       return of(null);
-    //     }),
-    //   ).subscribe((blockAudit) => {
-    //     this.blockAudit = blockAudit;
-    //     this.setupBlockGraphs();
-    //     this.isLoadingOverview = false;
-    //   });
-    // }
 
     this.networkChangedSubscription = this.stateService.networkChanged$
       .subscribe((network) => this.network = network);
@@ -502,7 +384,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
     this.transactionsError = null;
     target.scrollIntoView(); // works for chrome
 
-    // this.electrsApiService.getBlockTransactions$(this.block.id, start)
     this.stacksApiService.getBlockTransactions$(this.block.id, start)
     
       .pipe(
@@ -581,24 +462,20 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
   }
 
   setupBlockGraphs(): void {
-    // if (this.blockAudit || this.strippedTransactions) {
     if (this.strippedTransactions) {
 
       this.blockGraphProjected.forEach(graph => {
         graph.destroy();
         if (this.isMobile && this.mode === 'actual') {
-          // graph.setup(this.blockAudit?.transactions || this.strippedTransactions ||  []);
           graph.setup(this.strippedTransactions ||  []);
 
         } else {
-          // graph.setup(this.blockAudit?.template || []);
           graph.setup([]);
 
         }
       });
       this.blockGraphActual.forEach(graph => {
         graph.destroy();
-        // graph.setup(this.blockAudit?.transactions || this.strippedTransactions || []);
         graph.setup(this.strippedTransactions || []);
       });
     }
@@ -624,7 +501,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
     });
   }
 
-  // onTxClick(event: TransactionStripped): void {
   onTxClick(event: StacksTransactionStripped): void {
 
     const url = new RelativeUrlPipe(this.stateService).transform(`/tx/${event.txid}`);

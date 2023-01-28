@@ -15,10 +15,7 @@
         </td>
       </tr>
       <tr>
-        <!-- <td class="td-width" i18n="dashboard.latest-transactions.amount">Amount</td> -->
-        <td class="td-width" i18n="dashboard.latest-transactions.amount">Transaction Type</td>
-
-        <!-- <td><app-amount [satoshis]="value"></app-amount></td> -->
+        <td class="td-width" i18n="dashboard.latest-transactions.transaction-type">Transaction Type</td>
         <td>{{convertTxType(value) | titlecase }}</td>
       </tr>
       <tr>
@@ -28,24 +25,13 @@
       <tr>
         <td class="td-width" i18n="transaction.fee-rate|Transaction fee rate">Fee rate</td>
         <td>
-          {{ feeRate | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">uSTX/B</span>
+          {{ feeRate | feeRounding }} <span class="symbol" i18n="shared.uSTX-byte|uSTX/B">uSTX/B</span>
         </td>
       </tr>
       <tr>
-        <td class="td-width" i18n="transaction.vsize|Transaction Virtual Size">Size</td>
+        <td class="td-width" i18n="transaction.size|Transaction Size">Size</td>
         <td [innerHTML]="'&lrm;' + (size | bytes: 2)"></td>
       </tr>
-      <!-- <tr *ngIf="tx && tx.status && tx.status.length">
-        <td class="td-width" i18n="transaction.audit-status">Audit status</td>
-        <ng-container [ngSwitch]="tx?.status">
-          <td *ngSwitchCase="'found'" i18n="transaction.audit.match">match</td>
-          <td *ngSwitchCase="'censored'" i18n="transaction.audit.removed">removed</td>
-          <td *ngSwitchCase="'missing'" i18n="transaction.audit.marginal">marginal fee rate</td>
-          <td *ngSwitchCase="'fresh'" i18n="transaction.audit.recently-broadcast">recently broadcast</td>
-          <td *ngSwitchCase="'added'" i18n="transaction.audit.added">added</td>
-          <td *ngSwitchCase="'selected'" i18n="transaction.audit.marginal">marginal fee rate</td>
-        </ng-container>
-      </tr> -->
     </tbody>
   </table>
 </div>

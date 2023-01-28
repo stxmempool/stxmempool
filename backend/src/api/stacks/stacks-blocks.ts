@@ -194,11 +194,6 @@ class StacksBlocks {
       blockExtended.extras.avgFeeRate = 0;
       return blockExtended;
     } else {
-
-      // remove the 0 fee of a coinbase transacation
-      // const feeArray = transactions.map(tx => tx.feeRateAsNumber);
-
-      // const filteredFeeArray = transactions.map(tx => tx.feeRateAsNumber).filter(fee => fee !== 0);
       
       //TODO refactor, way too many sort functions
       const feeArray = transactions.map(tx => tx.feeRateAsNumber);
@@ -209,16 +204,14 @@ class StacksBlocks {
       feePerVSizeArray.sort((a, b) => a - b);
 
       transactions.sort((a, b) => b.feePerVsize - a.feePerVsize);
-      // blockExtended.extras.medianFee = Common.percentile(filteredArray, config.MEMPOOL.RECOMMENDED_FEE_PERCENTILE);
-      // blockExtended.extras.medianFee = Common.percentile(transactions.map((tx) => tx.effectiveFeePerVsize), config.MEMPOOL.RECOMMENDED_FEE_PERCENTILE);
+
       blockExtended.extras.medianFee = Common.percentile(feePerVSizeArray, config.MEMPOOL.RECOMMENDED_FEE_PERCENTILE);
 
-
-      // blockExtended.extras.feeRange = filteredArray;
       blockExtended.extras.feeRange = Common.getFeesInRange(transactions, rangeLength);
 
       blockExtended.extras.totalFees = feeArray.reduce((acc, curr) => acc + curr);
-      // this conditional prevents a rare case where there is a block with transactions but they have a feerate of zero. (See block height 3000)
+
+      // this conditional prevents a rare case where there is a block with transactions but they all have a feerate of zero. (See block height 3000)
       if (blockExtended.extras.totalFees === 0) {
         blockExtended.extras.avgFee = 0;
         blockExtended.extras.avgFeeRate = 0;
