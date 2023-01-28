@@ -24,51 +24,38 @@ class StacksApi {
   // constructor () {}
 
   public async $getTransaction(txId: string): Promise<Transaction | MempoolTransaction> {
-    // const { data } = await axios.get(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/${txId}`);
-    // const { data } = await axios.get(`http://localhost:3999/extended/v1/tx/${txId}`);
     const { data } = await axios.get(`${this.apiUrl}/extended/v1/tx/${txId}`);
 
     return data;
   }
   // used to grab the tx size
   public async $getTransactionSize(txId: string): Promise<number> {
-    // const { data } = await axios.get<{ raw_tx: string }>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/${txId}/raw`);
-    // const { data } = await axios.get<{ raw_tx: string }>(`http://localhost:3999/extended/v1/tx/${txId}/raw`);
     const { data } = await axios.get<{ raw_tx: string }>(`${this.apiUrl}/extended/v1/tx/${txId}/raw`);
 
     return data.raw_tx.length / 2;
   }
   public async $getBlockHeightTip(): Promise<number> {
-    // const  { data } = await axios.get<BlockListResponse>('https://stacks-node-api.mainnet.stacks.co/extended/v1/block?limit=1');
-    // const response = await axios.get('http://localhost:3999/extended/v1/block?limit=1');
     const  { data } = await axios.get<BlockListResponse>(`${this.apiUrl}/extended/v1/block?limit=1`);
 
     return data.results[0].height;
   }
   public async $getBlockHashByHeight(height: number): Promise<string> {
-    // const  { data } = await axios.get<Block>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/block/by_height/${height}`);
-    // const response = await axios.get('http://localhost:3999/extended/v1/block?limit=1');
     const  { data } = await axios.get<Block>(`${this.apiUrl}/extended/v1/block/by_height/${height}`);
 
     return data.hash;
   }
   public async $getBlockByHeight(height: number): Promise<Block> {
-    // const  { data } = await axios.get<Block>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/block/by_height/${height}`);
-    // const response = await axios.get('http://localhost:3999/extended/v1/block?limit=1');
     const  { data } = await axios.get<Block>(`${this.apiUrl}/extended/v1/block/by_height/${height}`);
 
     return data;
   }
 
   public async $getTxIdsForBlock(blockHash: string): Promise<string[]> {
-    // const { data } = await axios.get<Block>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/block/${blockHash}`);
-    // const { data } = await axios.get(`http://localhost:3999/extended/v1/block/${blockHash}`);
     const { data } = await axios.get<Block>(`${this.apiUrl}/extended/v1/block/${blockHash}`);
 
     return data.txs;
   }
 
-  // not a STX Api call but it is an important call
   // TODO Create a more effiecient way to store and update current STX value
   public async $getStacksPrice(): Promise<number> {
     const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=blockstack&vs_currencies=usd');
@@ -109,7 +96,6 @@ class StacksApi {
     try {
       for (let i = 0; i < queryArray.length; i++) {
         const query = queryArray[i].join('');
-        // promiseArray.push(axios.get(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`));
         promiseArray.push(axios.get(`${this.apiUrl}/extended/v1/tx/multiple?${query}`));
       }
       const result: AxiosResponse<CustomTransactionList>[] = await Promise.all(promiseArray);
@@ -124,8 +110,6 @@ class StacksApi {
   }
 
   public async $getStacksMempoolTransactions(): Promise<string[]> {
-    // const response = await axios.post('https://stacks-node-api.mainnet.stacks.co/rosetta/v1/mempool',
-    // const response = await axios.post('http://localhost:3999/rosetta/v1/mempool', 
     const response = await axios.post(`${this.apiUrl}/rosetta/v1/mempool`,
     {
       network_identifier: {
@@ -149,21 +133,18 @@ class StacksApi {
   }
 
   public async $getBlockByHash(hash: string): Promise<Block> {
-    // const { data } = await axios.get<Block>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/block/${hash}`);
     const { data } = await axios.get<Block>(`${this.apiUrl}/extended/v1/block/${hash}`);
 
     return data;
   }
 
   public async $getAddress(address: string): Promise<AddressBalanceResponse> {
-    // const { data } = await axios.get<AddressBalanceResponse>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/address/${address}/balances`);
     const { data } = await axios.get<AddressBalanceResponse>(`${this.apiUrl}/extended/v1/address/${address}/balances`);
 
     return data;
   }
 
   public async $getAddressTransactions(address: string, offset: string = '0'): Promise<{ total: number, transactions: (Transaction | MempoolTransaction)[]}> {
-    // const { data } = await axios.get<AddressTransactionsListResponse>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/address/${address}/transactions?limit=25&offset=${offset}`);
     const { data } = await axios.get<AddressTransactionsListResponse>(`${this.apiUrl}/extended/v1/address/${address}/transactions?limit=25&offset=${offset}`);
 
     return {
