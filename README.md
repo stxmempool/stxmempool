@@ -4,7 +4,7 @@ Stxmempool is an adaptation of the The Mempool Open Source Project™. Stxmempoo
 
 It is an open-source project developed and operated for the benefit of the Bitcoin and Stacks community, with a focus on the emerging transaction fee market.
 
-![mempool](https://mempool.space/resources/screenshots/stacks-v1.1-dashboard.png)
+![mempool](https://stxmempool.space/resources/screenshots/stacks-v1.1-dashboard.png)
 
 # Installation Methods
 
