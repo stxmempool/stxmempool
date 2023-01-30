@@ -5,9 +5,10 @@
         <div [attr.data-cy]="'mempool-block-' + i" class="bitcoin-block text-center mempool-block" id="mempool-block-{{ i }}" [ngStyle]="mempoolBlockStyles[i]" [class.blink-bg]="projectedBlock.blink">
           <a draggable="false" [routerLink]="['/mempool-block/' | relativeUrl, i]"
             class="blockLink" [ngClass]="{'disabled': (this.stateService.blockScrolling$ | async)}">&nbsp;</a>
-            <div [attr.data-cy]="'mempool-block-' + i + '-height'" class="block-height">
+            <!-- Include this link when we have projected Blocks from stacks-inspect -->
+            <!-- <div [attr.data-cy]="'mempool-block-' + i + '-height'" class="block-height">
               <a [routerLink]="['/mempool-block/' | relativeUrl, i]">{{ i=== 0 ? 'Projected Block' : 'All Txs' }}</a>
-            </div>
+            </div> -->
           <div class="block-body">
             <div [attr.data-cy]="'mempool-block-' + i + '-fees'" class="fees">
               ~{{ projectedBlock.medianFee | number:feeRounding }} <span i18n="shared.sat-vbyte|uSTX/vB">uSTX/B</span>

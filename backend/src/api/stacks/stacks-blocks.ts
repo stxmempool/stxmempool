@@ -548,10 +548,8 @@ class StacksBlocks {
       }
     }
     // Check if it's indexed in db
-    console.log('Common.stacksBlocksSummariesIndexingEnabled()-->', Common.stacksBlocksSummariesIndexingEnabled());
     if (skipDBLookup === false && Common.stacksBlocksSummariesIndexingEnabled() === true) {
       const indexedSummary = await StacksBlocksSummariesRepository.$getByBlockId(hash);
-      console.log('indexedSummary-->', indexedSummary);
       if (indexedSummary !== undefined && indexedSummary?.transactions?.length) {
         return indexedSummary.transactions;
       }
@@ -583,7 +581,6 @@ class StacksBlocks {
     if (blockByHeight) {
       startFromHash = blockByHeight.id;
     } else if (!Common.indexingEnabled()) {
-      // startFromHash = await bitcoinApi.$getBlockHash(currentHeight);
       const result = await stacksApi.$getBlockByHeight(currentHeight);
       startFromHash = result.hash;
     }

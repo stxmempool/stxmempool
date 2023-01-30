@@ -145,7 +145,6 @@ export default class TxView implements StacksTransactionStripped {
   // Temporarily override the tx color
   // returns minimum transition end time
   setHover(hoverOn: boolean, color: Color | void = defaultHoverColor): number {
-    console.log(this.vsize);
     if (hoverOn) {
       this.hover = true;
       this.hoverColor = color;

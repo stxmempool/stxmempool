@@ -1,14 +1,6 @@
 <div class="container-xl">
 
   <div class="title-block">
-    <div *ngIf="rbfTransaction" class="alert alert-mempool" role="alert">
-      <span i18n="transaction.rbf.replacement|RBF replacement">This transaction has been replaced by:</span>
-      <a class="alert-link" [routerLink]="['/tx/' | relativeUrl, rbfTransaction.txid]">
-        <span class="d-inline d-lg-none">{{ rbfTransaction.txid | shortenString : 24 }}</span>
-        <span class="d-none d-lg-inline">{{ rbfTransaction.txid }}</span>
-      </a>
-    </div>
-
     <ng-container *ngIf="!rbfTransaction || rbfTransaction?.size">
       <h1 i18n="shared.transaction">Transaction</h1>
 
@@ -21,16 +13,16 @@
       </span>
 
       <div class="container-buttons">
-        <!-- <ng-template [ngIf]="tx?.status?.confirmed">
+        <ng-template *ngIf="tx?.tx_status === 'success' || tx?.tx_status === 'abort_by_response' || tx?.tx_status === 'abort_by_post_condition'">
           <button *ngIf="latestBlock" type="button" class="btn btn-sm btn-success">
-            <ng-container *ngTemplateOutlet="latestBlock.height - tx.status.block_height + 1 == 1 ? confirmationSingular : confirmationPlural; context: {$implicit: latestBlock.height - tx.status.block_height + 1}"></ng-container>
+            <ng-container *ngTemplateOutlet="latestBlock.height - tx.block_height + 1 == 1 ? confirmationSingular : confirmationPlural; context: {$implicit: latestBlock.height - tx.block_height + 1}"></ng-container>
             <ng-template #confirmationSingular let-i i18n="shared.confirmation-count.singular|Transaction singular confirmation count">{{ i }} confirmation</ng-template>
             <ng-template #confirmationPlural let-i i18n="shared.confirmation-count.plural|Transaction plural confirmation count">{{ i }} confirmations</ng-template>
           </button>
-        </ng-template> -->
-        <!-- <ng-template [ngIf]="tx && !tx?.status.confirmed">
+        </ng-template>
+        <ng-template [ngIf]="tx && tx.tx_status !== 'success' && tx.tx_status !== 'abort_by_response' && tx.tx_status !== 'abort_by_post_condition'">
           <button type="button" class="btn btn-sm btn-danger" i18n="transaction.unconfirmed|Transaction unconfirmed state">Unconfirmed</button>
-        </ng-template> -->
+        </ng-template>
       </div>
     </ng-container>
   </div>
@@ -58,8 +50,6 @@
           </tr>
           <tr>
             <td>Deployed by</td>
-            <!-- Make this a link to address endpoint -->
-            <!-- <td>{{ tx.sender_address | shortenString: 16}}</td> -->
             <td><a class="tx-link" [routerLink]="[('/address/' + tx.sender_address) | relativeUrl]">
               {{ tx.sender_address | shortenString: 12 }}
             </a></td>
@@ -72,8 +62,6 @@
           </tr>
           <tr>
             <td>Sender address</td>
-            <!-- Make this a link to address endpoint -->
-            <!-- <td>{{ tx.sender_address | shortenString: 16}}</td> -->
             <td><a class="tx-link" [routerLink]="[('/address/' + tx.sender_address) | relativeUrl]">
               {{ tx.sender_address | shortenString: 12 }}
             </a></td>
@@ -94,7 +82,6 @@
           </tr>
           <tr>
             <td>Deployed by</td>
-            <!-- Make this a link to address endpoint -->
             <td><a class="tx-link" [routerLink]="[('/address/' + tx.sender_address) | relativeUrl]">
               {{ tx.sender_address | shortenString: 12 }}
             </a></td>
@@ -111,16 +98,12 @@
           </tr>
           <tr>
             <td>Sender</td>
-            <!-- Make this a link to address endpoint -->
-            <!-- <td>{{ tx.sender_address | shortenString: 16}}</td> -->
             <td><a class="tx-link" [routerLink]="[('/address/' + tx.sender_address) | relativeUrl]">
               {{ tx.sender_address | shortenString: 12 }}
             </a></td>
           </tr>
           <tr>
             <td>Recipient</td>
-            <!-- Make this a link to address endpoint -->
-            <!-- <td>{{ tx.token_transfer.recipient_address | shortenString: 16}}</td> -->
             <td><a class="tx-link" [routerLink]="[('/address/' + tx.token_transfer.recipient_address) | relativeUrl]">
               {{ tx.token_transfer.recipient_address | shortenString: 12 }}
             </a></td>
@@ -141,8 +124,6 @@
           </tr>
           <tr>
             <td>Sender</td>
-            <!-- Make this a link to address endpoint -->
-            <!-- <td>{{ tx.sender_address | shortenString: 16}}</td> -->
             <td><a class="tx-link" [routerLink]="[('/address/' + tx.sender_address) | relativeUrl]">
               {{ tx.sender_address | shortenString: 12 }}
             </a></td>
@@ -156,10 +137,12 @@
             <td>{{ tx.poison_microblock.microblock_header_2 | shortenString:16 }}</td>
           </tr>
         </ng-container>
-        <tr>
-          <td i18n="block.timestamp">Nonce</td>
-          <td>{{tx.nonce}}</td>
-        </tr>
+        <ng-container *ngIf="tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition'">
+          <tr>
+            <td i18n="block.timestamp">Nonce</td>
+            <td>{{tx.nonce}}</td>
+          </tr>
+        </ng-container>
       </tbody>
     </table>
   </ng-template>
@@ -172,199 +155,6 @@
         <div class="row">
           <div class="col-sm">
             <ng-container *ngTemplateOutlet="detailsTemplate"></ng-container>
-            <!--<table class="table table-borderless table-striped">
-              <tbody [ngSwitch]="true">
-                <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
-                  <tr>
-                    <td>Transaction type</td>
-                    <td>Contract Call</td>
-                  </tr>
-                  <tr>
-                    <td>Status</td>
-                    <td>{{ convertTxType(tx.tx_status) | titlecase }}</td>
-                  </tr>
-                  <tr>
-                    <td>Contract name</td>
-                    <td>{{ parseContractName(tx.contract_call?.contract_id )}}</td>
-                  </tr>
-                  <tr>
-                    <td>Function name</td>
-                    <td>{{ tx.contract_call?.function_name }}</td>
-                  </tr>
-                  <tr>
-                    <td>Deployed by</td>
-                    <!-- Make this a link to address endpoint
-                    <td>{{ tx.sender_address | shortenString: 16}}</td>
-                  </tr>
-                </ng-container>
-                <ng-container *ngSwitchCase="tx.tx_type === 'coinbase'">
-                  <tr>
-                    <td>Transaction type</td>
-                    <td>Coinbase</td>
-                  </tr>
-                  <tr>
-                    <td>Sender address</td>
-                    <!-- Make this a link to address endpoint 
-                    <td>{{ tx.sender_address | shortenString: 16}}</td>
-                  </tr>
-                </ng-container>
-                <ng-container *ngSwitchCase="tx.tx_type === 'smart_contract'">
-                  <tr>
-                    <td>Transaction type</td>
-                    <td>Smart Contract</td>
-                  </tr>
-                  <tr>
-                    <td>Status</td>
-                    <td>{{ convertTxType(tx.tx_status) | titlecase }}</td>
-                  </tr>
-                  <tr>
-                    <td>Contract name</td>
-                    <td>{{ parseContractName(tx.smart_contract?.contract_id )}}</td>
-                  </tr>
-                  <tr>
-                    <td>Deployed by</td>
-                    <!-- Make this a link to address endpoint 
-                    <td>{{ tx.sender_address | shortenString: 16}}</td>
-                  </tr>
-                </ng-container>
-                <ng-container *ngSwitchCase="tx.tx_type === 'token_transfer'">
-                  <tr>
-                    <td>Transaction type</td>
-                    <td>Token Transfer</td>
-                  </tr>
-                  <tr>
-                    <td>Status</td>
-                    <td>{{ convertTxType(tx.tx_status) | titlecase }}</td>
-                  </tr>
-                  <tr>
-                    <td>Sender</td>
-                    <!-- Make this a link to address endpoint 
-                    <td>{{ tx.sender_address | shortenString: 16}}</td>
-                  </tr>
-                  <tr>
-                    <td>Recipient</td>
-                    <!-- Make this a link to address endpoint 
-                    <td>{{ tx.token_transfer.recipient_address | shortenString: 16}}</td>
-                  </tr>
-                  <tr>
-                    <td>Amount</td>
-                    <td>{{ tx.token_transfer.amount | number }} <span class="symbol" i18n="shared.sat|sat">uSTX</span> <span class="fiat"><app-stacks-fiat [value]="tx.token_transfer.amount"></app-stacks-fiat></span></td>
-                  </tr>
-                </ng-container>
-                <ng-container *ngSwitchCase="tx.tx_type === 'poison_microblock'">
-                  <tr>
-                    <td>Transaction type</td>
-                    <td>Poison Microblock</td>
-                  </tr>
-                  <tr>
-                    <td>Status</td>
-                    <td>{{ convertTxType(tx.tx_status) | titlecase }}</td>
-                  </tr>
-                  <tr>
-                    <td>Sender</td>
-                    <!-- Make this a link to address endpoint 
-                    <td>{{ tx.sender_address | shortenString: 16}}</td>
-                  </tr>
-                  <tr>
-                    <td>Microblock header 1</td>
-                    <td>{{ tx.poison_microblock.microblock_header_1 | shortenString:16 }}</td>
-                  </tr>
-                  <tr>
-                    <td>Microblock header 2</td>
-                    <td>{{ tx.poison_microblock.microblock_header_2 | shortenString:16 }}</td>
-                  </tr>
-                </ng-container> -->
-                <!-- <tr>
-                  <td>Block height</td>
-                  <td>{{ tx.block_height }}</td>
-                </tr>
-                <tr>
-                  <td>Block hash</td>
-                  <td>{{ tx.block_hash | shortenString:16 }}</td>
-                </tr>
-                <tr>
-                  <td i18n="block.timestamp">Timestamp</td>
-                  <td>
-                    &lrm;{{ tx.burn_block_time * 1000 | date:'yyyy-MM-dd HH:mm' }}
-                    <div class="lg-inline">
-                      <i class="symbol">(<app-time-since [time]="tx.burn_block_time" [fastRender]="true"></app-time-since>)</i>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td i18n="block.timestamp">Nonce</td>
-                  <td>{{tx.nonce}}</td>
-                </tr>
-              </tbody> -->
-              <!-- <tbody>
-                <tr [ngSwitch]="true">
-                  <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
-                    <td>Transaction type</td>
-                    <td>Contract Call</td>
-                  </ng-container>
-                  <ng-container *ngSwitchCase="tx.tx_type === 'coinbase'">
-                    <td>Transaction type</td>
-                    <td>Coinbase</td>
-                  </ng-container>
-                  <ng-container *ngSwitchDefault>{{tx.tx_type}}</ng-container>
-                </tr>
-                <tr [ngSwitch]="true">
-                  <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
-                    <td>Contract name</td>
-                    <td>{{ parseContractName(tx.contract_call?.contract_id) }}</td>
-                  </ng-container>
-                  <ng-container *ngSwitchCase="tx.tx_type === 'coinbase'">
-                  </ng-container>
-                  <ng-container *ngSwitchDefault>{{tx.tx_type}}</ng-container>
-                </tr>
-                <tr [ngSwitch]="true">
-                  <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
-                    <td>Function name</td>
-                    <td>{{ tx.contract_call?.function_name }}</td>
-                  </ng-container>
-                  <ng-container *ngSwitchDefault>{{tx.tx_type}}</ng-container>
-                </tr>
-                <tr [ngSwitch]="true">
-                  <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
-                    <td>Deployed by</td>
-                    Make this a link to address endpoint
-                    <td>{{ tx.sender_address | shortenString: 16}}</td>
-                  </ng-container>
-                  <ng-container *ngSwitchDefault>{{tx.tx_type}}</ng-container>
-                </tr>
-                <tr>
-                  <td i18n="block.timestamp">Timestamp</td>
-                  <td>
-                    &lrm;{{ tx.burn_block_time * 1000 | date:'yyyy-MM-dd HH:mm' }}
-                    <div class="lg-inline">
-                      <i class="symbol">(<app-time-since [time]="tx.burn_block_time" [fastRender]="true"></app-time-since>)</i>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td i18n="block.timestamp">Nonce</td>
-                  <td>{{tx.nonce}}</td>
-                </tr>
-                <tr *ngIf="latestBlock && tx.block_height <= latestBlock.height - 8">
-                  <td class="td-width" i18n="transaction.included-in-block|Transaction included in block">Included in block</td>
-                  <td>
-                    <a [routerLink]="['/block/' | relativeUrl, tx.status.block_hash]" [state]="{ data: { blockHeight: tx.block_height } }">{{ tx.block_height }}</a>
-                  </td>
-                </tr>
-                <ng-template [ngIf]="transactionTime > 0">
-                  <tr>
-                    <td i18n="transaction.confirmed|Transaction Confirmed state">Confirmed</td>
-                    <td><app-time-span [time]="tx.burn_block_time - transactionTime" [fastRender]="true"></app-time-span></td>
-                  </tr>
-                </ng-template>
-                <tr *ngIf="network !== 'liquid' && network !== 'liquidtestnet'">
-                  <td class="td-width" i18n="transaction.features|Transaction features">Features</td>
-                  <td>
-                    <app-tx-features [tx]="tx"></app-tx-features>
-                  </td>
-                </tr>
-              </tbody>
-            </table> -->
           </div>
           <div class="col-sm">
             <ng-container *ngTemplateOutlet="feeTable"></ng-container>
@@ -424,75 +214,12 @@
               </tbody>
             </table>
             <ng-container *ngTemplateOutlet="feeTable"></ng-container>
-            <!-- <ng-container *ngTemplateOutlet="unconfirmedTemplate"></ng-container> -->
           </div>
         </div>
       </div>
     </ng-template>
 
-    <!-- <ng-template [ngIf]="showCpfpDetails">
-      <br>
-
-      <h2 class="text-left">CPFP <fa-icon [icon]="['fas', 'info-circle']" [fixedWidth]="true" size="xs"></fa-icon></h2>
-      <div class="box">
-        <table class="table table-borderless table-striped">
-          <thead>
-            <tr>
-              <th i18n="transactions-list.vout.scriptpubkey-type">Type</th>
-              <th i18n="dashboard.latest-transactions.txid">TXID</th>
-              <th class="d-none d-lg-table-cell" i18n="transaction.vsize|Transaction Virtual Size">Virtual size</th>
-              <th i18n="transaction.fee-rate|Transaction fee rate">Fee rate</th>
-              <th class="d-none d-lg-table-cell"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <ng-template [ngIf]="cpfpInfo?.descendants?.length">
-              <tr *ngFor="let cpfpTx of cpfpInfo.descendants">
-                <td><span class="badge badge-primary" i18n="transaction.descendant|Descendant">Descendant</span></td>
-                  <td><a [routerLink]="['/tx' | relativeUrl, cpfpTx.txid]">
-                    <span class="d-inline d-lg-none">{{ cpfpTx.txid | shortenString : 8 }}</span>
-                    <span class="d-none d-lg-inline">{{ cpfpTx.txid }}</span>
-                  </a>
-                </td>
-                <td class="d-none d-lg-table-cell" [innerHTML]="cpfpTx.weight / 4 | vbytes: 2"></td>
-                <td>{{ cpfpTx.fee / (cpfpTx.weight / 4) | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">sat/vB</span></td>
-                <td class="d-none d-lg-table-cell"><fa-icon  *ngIf="roundToOneDecimal(cpfpTx) > roundToOneDecimal(tx)"  class="arrow-green" [icon]="['fas', 'angle-double-up']" [fixedWidth]="true"></fa-icon></td>
-              </tr>
-            </ng-template>
-            <ng-template [ngIf]="cpfpInfo?.bestDescendant">
-              <tr>
-                <td><span class="badge badge-success" i18n="transaction.descendant|Descendant">Descendant</span></td>
-                <td>
-                  <a [routerLink]="['/tx' | relativeUrl, cpfpInfo.bestDescendant.txid]">
-                    <span class="d-inline d-lg-none">{{ cpfpInfo.bestDescendant.txid | shortenString : 8 }}</span>
-                    <span class="d-none d-lg-inline">{{ cpfpInfo.bestDescendant.txid }}</span>
-                  </a>
-                </td>
-                <td class="d-none d-lg-table-cell" [innerHTML]="cpfpInfo.bestDescendant.weight / 4 | vbytes: 2"></td>
-                <td>{{ cpfpInfo.bestDescendant.fee / (cpfpInfo.bestDescendant.weight / 4) | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">sat/vB</span></td>
-                <td class="d-none d-lg-table-cell"><fa-icon class="arrow-green" [icon]="['fas', 'angle-double-up']" [fixedWidth]="true"></fa-icon></td>
-              </tr>
-            </ng-template>
-            <ng-template [ngIf]="cpfpInfo?.ancestors?.length">
-              <tr *ngFor="let cpfpTx of cpfpInfo.ancestors">
-                <td><span class="badge badge-primary" i18n="transaction.ancestor|Transaction Ancestor">Ancestor</span></td>
-                  <td><a [routerLink]="['/tx' | relativeUrl, cpfpTx.txid]">
-                    <span class="d-inline d-lg-none">{{ cpfpTx.txid | shortenString : 8 }}</span>
-                    <span class="d-none d-lg-inline">{{ cpfpTx.txid }}</span>
-                  </a>
-                </td>
-                <td class="d-none d-lg-table-cell" [innerHTML]="cpfpTx.weight / 4 | vbytes: 2"></td>
-                <td>{{ cpfpTx.fee / (cpfpTx.weight / 4) | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">sat/vB</span></td>
-                <td class="d-none d-lg-table-cell"><fa-icon *ngIf="roundToOneDecimal(cpfpTx) < roundToOneDecimal(tx)" class="arrow-red" [icon]="['fas', 'angle-double-down']" [fixedWidth]="true"></fa-icon></td>
-              </tr>
-            </ng-template>
-          </tbody>
-        </table>
-      </div>
-    </ng-template> -->
-
     <br>
-    <!-- <ng-container *ngIf="flowEnabled; else flowPlaceholder"> -->
     <ng-container *ngIf="(this.tx.tx_status === 'success' || this.tx.tx_status === 'abort_by_response' || this.tx.tx_status === 'abort_by_post_condition') && (this.tx.tx_type !== 'coinbase' && this.tx.tx_type !== 'token_transfer'); else flowPlaceholder">
       <div class="title float-left">
         <h2 id="flow" i18n="transaction.flow|Transaction flow">Execution Costs</h2>
@@ -511,105 +238,12 @@
         </div>
       </div>
     </ng-container>
-    <!-- <ng-container *ngIf="flowEnabled; else flowPlaceholder">
-      <div class="title float-left">
-        <h2 id="flow" i18n="transaction.flow|Transaction flow">Flow</h2>
-      </div>
-
-      <button type="button" class="btn btn-outline-info flow-toggle btn-sm float-right" (click)="toggleGraph()" i18n="hide-diagram">Hide diagram</button>
-
-      <div class="clearfix"></div>
-
-      <div class="box">
-        <div class="graph-container" #graphContainer>
-          <tx-bowtie-graph
-            [tx]="tx"
-            [width]="graphWidth"
-            [height]="graphHeight"
-            [lineLimit]="inOutLimit"
-            [maxStrands]="graphExpanded ? maxInOut : 24"
-            [network]="network"
-            [tooltip]="true"
-            [connectors]="true"
-            [inputIndex]="inputIndex" [outputIndex]="outputIndex"
-          >
-          </tx-bowtie-graph>
-        </div>
-        <div class="toggle-wrapper" *ngIf="maxInOut > 24">
-          <button class="btn btn-sm btn-primary graph-toggle" (click)="expandGraph();" *ngIf="!graphExpanded; else collapseBtn"><span i18n="show-more">Show more</span></button>
-          <ng-template #collapseBtn>
-            <button class="btn btn-sm btn-primary graph-toggle" (click)="collapseGraph();"><span i18n="show-less">Show less</span></button>
-          </ng-template>
-        </div>
-      </div>
-
-      <br>
-    </ng-container> -->
     <ng-template #flowPlaceholder>
       <div class="box hidden">
         <div class="graph-container" #graphContainer>
         </div>
       </div>
     </ng-template>
-
-    <!-- <div class="subtitle-block">
-      <div class="title">
-        <h2 i18n="transaction.inputs-and-outputs|Transaction inputs and outputs">Inputs & Outputs</h2>
-      </div>
-
-      <div class="title-buttons">
-        <button *ngIf="!flowEnabled" type="button" class="btn btn-outline-info flow-toggle btn-sm" (click)="toggleGraph()" i18n="show-diagram">Show diagram</button>
-        <button type="button" class="btn btn-outline-info btn-sm" (click)="txList.toggleDetails()" i18n="transaction.details|Transaction Details">Details</button>
-      </div>
-    </div> -->
-
-
-    <!-- <app-stacks-transactions-list #txList [transactions]="[tx]" [errorUnblinded]="errorUnblinded" [inputIndex]="inputIndex" [outputIndex]="outputIndex" [transactionPage]="true"></app-stacks-transactions-list> -->
-
-    <!-- <div class="title text-left">
-      <h2 i18n="transaction.details">Details</h2>
-    </div>
-    <div class="box">
-      <div class="row">
-        <div class="col-sm">
-          <table class="table table-borderless table-striped">
-            <tbody>
-              <tr>
-                <td i18n="block.size">Size</td>
-                <td [innerHTML]="'&lrm;' + (tx.size | bytes: 2)"></td>
-              </tr>
-              <tr>
-                <td i18n="transaction.vsize|Transaction Virtual Size">Virtual size</td>
-                <td [innerHTML]="'&lrm;' + (tx.weight / 4 | vbytes: 2)"></td>
-              </tr>
-              <tr>
-                <td i18n="block.weight">Weight</td>
-                <td [innerHTML]="'&lrm;' + (tx.weight | wuBytes: 2)"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="col-sm">
-          <table class="table table-borderless table-striped">
-            <tbody>
-              <tr>
-                <td i18n="transaction.version">Version</td>
-                <td [innerHTML]="'&lrm;' + (tx.version | number)"></td>
-              </tr>
-              <tr>
-                <td i18n="transaction.locktime">Locktime</td>
-                <td [innerHTML]="'&lrm;' + (tx.locktime | number)"></td>
-              </tr>
-              <tr>
-                <td i18n="transaction.hex">Transaction hex</td>
-                <td><a target="_blank" href="{{ network === '' ? '' : '/' + network }}/api/tx/{{ txId }}/hex"><fa-icon [icon]="['fas', 'external-link-alt']" [fixedWidth]="true"></fa-icon></a></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div> -->
-
   </ng-template>
 
   <ng-template [ngIf]="isLoadingTx && !error">
@@ -787,13 +421,15 @@
         <td i18n="transaction.fee-rate|Transaction fee rate">Fee rate</td>
         <td>
           {{ tx.feeRateAsNumber / tx.vsize | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">uSTX/B</span>
-          <!-- <ng-template [ngIf]="tx.tx_status === 'success'">
-            &nbsp;
-            <app-tx-fee-rating *ngIf="tx.fee && ((cpfpInfo && !cpfpInfo?.descendants?.length && !cpfpInfo?.bestDescendant && !cpfpInfo?.ancestors?.length) || !cpfpInfo)" [tx]="tx"></app-tx-fee-rating>
-          </ng-template> -->
         </td>
       </tr>
-      <ng-container *ngIf="tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_bt_post_condition'">
+      <ng-container *ngIf="tx.tx_status !== 'success' && tx.tx_status !== 'abort_by_response' && tx.tx_status !== 'abort_by_post_condition'">
+        <tr>
+          <td i18n="block.timestamp">Nonce</td>
+          <td>{{tx.nonce}}</td>
+        </tr>
+      </ng-container>
+      <ng-container *ngIf="tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition'">
         <tr>
           <td>Block height</td>
           <td>{{ tx.block_height }}</td>

@@ -247,35 +247,14 @@ class WebsocketHandler {
   getStacksInitData(_blocks?: StacksBlockExtended[]): GetStacksInitData {
 
     if (!_blocks) {
-      // _blocks = blocks.getBlocks().slice(-config.MEMPOOL.INITIAL_BLOCKS_AMOUNT);
       _blocks = stacksBlocks.getBlocks().slice(-2);
     }
-    // const mBlocks = stacksMempoolBlocks.getMempoolBlocks();
-    // const mProjectedBlock = stacksMempoolBlocks.getProjectedBlock();
-    // const mProjectedBlock = stacksMempoolBlocks.getProjectedBlockWithTransactions();
-    // const allMBlocks = mBlocks;
-    // allMBlocks.unshift(mProjectedBlock);
-    // return {
-    //   'mempoolInfo': memPool.getMempoolInfo(),
-    //   'vBytesPerSecond': memPool.getVBytesPerSecond(),
-    //   'blocks': _blocks,
-    //   'conversions': fiatConversion.getConversionRates(),
-    //   'mempool-blocks': mempoolBlocks.getMempoolBlocks(),
-    //   'transactions': memPool.getLatestTransactions(),
-    //   'backendInfo': backendInfo.getBackendInfo(),
-    //   'loadingIndicators': loadingIndicators.getLoadingIndicators(),
-    //   'da': difficultyAdjustment.getDifficultyAdjustment(),
-    //   'fees': feeApi.getRecommendedFee(),
-    //   ...this.extraInitProperties
-    // };
     return {
       'mempoolInfo': stacksMempool.getMempoolInfo(),
       'vBytesPerSecond': stacksMempool.getVBytesPerSecond(),
       'blocks': _blocks,
       'conversions': fiatConversion.getConversionRates(),
       'mempool-blocks': stacksMempoolBlocks.getMempoolBlocks(),
-      // 'mempool-blocks': stacksMempoolBlocks.getProjectedBlock(),
-      // 'mempool-blocks': allMBlocks,
       'transactions': stacksMempool.getLatestTransactions(),
       'backendInfo': backendInfo.getBackendInfo(),
       'loadingIndicators': loadingIndicators.getLoadingIndicators(),

@@ -157,12 +157,6 @@ class StacksMempool {
               });
             }
             hasChange = true;
-            // Fetched Transactions
-            // if (diff > 0) {
-            //   logger.debug('Fetched Stacks transaction ' + txCount + ' / ' + diff);
-            // } else {
-            //   logger.debug('Fetched Stacks transaction ' + txCount);
-            // }
             newTransactions.push(transaction);
           } catch (e) {
             logger.debug('Error finding transaction in Stacks mempool: ' + (e instanceof Error ? e.message : e));
@@ -226,11 +220,7 @@ class StacksMempool {
     }
     const end = new Date().getTime();
     const time = end - start;
-    // logger.debug(`New Stacks mempool size: ${Object.keys(this.mempoolCache).length} Change: ${diff}`);
-    // logger.debug('Stacks Mempool updated in ' + time / 1000 + ' seconds');
     logger.debug(`Mempool updated in ${time / 1000} seconds. New size: ${Object.keys(this.mempoolCache).length} (${diff > 0 ? '+' + diff : diff})`);
-    // logger.debug(`Mempool updated in ${time / 1000} seconds. New size: ${cacheSize} (${diff > 0 ? '+' + diff : diff})`);
-
   }
 
   private updateTxPerSecond(): void {

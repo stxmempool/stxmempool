@@ -172,10 +172,11 @@ export class StacksSearchFormComponent implements OnInit {
                 }
               },
               error: (e) => {
-                console.log(e);
                 this.isBlockHash = false;
               },
-              complete: () => console.log('done'),
+              complete: () => {
+                console.log('done');
+              },
             });
           const matchesBlockHeight = this.regexBlockheight.test(searchText);
           const matchesTxId = this.regexTransaction.test(searchText) && this.isBlockHash === false;

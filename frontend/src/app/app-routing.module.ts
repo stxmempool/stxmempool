@@ -365,7 +365,6 @@ if (browserWindowEnv && browserWindowEnv.BASE_MODULE === 'bisq') {
     loadChildren: () => import('./bisq/bisq.module').then(m => m.BisqModule)
   }];
 }
-console.log('browserWindowEnv-->', browserWindowEnv, 'browserWindowEnv.BASE_MODULE-->', browserWindowEnv.BASE_MODULE);
 if (browserWindowEnv && browserWindowEnv.BASE_MODULE === 'stacks') {
   routes = [
     {

@@ -92,7 +92,6 @@ export class StacksTransactionsListComponent implements OnInit, OnChanges {
     if (scrollHeight > 0){
       const percentageScrolled = scrollTop * 100 / scrollHeight;
       if (percentageScrolled > 70){
-        console.log(percentageScrolled);
         this.loadMore.emit();
       }
     }

@@ -185,50 +185,51 @@ export class StacksTransactionComponent implements OnInit, AfterViewInit, OnDest
           return of(tx);
         })
       )
-      .subscribe((tx: Transaction) => {
+      .subscribe((tx: any) => {
       // .subscribe((tx: StacksTransactionExtended) => {
 
           if (!tx) {
             return;
           }
-
           this.tx = tx;
-          if (tx.fee === undefined) {
+          if (tx.feeRateAsNumber === undefined) {
             this.tx.fee = 0;
           }
-          this.tx.feePerVsize = tx.fee / (tx.weight / 4);
+          // this.tx.feePerVsize = tx.fee / (tx.weight / 4);
+          this.tx.feePerVsize = tx.feeRateAsNumber / tx.vsize;
+
           this.isLoadingTx = false;
           this.error = undefined;
           this.waitingForTransaction = false;
           this.setMempoolBlocksSubscription();
-          this.websocketService.startTrackTransaction(tx.txid);
+          this.websocketService.startTrackTransaction(tx.tx_id);
           this.graphExpanded = false;
           this.setupGraph();
 
-          if (!tx.status.confirmed && tx.firstSeen) {
-            this.transactionTime = tx.firstSeen;
-          } else {
-            this.getTransactionTime();
-          }
+          // if (!tx.status.confirmed && tx.firstSeen) {
+          //   this.transactionTime = tx.firstSeen;
+          // } else {
+          //   this.getTransactionTime();
+          // }
 
-          if (this.tx.status.confirmed) {
-            this.stateService.markBlock$.next({
-              blockHeight: tx.status.block_height,
-            });
-            this.fetchCpfp$.next(this.tx.txid);
-          } else {
-            if (tx.cpfpChecked) {
-              this.stateService.markBlock$.next({
-                txFeePerVSize: tx.effectiveFeePerVsize,
-              });
-              this.cpfpInfo = {
-                ancestors: tx.ancestors,
-                bestDescendant: tx.bestDescendant,
-              };
-            } else {
-              this.fetchCpfp$.next(this.tx.txid);
-            }
-          }
+          // if (this.tx.confirmed) {
+          //   this.stateService.markBlock$.next({
+          //     blockHeight: tx.status.block_height,
+          //   });
+          //   this.fetchCpfp$.next(this.tx.txid);
+          // } else {
+          //   if (tx.cpfpChecked) {
+          //     this.stateService.markBlock$.next({
+          //       txFeePerVSize: tx.effectiveFeePerVsize,
+          //     });
+          //     this.cpfpInfo = {
+          //       ancestors: tx.ancestors,
+          //       bestDescendant: tx.bestDescendant,
+          //     };
+          //   } else {
+          //     this.fetchCpfp$.next(this.tx.txid);
+          //   }
+          // }
           setTimeout(() => { this.applyFragment(); }, 0);
         },
         (error) => {

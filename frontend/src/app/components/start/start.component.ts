@@ -26,7 +26,6 @@ export class StartComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    console.log(this.stateService.network);
     this.timeLtrSubscription = this.stateService.timeLtr.subscribe((ltr) => {
       this.timeLtr = !!ltr;
     });

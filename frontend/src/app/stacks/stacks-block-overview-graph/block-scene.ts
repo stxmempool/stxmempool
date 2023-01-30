@@ -411,7 +411,6 @@ export default class BlockScene {
   // calculates and returns the size of the tx in multiples of the grid size
   private txSize(tx: TxView): number {
     const scale = Math.max(1, Math.round(Math.sqrt(tx.vsize / this.vbytesPerUnit)));
-    console.log('scale-->', scale);
     return Math.min(this.gridWidth, Math.max(1, scale)); // bound between 1 and the max displayable size (just in case!)
   }
 

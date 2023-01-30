@@ -234,7 +234,9 @@ export class StacksMempoolBlocksComponent implements OnInit, OnDestroy {
   }
 
   getStyleForMempoolBlock(mempoolBlock: MempoolBlock, index: number) {
-    const emptyBackgroundSpacePercentage = Math.max(100 - mempoolBlock.blockVSize / this.stateService.blockVSize * 100, 0);
+    // const emptyBackgroundSpacePercentage = Math.max(100 - mempoolBlock.blockVSize / this.stateService.blockVSize * 100, 0);
+    const emptyBackgroundSpacePercentage = Math.max(100 - mempoolBlock.blockSize / 2000000 * 100, 0);
+
     const usedBlockSpace = 100 - emptyBackgroundSpacePercentage;
     const backgroundGradients = [`repeating-linear-gradient(to right,  #554b45, #554b45 ${emptyBackgroundSpacePercentage}%`];
     const gradientColors = [];

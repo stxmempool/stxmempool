@@ -4,11 +4,11 @@ Stxmempool is an adaptation of the The Mempool Open Source Project™. Stxmempoo
 
 It is an open-source project developed and operated for the benefit of the Bitcoin and Stacks community, with a focus on the emerging transaction fee market.
 
-![mempool](https://mempool.space/resources/screenshots/stacks-v1.0-dashboard.png)
+![mempool](https://mempool.space/resources/screenshots/stacks-v1.1-dashboard.png)
 
 # Installation Methods
 
-Currently stxmempool supports a local installation with limited production support. Stxmempool is primarily focused on development. Later we wish to provide more support to non-developers.
+Currently Stxmempool supports a local installation with limited production support. Stxmempool is primarily focused on development. Later we wish to provide more support to non-developers.
 
 This codebase does not support being able to switch between networks like The Mempool Open Source Project™. The following guide will help you setup a enviroment similar to [stxmempool.space](https://stxmempool.space/).
 
@@ -62,7 +62,7 @@ MariaDB [(none)]> grant all privileges on mempool.* to 'mempool'@'%' identified 
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-### 5. Prepare Mempool Backend
+### 4. Prepare Mempool Backend
 
 #### Build
 
@@ -86,9 +86,9 @@ cp mempool-config.sample.json mempool-config.json
 
 Edit `mempool-config.json` as needed.
 
-Set `INDEXING_BLOCKS_AMOUNT` in either `MEMPOOL` or `STACKS` to 0 to disable indexing or -1 to index all blocks.
+Set `INDEXING_BLOCKS_AMOUNT` in either `MEMPOOL` or `STACKS` to `0` to disable indexing or `-1` to index all blocks.
 
-Here is a example of the `STACKS` block that has block indexing enabled up to 10 blocks, block summaries indexing enabled, and does not have a dedicated local [stacks-blockchain-api](https://github.com/hirosystems/stacks-blockchain-api):
+Here is a example of the `STACKS` block that has block indexing enabled for up to 10 blocks off of the current chain tip, block summaries indexing enabled, and does not have a dedicated local [stacks-blockchain-api](https://github.com/hirosystems/stacks-blockchain-api):
 ```
   "STACKS": {
     "ENABLED": true,
@@ -119,7 +119,6 @@ Run the Stxmempool backend:
 
 ```
 npm run start
-
 ```
 You can also set env var `MEMPOOL_CONFIG_FILE` to specify a custom config file location:
 ```
@@ -131,7 +130,7 @@ For development purposes use the following command after making changes:
 npm run build && npm run start
 ```
 
-Everytime you make changes and rebuild the backend, it will requery the past number of blocks set in the mempool-config file under `"INITIAL_BLOCKS_AMOUNT": 8` in `STACKS`, and resync the mempool. Setting this to 1 or 2 can be very helpful for a faster restart.
+Everytime you make changes and rebuild the backend, it will requery the past number of blocks set in the mempool-config file under `"INITIAL_BLOCKS_AMOUNT": 8` in `STACKS`, and resync the mempool. Setting this to `1` or `2` can be very helpful for a faster restart.
 
 ## Frontend
 
@@ -143,7 +142,7 @@ Get the latest Stxmempool code:
 git clone https://github.com/stxmempool/stxmempool
 cd mempool
 ```
-### 3. Configure the Frontend
+### 2. Configure the Frontend
 
 Copy frontend config
 

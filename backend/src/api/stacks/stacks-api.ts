@@ -28,7 +28,7 @@ class StacksApi {
 
     return data;
   }
-  // used to grab the tx size
+
   public async $getTransactionSize(txId: string): Promise<number> {
     const { data } = await axios.get<{ raw_tx: string }>(`${this.apiUrl}/extended/v1/tx/${txId}/raw`);
 

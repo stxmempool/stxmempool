@@ -336,7 +336,6 @@ export class StacksBlockComponent implements OnInit, OnDestroy {
         }
       }
     });
-    console.log('is auditEnabled-->', this.auditEnabled, 'is indexingAvailable-->', this.indexingAvailable, 'is AuditDataMissing-->', this.auditDataMissing);
   }
 
   ngAfterViewInit(): void {

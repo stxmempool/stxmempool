@@ -147,7 +147,6 @@ export class StateService {
     // @ts-ignore
     const browserWindowEnv = browserWindow.__env || {};
     this.env = Object.assign(defaultEnv, browserWindowEnv);
-    console.log('this.env-->', this.env);
 
     if (defaultEnv.BASE_MODULE !== 'mempool') {
       this.env.MINING_DASHBOARD = false;
@@ -205,7 +204,6 @@ export class StateService {
 
   setNetworkBasedonUrl(url: string) {
     if (this.env.BASE_MODULE !== 'mempool' && this.env.BASE_MODULE !== 'liquid') {
-      console.log('returning');
 
       return;
     }
