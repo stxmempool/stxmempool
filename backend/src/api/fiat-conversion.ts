@@ -6,6 +6,7 @@ import { IConversionRates } from '../mempool.interfaces';
 import config from '../config';
 import backendInfo from './backend-info';
 import { SocksProxyAgent } from 'socks-proxy-agent';
+import stacksApi from './stacks/stacks-api';
 
 class FiatConversion {
   private debasingFiatCurrencies = ['AED', 'AUD', 'BDT', 'BHD', 'BMD', 'BRL', 'CAD', 'CHF', 'CLP',
@@ -43,78 +44,84 @@ class FiatConversion {
   }
 
   private async updateCurrency(): Promise<void> {
-    type axiosOptions = {
-      headers: {
-        'User-Agent': string
+    if (config.STACKS.ENABLED) {
+      const conversionRate = await stacksApi.$getStacksPrice();
+      // this.conversionRates['USD'] = conversionRate;
+      this.conversionRates['USD'] = Math.round(100 * conversionRate) / 100;
+    } else {
+      type axiosOptions = {
+        headers: {
+          'User-Agent': string
+        };
+        timeout: number;
+        httpAgent?: http.Agent;
+        httpsAgent?: https.Agent;
+      }
+      const setDelay = (secs: number = 1): Promise<void> => new Promise(resolve => setTimeout(() => resolve(), secs * 1000));
+      const fiatConversionUrl = (config.SOCKS5PROXY.ENABLED === true) && (config.SOCKS5PROXY.USE_ONION === true) ? config.PRICE_DATA_SERVER.TOR_URL : config.PRICE_DATA_SERVER.CLEARNET_URL;
+      const isHTTP = (new URL(fiatConversionUrl).protocol.split(':')[0] === 'http') ? true : false;
+      const axiosOptions: axiosOptions = {
+        headers: {
+          'User-Agent': (config.MEMPOOL.USER_AGENT === 'mempool') ? `mempool/v${backendInfo.getBackendInfo().version}` : `${config.MEMPOOL.USER_AGENT}`
+        },
+        timeout: config.SOCKS5PROXY.ENABLED ? 30000 : 10000
       };
-      timeout: number;
-      httpAgent?: http.Agent;
-      httpsAgent?: https.Agent;
-    }
-    const setDelay = (secs: number = 1): Promise<void> => new Promise(resolve => setTimeout(() => resolve(), secs * 1000));
-    const fiatConversionUrl = (config.SOCKS5PROXY.ENABLED === true) && (config.SOCKS5PROXY.USE_ONION === true) ? config.PRICE_DATA_SERVER.TOR_URL : config.PRICE_DATA_SERVER.CLEARNET_URL;
-    const isHTTP = (new URL(fiatConversionUrl).protocol.split(':')[0] === 'http') ? true : false;
-    const axiosOptions: axiosOptions = {
-      headers: {
-        'User-Agent': (config.MEMPOOL.USER_AGENT === 'mempool') ? `mempool/v${backendInfo.getBackendInfo().version}` : `${config.MEMPOOL.USER_AGENT}`
-      },
-      timeout: config.SOCKS5PROXY.ENABLED ? 30000 : 10000
-    };
 
-    let retry = 0;
+      let retry = 0;
 
-    while(retry < config.MEMPOOL.EXTERNAL_MAX_RETRY) {
-      try {
-        if (config.SOCKS5PROXY.ENABLED) {
-          let socksOptions: any = {
-            agentOptions: {
-              keepAlive: true,
-            },
-            hostname: config.SOCKS5PROXY.HOST,
-            port: config.SOCKS5PROXY.PORT
-          };
+      while(retry < config.MEMPOOL.EXTERNAL_MAX_RETRY) {
+        try {
+          if (config.SOCKS5PROXY.ENABLED) {
+            let socksOptions: any = {
+              agentOptions: {
+                keepAlive: true,
+              },
+              hostname: config.SOCKS5PROXY.HOST,
+              port: config.SOCKS5PROXY.PORT
+            };
 
-          if (config.SOCKS5PROXY.USERNAME && config.SOCKS5PROXY.PASSWORD) {
-            socksOptions.username = config.SOCKS5PROXY.USERNAME;
-            socksOptions.password = config.SOCKS5PROXY.PASSWORD;
-          } else {
-            // Retry with different tor circuits https://stackoverflow.com/a/64960234
-            socksOptions.username = `circuit${retry}`;
+            if (config.SOCKS5PROXY.USERNAME && config.SOCKS5PROXY.PASSWORD) {
+              socksOptions.username = config.SOCKS5PROXY.USERNAME;
+              socksOptions.password = config.SOCKS5PROXY.PASSWORD;
+            } else {
+              // Retry with different tor circuits https://stackoverflow.com/a/64960234
+              socksOptions.username = `circuit${retry}`;
+            }
+
+            // Handle proxy agent for onion addresses
+            if (isHTTP) {
+              axiosOptions.httpAgent = new SocksProxyAgent(socksOptions);
+            } else {
+              axiosOptions.httpsAgent = new SocksProxyAgent(socksOptions);
+            }
+          }
+          
+          logger.debug('Querying currency rates service...');
+
+          const response: AxiosResponse = await axios.get(`${fiatConversionUrl}`, axiosOptions);
+
+          if (response.statusText === 'error' || !response.data) {
+            throw new Error(`Could not fetch data from ${fiatConversionUrl}, Error: ${response.status}`);
           }
 
-          // Handle proxy agent for onion addresses
-          if (isHTTP) {
-            axiosOptions.httpAgent = new SocksProxyAgent(socksOptions);
-          } else {
-            axiosOptions.httpsAgent = new SocksProxyAgent(socksOptions);
+          for (const rate of response.data.data) {
+            if (this.debasingFiatCurrencies.includes(rate.currencyCode) && rate.provider === 'Bisq-Aggregate') {
+              this.conversionRates[rate.currencyCode] = Math.round(100 * rate.price) / 100;
+            }
           }
-        }
-        
-        logger.debug('Querying currency rates service...');
 
-        const response: AxiosResponse = await axios.get(`${fiatConversionUrl}`, axiosOptions);
+          this.ratesInitialized = true;
+          logger.debug(`USD Conversion Rate: ${this.conversionRates.USD}`);
 
-        if (response.statusText === 'error' || !response.data) {
-          throw new Error(`Could not fetch data from ${fiatConversionUrl}, Error: ${response.status}`);
-        }
-
-        for (const rate of response.data.data) {
-          if (this.debasingFiatCurrencies.includes(rate.currencyCode) && rate.provider === 'Bisq-Aggregate') {
-            this.conversionRates[rate.currencyCode] = Math.round(100 * rate.price) / 100;
+          if (this.ratesChangedCallback) {
+            this.ratesChangedCallback(this.conversionRates);
           }
+          break;
+        } catch (e) {
+          logger.err('Error updating fiat conversion rates: '  + (e instanceof Error ? e.message : e));
+          await setDelay(config.MEMPOOL.EXTERNAL_RETRY_INTERVAL);
+          retry++;
         }
-
-        this.ratesInitialized = true;
-        logger.debug(`USD Conversion Rate: ${this.conversionRates.USD}`);
-
-        if (this.ratesChangedCallback) {
-          this.ratesChangedCallback(this.conversionRates);
-        }
-        break;
-      } catch (e) {
-        logger.err('Error updating fiat conversion rates: '  + (e instanceof Error ? e.message : e));
-        await setDelay(config.MEMPOOL.EXTERNAL_RETRY_INTERVAL);
-        retry++;
       }
     }
   }

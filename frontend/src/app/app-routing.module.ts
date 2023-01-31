@@ -4,7 +4,6 @@ import { AppPreloadingStrategy } from './app.preloading-strategy'
 import { StartComponent } from './components/start/start.component';
 import { TransactionComponent } from './components/transaction/transaction.component';
 import { BlockComponent } from './components/block/block.component';
-import { BlockAuditComponent } from './components/block-audit/block-audit.component';
 import { AddressComponent } from './components/address/address.component';
 import { MasterPageComponent } from './components/master-page/master-page.component';
 import { AboutComponent } from './components/about/about.component';
@@ -21,6 +20,7 @@ import { AssetsFeaturedComponent } from './components/assets/assets-featured/ass
 import { AssetsComponent } from './components/assets/assets.component';
 import { AssetComponent } from './components/asset/asset.component';
 import { AssetsNavComponent } from './components/assets/assets-nav/assets-nav.component';
+import { StacksMasterPageComponent } from './components/stacks-master-page/stacks-master-page.component';
 
 const browserWindow = window || {};
 // @ts-ignore
@@ -100,16 +100,6 @@ let routes: Routes = [
                 data: {
                   ogImage: true
                 }
-              },
-            ],
-          },
-          {
-            path: 'block-audit',
-            data: { networkSpecific: true },
-            children: [
-              {
-                path: ':id',
-                component: BlockAuditComponent,
               },
             ],
           },
@@ -220,16 +210,6 @@ let routes: Routes = [
             ],
           },
           {
-            path: 'block-audit',
-            data: { networkSpecific: true },
-            children: [
-              {
-                path: ':id',
-                component: BlockAuditComponent,
-              },
-            ],
-          },
-          {
             path: 'docs',
             loadChildren: () => import('./docs/docs.module').then(m => m.DocsModule)
           },
@@ -332,16 +312,6 @@ let routes: Routes = [
         ],
       },
       {
-        path: 'block-audit',
-        data: { networkSpecific: true },
-        children: [
-          {
-            path: ':id',
-            component: BlockAuditComponent
-          },
-        ],
-      },
-      {
         path: 'docs',
         loadChildren: () => import('./docs/docs.module').then(m => m.DocsModule)
       },
@@ -395,7 +365,16 @@ if (browserWindowEnv && browserWindowEnv.BASE_MODULE === 'bisq') {
     loadChildren: () => import('./bisq/bisq.module').then(m => m.BisqModule)
   }];
 }
-
+console.log('browserWindowEnv-->', browserWindowEnv, 'browserWindowEnv.BASE_MODULE-->', browserWindowEnv.BASE_MODULE);
+if (browserWindowEnv && browserWindowEnv.BASE_MODULE === 'stacks') {
+  routes = [
+    {
+      path: '',
+      component: StacksMasterPageComponent,
+      loadChildren: () => import('./stacks/stacks.module').then(m => m.StacksModule)
+    }
+  ]
+}
 if (browserWindowEnv && browserWindowEnv.BASE_MODULE === 'liquid') {
   routes = [
     {
@@ -658,7 +637,7 @@ if (browserWindowEnv && browserWindowEnv.BASE_MODULE === 'liquid') {
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
-    initialNavigation: 'enabled',
+    initialNavigation: 'enabledBlocking',
     scrollPositionRestoration: 'enabled',
     anchorScrolling: 'enabled',
     preloadingStrategy: AppPreloadingStrategy

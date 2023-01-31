@@ -23,6 +23,7 @@ export interface Env {
   LIQUID_TESTNET_ENABLED: boolean;
   BISQ_ENABLED: boolean;
   BISQ_SEPARATE_BACKEND: boolean;
+  STACKS_ENABLED: boolean,
   ITEMS_PER_PAGE: number;
   KEEP_BLOCKS_AMOUNT: number;
   OFFICIAL_MEMPOOL_SPACE: boolean;
@@ -37,8 +38,12 @@ export interface Env {
   MEMPOOL_WEBSITE_URL: string;
   LIQUID_WEBSITE_URL: string;
   BISQ_WEBSITE_URL: string;
+  STACKS_WEBSITE_URL: string;
   MINING_DASHBOARD: boolean;
   LIGHTNING: boolean;
+  MAINNET_BLOCK_AUDIT_START_HEIGHT: number;
+  TESTNET_BLOCK_AUDIT_START_HEIGHT: number;
+  SIGNET_BLOCK_AUDIT_START_HEIGHT: number;
 }
 
 const defaultEnv: Env = {
@@ -46,6 +51,7 @@ const defaultEnv: Env = {
   'SIGNET_ENABLED': false,
   'LIQUID_ENABLED': false,
   'LIQUID_TESTNET_ENABLED': false,
+  'STACKS_ENABLED': false,
   'BASE_MODULE': 'mempool',
   'BISQ_ENABLED': false,
   'BISQ_SEPARATE_BACKEND': false,
@@ -62,8 +68,12 @@ const defaultEnv: Env = {
   'MEMPOOL_WEBSITE_URL': 'https://mempool.space',
   'LIQUID_WEBSITE_URL': 'https://liquid.network',
   'BISQ_WEBSITE_URL': 'https://bisq.markets',
+  "STACKS_WEBSITE_URL": 'https://localhost:4200',
   'MINING_DASHBOARD': true,
   'LIGHTNING': false,
+  'MAINNET_BLOCK_AUDIT_START_HEIGHT': 0,
+  'TESTNET_BLOCK_AUDIT_START_HEIGHT': 0,
+  'SIGNET_BLOCK_AUDIT_START_HEIGHT': 0,
 };
 
 @Injectable({
@@ -84,7 +94,9 @@ export class StateService {
   conversions$ = new ReplaySubject<any>(1);
   bsqPrice$ = new ReplaySubject<number>(1);
   mempoolInfo$ = new ReplaySubject<MempoolInfo>(1);
-  mempoolBlocks$ = new ReplaySubject<MempoolBlock[]>(1);
+  // mempoolBlocks$ = new ReplaySubject<MempoolBlock[]>(1);
+  mempoolBlocks$ = new ReplaySubject<any[]>(1);
+
   mempoolBlockTransactions$ = new Subject<TransactionStripped[]>();
   mempoolBlockDelta$ = new Subject<MempoolBlockDelta>();
   txReplaced$ = new Subject<ReplacedTransaction>();
@@ -112,6 +124,8 @@ export class StateService {
   timeLtr: BehaviorSubject<boolean>;
   hideFlow: BehaviorSubject<boolean>;
 
+  txCache: { [txid: string]: Transaction } = {};
+
   constructor(
     @Inject(PLATFORM_ID) private platformId: any,
     @Inject(LOCALE_ID) private locale: string,
@@ -122,6 +136,7 @@ export class StateService {
     // @ts-ignore
     const browserWindowEnv = browserWindow.__env || {};
     this.env = Object.assign(defaultEnv, browserWindowEnv);
+    console.log('this.env-->', this.env);
 
     if (defaultEnv.BASE_MODULE !== 'mempool') {
       this.env.MINING_DASHBOARD = false;
@@ -145,7 +160,6 @@ export class StateService {
     });
 
     this.blocks$ = new ReplaySubject<[BlockExtended, boolean]>(this.env.KEEP_BLOCKS_AMOUNT);
-
     if (this.env.BASE_MODULE === 'bisq') {
       this.network = this.env.BASE_MODULE;
       this.networkChanged$.next(this.env.BASE_MODULE);
@@ -174,6 +188,8 @@ export class StateService {
 
   setNetworkBasedonUrl(url: string) {
     if (this.env.BASE_MODULE !== 'mempool' && this.env.BASE_MODULE !== 'liquid') {
+      console.log('returning');
+
       return;
     }
     // horrible network regex breakdown:
@@ -264,5 +280,20 @@ export class StateService {
 
   isLiquid() {
     return this.network === 'liquid' || this.network === 'liquidtestnet';
+  }
+
+  setTxCache(transactions) {
+    this.txCache = {};
+    transactions.forEach(tx => {
+      this.txCache[tx.txid] = tx;
+    });
+  }
+ 
+  getTxFromCache(txid) {
+    if (this.txCache && this.txCache[txid]) {
+      return this.txCache[txid];
+    } else {
+      return null;
+    }
   }
 }

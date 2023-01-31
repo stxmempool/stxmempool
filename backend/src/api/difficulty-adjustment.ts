@@ -1,6 +1,7 @@
 import config from '../config';
 import { IDifficultyAdjustment } from '../mempool.interfaces';
 import blocks from './blocks';
+import stacksBlocks from './stacks/stacks-blocks';
 
 export interface DifficultyAdjustment {
   progressPercent: number;       // Percent: 0 to 100
@@ -82,10 +83,14 @@ export function calcDifficultyAdjustment(
 
 class DifficultyAdjustmentApi {
   public getDifficultyAdjustment(): IDifficultyAdjustment | null {
-    const DATime = blocks.getLastDifficultyAdjustmentTime();
-    const previousRetarget = blocks.getPreviousDifficultyRetarget();
-    const blockHeight = blocks.getCurrentBlockHeight();
-    const blocksCache = blocks.getBlocks();
+    // const DATime = blocks.getLastDifficultyAdjustmentTime();
+    // const previousRetarget = blocks.getPreviousDifficultyRetarget();
+    // const blockHeight = blocks.getCurrentBlockHeight();
+    // const blocksCache = blocks.getBlocks();
+    const DATime = stacksBlocks.getLastDifficultyAdjustmentTime();
+    const previousRetarget = stacksBlocks.getPreviousDifficultyRetarget();
+    const blockHeight = stacksBlocks.getCurrentBTCHeight();
+    const blocksCache = stacksBlocks.getBlocks();
     const latestBlock = blocksCache[blocksCache.length - 1];
     if (!latestBlock) {
       return null;

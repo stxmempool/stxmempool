@@ -1,6 +1,11 @@
 import bitcoinApi from './bitcoin/bitcoin-api-factory';
+import stacksApi from './stacks/stacks-api';
 import { TransactionExtended, TransactionMinerInfo } from '../mempool.interfaces';
 import { IEsploraApi } from './bitcoin/esplora-api.interface';
+import { Transaction, MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
+import { StacksTransactionExtended } from './stacks/stacks-api.interface';
+
+
 import config from '../config';
 import { Common } from './common';
 
@@ -26,6 +31,21 @@ class TransactionUtils {
     return this.extendTransaction(transaction);
   }
 
+  public async $getStacksTransactionExtended(txId: string, verboseTransaction: Transaction | MempoolTransaction): Promise<StacksTransactionExtended> {
+    // const transaction = await stacksApi.$getTransaction(txId);
+    const size = await stacksApi.$getTransactionSize(txId);
+    // return this.extendStacksTransaction(transaction, size);
+    return this.extendStacksTransaction(verboseTransaction, size);
+
+  }
+  public async $getStacksMempoolTransactionExtended(txId: string): Promise<StacksTransactionExtended> {
+    const transaction = await stacksApi.$getTransaction(txId);
+    const size = await stacksApi.$getTransactionSize(txId);
+    return this.extendStacksTransaction(transaction, size);
+    // return this.extendStacksTransaction(verboseTransaction, size);
+
+  }
+
   private extendTransaction(transaction: IEsploraApi.Transaction): TransactionExtended {
     // @ts-ignore
     if (transaction.vsize) {
@@ -41,6 +61,27 @@ class TransactionUtils {
     }, transaction);
     if (!transaction.status.confirmed) {
       transactionExtended.firstSeen = Math.round((new Date().getTime() / 1000));
+    }
+    return transactionExtended;
+  }
+
+  public extendStacksTransaction (transaction: Transaction | MempoolTransaction, size: number): StacksTransactionExtended {
+    // @ts-ignore
+    if (transaction.vsize) {
+      // @ts-ignore
+      return transaction;
+    }
+    const feePerVbytes = Math.max(1, (Number(transaction.fee_rate) || 0) / size);
+    const transactionExtended: StacksTransactionExtended = Object.assign({
+      feeRateAsNumber: Number(transaction.fee_rate),
+      vsize: size,
+      feePerVsize: feePerVbytes,
+      effectiveFeePerVsize: feePerVbytes,
+      firstSeen: 1,
+    }, transaction);
+    if (transaction.tx_status === 'pending') {
+      // transactionExtended['firstSeen'] = Math.round((new Date().getTime() / 1000));
+      transactionExtended['firstSeen'] = transaction.receipt_time;
     }
     return transactionExtended;
   }

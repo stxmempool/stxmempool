@@ -195,21 +195,25 @@ export class IncomingTransactionsGraphComponent implements OnInit, OnChanges {
           color: '#7CB342'
         },
         {
+          // 83%
           gt: 1667,
           lte: 2000,
           color: '#FDD835'
         },
         {
+          // 80%
           gt: 2000,
           lte: 2500,
           color: '#FFB300'
         },
         {
+          // 83%
           gt: 2500,
           lte: 3000,
           color: '#FB8C00'
         },
         {
+          // 85%
           gt: 3000,
           lte: 3500,
           color: '#F4511E'

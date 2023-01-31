@@ -1,0 +1,327 @@
+.dashboard-container {
+  padding-bottom: 60px;
+  text-align: center;
+  margin-top: 0.5rem;
+  @media (min-width: 992px) {
+    padding-bottom: 0px;
+  }
+  .col {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.card {
+  background-color: #1d1f31;
+  height: 100%;
+}
+
+.card-title {
+  color: #4a68b9;
+  font-size: 1rem;
+}
+
+.info-block {
+  float: left;
+  width: 350px;
+  line-height: 25px;
+}
+
+.progress {
+  display: inline-flex;
+  width: 100%;
+  background-color: #2d3348;
+  height: 1.1rem;
+  max-width: 180px;
+}
+
+.bg-warning {
+  background-color: #b58800 !important;
+}
+
+.skeleton-loader {
+  max-width: 100%;
+}
+
+.more-padding {
+  padding: 18px;
+}
+
+.graph-card {
+  height: 100%;
+  @media (min-width: 992px) {
+    height: 385px;
+  }
+}
+
+.mempool-info-data {
+  min-height: 56px;
+  display: block;
+  @media (min-width: 485px) {
+    display: flex;
+    flex-direction: row;
+  }
+  h5 {
+    margin-bottom: 10px;
+  }
+  .item {
+    width: 50%;
+    margin: 0px auto 20px;
+    display: inline-block;
+    @media (min-width: 485px) {
+      margin: 0px auto 10px;
+    }
+    @media (min-width: 785px) {
+      margin: 0px auto 0px;
+    }
+    &:last-child {
+      margin: 0px auto 0px;
+    }
+    &:nth-child(2) {
+      order: 2;
+      @media (min-width: 485px) {
+        order: 3;
+      }
+    }
+    &:nth-child(3) {
+      order: 3;
+      @media (min-width: 485px) {
+        order: 2;
+        display: block;
+      }
+      @media (min-width: 768px) {
+        display: none;
+      }
+      @media (min-width: 992px) {
+        display: block;
+      }
+    }
+    .card-text {
+      font-size: 18px;
+      span {
+        color: #ffffff66;
+        font-size: 12px;
+      }
+    }
+    .progress {
+      width: 90%;
+      @media (min-width: 768px) {
+        width: 100%;
+      }
+    }
+  }
+  .bar {
+    width: 93%;
+    margin: 0px 5px 20px;
+    @media (min-width: 485px) {
+      max-width: 200px;
+      margin: 0px auto 0px;
+    }
+  }
+  .skeleton-loader {
+    width: 100%;
+    max-width: 100px;
+    display: block;
+    margin: 18px auto 0;
+  }
+  .skeleton-loader-big {
+    max-width: 180px;
+  }
+}
+
+.latest-transactions {
+  width: 100%;
+  text-align: left;
+  table-layout:fixed;
+  tr, td, th {
+    border: 0px;
+    padding-top: 0.71rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+  td {
+    overflow:hidden;
+    width: 25%;
+  }
+  .table-cell-satoshis {
+    display: none;
+    text-align: right;
+    @media (min-width: 576px) {
+      display: table-cell;
+    }
+    @media (min-width: 768px) {
+      display: none;
+    }
+    @media (min-width: 1100px) {
+      display: table-cell;
+    }
+  }
+  .table-cell-fiat {
+    display: none;
+    text-align: right;
+    @media (min-width: 485px) {
+      display: table-cell;
+    }
+    @media (min-width: 768px) {
+      display: none;
+    }
+    @media (min-width: 992px) {
+      display: table-cell;
+    }
+  }
+  .table-cell-fees {
+    text-align: right;
+  }
+}
+.skeleton-loader-transactions {
+  max-width: 250px;
+  position: relative;
+  top: 2px;
+  margin-bottom: -3px;
+  height: 18px;
+}
+
+.lastest-blocks-table {
+  width: 100%;
+  text-align: left;
+  tr, td, th {
+    border: 0px;
+    padding-top: 0.65rem !important;
+    padding-bottom: 0.7rem !important;
+  }
+  .table-cell-height {
+    width: 15%;
+  }
+  .table-cell-mined {
+    width: 35%;
+    text-align: left;
+    // background-color: green;
+  }
+  .table-cell-transaction-count {
+    display: none;
+    text-align: right;
+    width: 20%;
+    display: table-cell;
+  }
+  .table-cell-size {
+    display: none;
+    text-align: center;
+    width: 30%;
+    @media (min-width: 485px) {
+      display: table-cell;
+    }
+    @media (min-width: 768px) {
+      display: none;
+    }
+    @media (min-width: 992px) {
+      display: table-cell;
+    }
+  }
+}
+
+.mempool-graph {
+  height: 255px;
+}
+.loadingGraphs{
+  height: 250px;
+  display: grid;
+  place-items: center;
+}
+
+.inc-tx-progress-bar {
+  max-width: 250px;
+  .progress-bar {
+    padding: 4px;
+  }
+}
+
+.terms-of-service {
+  margin-top: 1rem;
+}
+
+.small-bar {
+  height: 8px;
+  top: -4px;
+  max-width: 120px;
+}
+
+.loading-container {
+  min-height: 76px;
+}
+
+.main-title {
+  position: relative;
+  color: #ffffff91;
+  margin-top: -13px;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-align: center;
+  padding-bottom: 3px;
+}
+
+.card-wrapper {
+  .card {
+    height: auto !important;
+  }
+  .card-body {
+    display: flex;
+    flex: inherit;
+    text-align: center;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 22px 20px;
+  }
+  .less-padding {
+    padding: 20px 20px;
+  }
+}
+
+.retarget-sign {
+  margin-right: -3px;
+  font-size: 14px;
+  top: -2px;
+  position: relative;
+}
+
+.previous-retarget-sign {
+  margin-right: -2px;
+  font-size: 10px;
+}
+
+.assetIcon {
+  width: 40px;
+  height: 40px;
+}
+
+.asset-title {
+  text-align: left;
+  vertical-align: middle;
+}
+
+.asset-icon {
+  width: 65px;
+  height: 65px;
+  vertical-align: middle;
+}
+
+.circulating-amount {
+  text-align: right;
+  width: 100%;
+  vertical-align: middle;
+}
+
+.clear-link {
+  color: white;
+}
+
+.pool-name {
+  display: inline-block;
+  vertical-align: text-top;
+  padding-left: 10px;
+}
+
+.title-link, .title-link:hover, .title-link:focus, .title-link:active {
+  display: block;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: inherit;
+}

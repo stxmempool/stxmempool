@@ -2,11 +2,13 @@ import { MempoolBlock } from '../mempool.interfaces';
 import { Common } from './common';
 import mempool from './mempool';
 import projectedBlocks from './mempool-blocks';
+import stacksApi from './stacks/stacks-api';
 
 class FeeApi {
   constructor() { }
 
   defaultFee = Common.isLiquid() ? 0.1 : 1;
+  defaultStacksFee = 1;
 
   public getRecommendedFee() {
     const pBlocks = projectedBlocks.getMempoolBlocks();
@@ -46,6 +48,29 @@ class FeeApi {
       return Math.max(Math.round(useFee * multiplier), this.defaultFee);
     }
     return Math.ceil(useFee);
+  }
+  public async $processStacksFees() {
+    const stats = await stacksApi.$getStacksFees();
+    return {
+      tokenTransfer: {
+        p25: stats.tx_simple_fee_averages.token_transfer.p25,
+        p50: stats.tx_simple_fee_averages.token_transfer.p50,
+        p75: stats.tx_simple_fee_averages.token_transfer.p75,
+        p95: stats.tx_simple_fee_averages.token_transfer.p95,
+      },
+      smartContract: {
+        p25: stats.tx_simple_fee_averages.smart_contract.p25,
+        p50: stats.tx_simple_fee_averages.smart_contract.p50,
+        p75: stats.tx_simple_fee_averages.smart_contract.p75,
+        p95: stats.tx_simple_fee_averages.smart_contract.p95,
+      },
+      contractCall: {
+        p25: stats.tx_simple_fee_averages.contract_call.p25,
+        p50: stats.tx_simple_fee_averages.contract_call.p50,
+        p75: stats.tx_simple_fee_averages.contract_call.p75,
+        p95: stats.tx_simple_fee_averages.contract_call.p95,
+      }
+    };
   }
 }
 

@@ -20,6 +20,7 @@ export class BlockchainComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.network = this.stateService.network;
+    console.log('this.network', this.network);
     this.timeLtrSubscription = this.stateService.timeLtr.subscribe((ltr) => {
       this.timeLtr = !!ltr;
     });

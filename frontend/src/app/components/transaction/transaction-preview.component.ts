@@ -63,34 +63,14 @@ export class TransactionPreviewComponent implements OnInit, OnDestroy {
     this.fetchCpfpSubscription = this.fetchCpfp$
       .pipe(
         switchMap((txId) =>
-          this.apiService
-            .getCpfpinfo$(txId)
-            .pipe(retryWhen((errors) => errors.pipe(delay(2000))))
+          this.apiService.getCpfpinfo$(txId).pipe(
+            catchError((err) => {
+              return of(null);
+            })
+          )
         )
       )
       .subscribe((cpfpInfo) => {
-        if (!this.tx) {
-          return;
-        }
-        const lowerFeeParents = cpfpInfo.ancestors.filter(
-          (parent) => parent.fee / (parent.weight / 4) < this.tx.feePerVsize
-        );
-        let totalWeight =
-          this.tx.weight +
-          lowerFeeParents.reduce((prev, val) => prev + val.weight, 0);
-        let totalFees =
-          this.tx.fee +
-          lowerFeeParents.reduce((prev, val) => prev + val.fee, 0);
-
-        if (cpfpInfo.bestDescendant) {
-          totalWeight += cpfpInfo.bestDescendant.weight;
-          totalFees += cpfpInfo.bestDescendant.fee;
-        }
-
-        this.tx.effectiveFeePerVsize = totalFees / (totalWeight / 4);
-        this.stateService.markBlock$.next({
-          txFeePerVSize: this.tx.effectiveFeePerVsize,
-        });
         this.cpfpInfo = cpfpInfo;
         this.openGraphService.waitOver('cpfp-data-' + this.txId);
       });
@@ -117,8 +97,9 @@ export class TransactionPreviewComponent implements OnInit, OnDestroy {
         }),
         switchMap(() => {
           let transactionObservable$: Observable<Transaction>;
-          if (history.state.data && history.state.data.fee !== -1) {
-            transactionObservable$ = of(history.state.data);
+          const cached = this.stateService.getTxFromCache(this.txId);
+          if (cached && cached.fee !== -1) {
+            transactionObservable$ = of(cached);
           } else {
             transactionObservable$ = this.electrsApiService
               .getTransaction$(this.txId)
@@ -175,8 +156,17 @@ export class TransactionPreviewComponent implements OnInit, OnDestroy {
             this.getTransactionTime();
           }
 
-          if (!this.tx.status.confirmed) {
+          if (this.tx.status.confirmed) {
+            this.stateService.markBlock$.next({
+              blockHeight: tx.status.block_height,
+            });
+            this.openGraphService.waitFor('cpfp-data-' + this.txId);
+            this.fetchCpfp$.next(this.tx.txid);
+          } else {
             if (tx.cpfpChecked) {
+              this.stateService.markBlock$.next({
+                txFeePerVSize: tx.effectiveFeePerVsize,
+              });
               this.cpfpInfo = {
                 ancestors: tx.ancestors,
                 bestDescendant: tx.bestDescendant,
