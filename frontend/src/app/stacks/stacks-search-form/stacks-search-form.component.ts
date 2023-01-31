@@ -8,16 +8,19 @@ import { debounceTime, distinctUntilChanged, switchMap, catchError, map, startWi
 import { ElectrsApiService } from '../../services/electrs-api.service';
 import { RelativeUrlPipe } from '../../shared/pipes/relative-url/relative-url.pipe';
 import { ApiService } from '../../services/api.service';
-import { SearchResultsComponent } from './search-results/search-results.component';
+import { StacksSearchResultsComponent } from './search-results/stacks-search-results.component';
 import { c32addressDecode } from 'c32check';
+import { StacksApiService } from '../stacks-api.service';
+import { SearchSuccessResult } from '@stacks/stacks-blockchain-api-types';
+
 
 @Component({
-  selector: 'app-search-form',
-  templateUrl: './search-form.component.html',
-  styleUrls: ['./search-form.component.scss'],
+  selector: 'app-stacks-search-form',
+  templateUrl: './stacks-search-form.component.html',
+  styleUrls: ['./stacks-search-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchFormComponent implements OnInit {
+export class StacksSearchFormComponent implements OnInit {
   network = '';
   assets: object = {};
   isSearching = false;
@@ -25,6 +28,8 @@ export class SearchFormComponent implements OnInit {
   typeAhead$: Observable<any>;
   searchForm: UntypedFormGroup;
   dropdownHidden = false;
+  isBlockHash = false;
+  validID$:  Observable<any>; 
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event) {
@@ -34,24 +39,36 @@ export class SearchFormComponent implements OnInit {
       this.dropdownHidden = true;
     }
   }
-  //BTC
-  // regexAddress = /^([a-km-zA-HJ-NP-Z1-9]{26,35}|[a-km-zA-HJ-NP-Z1-9]{80}|[A-z]{2,5}1[a-zA-HJ-NP-Z0-9]{39,59})$/;
 
-  //BTC
-  regexBlockhash = /^[0]{8}[a-fA-F0-9]{56}$/;
 
-  //BTC
-  // regexTransaction = /^([a-fA-F0-9]{64})(:\d+)?$/;
+  /*
+    For future iterations, if you want to add ContractId search support here is a good place to start
 
-  //STX
+    validateContractId(contract_id) {
+      if (!contract_id.includes(".")) return false;
+      const stxAddress = contract_id.split(".")[0];
+      const contractName = contract_id.split(".")[1];
+      const nameRegex = /[a-zA-Z]([a-zA-Z0-9]|[-_!?+<>=/*])*$|^[-+=/*]$|^[<>]=?$/;
+
+      try {
+        const validStacksAddress = validateStacksAddress(stxAddress);
+        const validName = nameRegex.exec(contractName);
+        return !!(validName && validStacksAddress);
+      } catch (e) {
+        return false;
+      }
+    };
+  */
+
+  // Unfortunately, the regex for a STX's Block Hash or Transaction is identical
   regexTransaction = /0x[A-Fa-f0-9]{64}/;
-
   regexBlockheight = /^[0-9]{1,9}$/;
+
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
 
   @Output() searchTriggered = new EventEmitter();
-  @ViewChild('searchResults') searchResults: SearchResultsComponent;
+  @ViewChild('searchResults') searchResults: StacksSearchResultsComponent;
   @HostListener('keydown', ['$event']) keydown($event): void {
     this.handleKeyDown($event);
   }
@@ -65,29 +82,19 @@ export class SearchFormComponent implements OnInit {
     private apiService: ApiService,
     private relativeUrlPipe: RelativeUrlPipe,
     private elementRef: ElementRef,
+    private stacksApiService: StacksApiService
   ) { }
 
   ngOnInit(): void {
     this.stateService.networkChanged$.subscribe((network) => this.network = network);
-    console.log(this.network);
 
     this.searchForm = this.formBuilder.group({
       searchText: ['', Validators.required],
     });
 
-    if (this.network === 'liquid' || this.network === 'liquidtestnet') {
-      this.assetsService.getAssetsMinimalJson$
-        .subscribe((assets) => {
-          this.assets = assets;
-        });
-    }
-
     const searchText$ = this.searchForm.get('searchText').valueChanges
     .pipe(
       map((text) => {
-        if (this.network === 'bisq' && text.match(/^(b)[^c]/i)) {
-          return text.substr(1);
-        }
         return text.trim();
       }),
       distinctUntilChanged(),
@@ -105,12 +112,14 @@ export class SearchFormComponent implements OnInit {
         this.isTypeaheading$.next(true);
         if (!this.stateService.env.LIGHTNING) {
           return zip(
-            this.electrsApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
+            // this.electrsApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
+            this.stacksApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
+
             [{ nodes: [], channels: [] }],
           );
         }
         return zip(
-          this.electrsApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
+          this.stacksApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
           this.apiService.lightningSearch$(text).pipe(catchError(() => of({
             nodes: [],
             channels: [],
@@ -154,23 +163,53 @@ export class SearchFormComponent implements OnInit {
           const addressPrefixSearchResults = result[0];
           const lightningResults = result[1];
 
-          if (this.network === 'bisq') {
-            return searchText.map((address: string) => 'B' + address);
-          }
-
+          this.stacksApiService.searchStacksApi$(searchText)
+            .subscribe({
+              next: (data) => {
+                if (data.found === true && data.result.entity_type === 'block_hash'){
+                  this.isBlockHash = true;
+                } else {
+                  this.isBlockHash = false;
+                }
+              },
+              error: (e) => {
+                console.log(e);
+                this.isBlockHash = false;
+              },
+              complete: () => console.log('done'),
+            });
+          // this.stacksApiService.searchStacksApi$(searchText).subscribe((data) => {
+          //   console.log(data);
+          //   if (data.found === true && data.result.entity_type === 'block_hash'){
+          //     // this.navigate('/block/', searchText);
+          //     this.isBlockHash = true;
+          //   } else {
+          //     this.isBlockHash = false;
+          //   }
+          //   // if (data.found === true && data.result.entity_type === 'tx_id'){
+          //   //   // this.navigate('/block/', searchText);
+          //   //   matchesBlockHash = false;
+          //   // }
+          // });
           const matchesBlockHeight = this.regexBlockheight.test(searchText);
-          const matchesTxId = this.regexTransaction.test(searchText) && !this.regexBlockhash.test(searchText);
-          const matchesBlockHash = this.regexBlockhash.test(searchText);
+
+          // const matchesTxId = this.regexTransaction.test(searchText) && !this.regexBlockhash.test(searchText);
+          const matchesTxId = this.regexTransaction.test(searchText) && this.isBlockHash === false;
+          // console.log('matchesTxId-->', matchesTxId, 'isBlockHash', this.isBlockHash);
+          // const matchesBlockHash = this.regexBlockhash.test(searchText);
           // const matchesAddress = this.regexAddress.test(searchText);
           const matchesAddress = this.validateStacksAddress(searchText);
 
 
           return {
             searchText: searchText,
-            hashQuickMatch: +(matchesBlockHeight || matchesBlockHash || matchesTxId || matchesAddress),
+            // hashQuickMatch: +(matchesBlockHeight || matchesBlockHash || matchesTxId || matchesAddress),
+            hashQuickMatch: +(matchesBlockHeight || this.isBlockHash || matchesTxId || matchesAddress),
+
             blockHeight: matchesBlockHeight,
             txId: matchesTxId,
-            blockHash: matchesBlockHash,
+            // blockHash: matchesBlockHash,
+            blockHash: this.isBlockHash,
             address: matchesAddress,
             addresses: addressPrefixSearchResults,
             nodes: lightningResults.nodes,
@@ -202,12 +241,22 @@ export class SearchFormComponent implements OnInit {
 
   search(result?: string): void {
     const searchText = result || this.searchForm.value.searchText.trim();
+
     if (searchText) {
       this.isSearching = true;
+      console.log('searchText', searchText);
+      this.stacksApiService.searchStacksApi$(searchText).subscribe((data) => {
+        console.log(data);
+        if (data.found === true && data.result.entity_type === 'block_hash'){
+          // this.navigate('/block/', searchText);
+          this.navigate('/block/', data.result.entity_id);
+        }
+      })
       // if (this.regexAddress.test(searchText)) {
       if (this.validateStacksAddress(searchText)) {
         this.navigate('/address/', searchText);
-      } else if (this.regexBlockhash.test(searchText) || this.regexBlockheight.test(searchText)) {
+      // } else if (this.regexBlockhash.test(searchText) || this.regexBlockheight.test(searchText)) {
+      } else if (this.regexBlockheight.test(searchText)) {
         this.navigate('/block/', searchText);
       } else if (this.regexTransaction.test(searchText)) {
         const matches = this.regexTransaction.exec(searchText);

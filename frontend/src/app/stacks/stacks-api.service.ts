@@ -6,8 +6,8 @@ import { Observable } from 'rxjs';
 import { StateService } from '../services/state.service';
 import { WebsocketResponse } from '../interfaces/websocket.interface';
 import { Outspend } from '../interfaces/electrs.interface';
-import { StacksBlockExtended, StacksTransactionStripped } from './stacks.interfaces';
-import { Transaction } from '@stacks/stacks-blockchain-api-types';
+import { StacksBlockExtended, StacksTransactionStripped, MinedStacksTransactionExtended } from './stacks.interfaces';
+import { Transaction, AddressBalanceResponse, MempoolTransaction, SearchSuccessResult } from '@stacks/stacks-blockchain-api-types';
 @Injectable({
   providedIn: 'root'
 })
@@ -31,13 +31,40 @@ export class StacksApiService {
       this.apiBasePath = network ? '/' + network : '';
     });
   }
-  getBlockTransactions$(hash: string, index: number = 0): Observable<Transaction[]> {
-    return this.httpClient.get<Transaction[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/block/' + hash + '/txs/' + index);
+  // getBlockTransactions$(hash: string, index: number = 0): Observable<Transaction[]> {
+  getBlockTransactions$(hash: string, index: number = 0): Observable<MinedStacksTransactionExtended[]> {
+    return this.httpClient.get<MinedStacksTransactionExtended[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/block/' + hash + '/txs/' + index);
   }
   getTransaction$(txId: string): Observable<Transaction> {
     return this.httpClient.get<Transaction>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/tx/' + txId);
   }
-
+  // Address Component
+  // getAddress$(address: string): Observable<Address> {
+  getAddress$(address: string): Observable<AddressBalanceResponse> {
+    return this.httpClient.get<AddressBalanceResponse>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address);
+  }
+  // getAddressTransactions$(address: string): Observable<(MempoolTransaction | Transaction)[]> {
+  getAddressTransactions$(address: string): Observable<{ total: number, transactions: (Transaction | MempoolTransaction)[]}> {
+    return this.httpClient.get<{ total: number, transactions: (Transaction | MempoolTransaction)[]}>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address + '/txs');
+  }
+  getMoreAddressTransactions$(address: string, offset: number): Observable<{ total: number, transactions: (Transaction | MempoolTransaction)[]}> {
+    return this.httpClient.get<{ total: number, transactions: (Transaction | MempoolTransaction)[]}>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address + '/txs/' + offset);
+  }
+  getAddressesByPrefix$(prefix: string): Observable<string[]> {
+    if (prefix.toLowerCase().indexOf('bc1') === 0) {
+      prefix = prefix.toLowerCase();
+    }
+    return this.httpClient.get<string[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address-prefix/' + prefix);
+  }
+  searchStacksApi$(id: string): Observable<SearchSuccessResult> {
+    return this.httpClient.get<SearchSuccessResult>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/search/${id}`);
+  }
+  getBlockHashFromHeight$(height: number): Observable<string> {
+    return this.httpClient.get(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/block-height/' + height, {responseType: 'text'});
+  }
+  getTotalNumberOfAddressTransactions$(address: string): Observable<number> {
+    return this.httpClient.get<number>(this.apiBaseUrl + this.apiBasePath + '/api/v1/stacks/address/' + address + '/total');
+  }
   list2HStatistics$(): Observable<OptimizedMempoolStats[]> {
     console.log('Base Path', this.apiBasePath);
     return this.httpClient.get<OptimizedMempoolStats[]>(this.apiBaseUrl + this.apiBasePath + '/api/v1/statistics/2h');

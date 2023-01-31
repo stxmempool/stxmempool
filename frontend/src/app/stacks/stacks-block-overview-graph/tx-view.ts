@@ -35,6 +35,7 @@ export default class TxView implements TransactionStripped {
   vsize: number;
   value: number;
   feerate: number;
+  type: 'token_transfer' | 'smart_contract' | 'contract_call' | 'poison_microblock' | 'coinbase';
   status?: 'found' | 'missing' | 'fresh' | 'added' | 'censored' | 'selected';
   context?: 'projected' | 'actual';
 
@@ -55,12 +56,20 @@ export default class TxView implements TransactionStripped {
     // this.txid = tx.type;
 
     this.fee = tx.fee;
-    this.vsize = tx.vsize;
-    // this.vsize = tx.execution_cost_runtime;
+    // this.fee = tx.execution_cost_read_count;
+
+    // this.vsize = tx.vsize;
+    // this.vsize = 100;
+
+    // this.vsize = typeof tx.execution_cost_read_count === 'number' ? tx.execution_cost_read_count : tx.vsize;
+    this.vsize = typeof tx.execution_cost_read_count === 'number' ? tx.execution_cost_read_count : 0;
+
 
     // this.value = tx.value;
     this.value = tx.type;
     this.feerate = tx.fee / tx.vsize;
+    // this.feerate = tx.vsize;
+
     this.status = tx.status;
     this.initialised = false;
     this.vertexArray = vertexArray;
@@ -137,6 +146,7 @@ export default class TxView implements TransactionStripped {
   // Temporarily override the tx color
   // returns minimum transition end time
   setHover(hoverOn: boolean, color: Color | void = defaultHoverColor): number {
+    console.log(this.vsize);
     if (hoverOn) {
       this.hover = true;
       this.hoverColor = color;

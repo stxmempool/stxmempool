@@ -194,14 +194,12 @@ class StacksMempool {
     if (this.asyncMempoolChangedCallback && (hasChange || deletedTransactions.length)) {
       await this.asyncMempoolChangedCallback(this.mempoolCache, newTransactions, deletedTransactions);
     }
-    const cacheSize = Object.keys(this.mempoolCache).length;
-    this.mempoolInfo.size = cacheSize;
     const end = new Date().getTime();
     const time = end - start;
     // logger.debug(`New Stacks mempool size: ${Object.keys(this.mempoolCache).length} Change: ${diff}`);
     // logger.debug('Stacks Mempool updated in ' + time / 1000 + ' seconds');
-    // logger.debug(`Mempool updated in ${time / 1000} seconds. New size: ${Object.keys(this.mempoolCache).length} (${diff > 0 ? '+' + diff : diff})`);
-    logger.debug(`Mempool updated in ${time / 1000} seconds. New size: ${cacheSize} (${diff > 0 ? '+' + diff : diff})`);
+    logger.debug(`Mempool updated in ${time / 1000} seconds. New size: ${Object.keys(this.mempoolCache).length} (${diff > 0 ? '+' + diff : diff})`);
+    // logger.debug(`Mempool updated in ${time / 1000} seconds. New size: ${cacheSize} (${diff > 0 ? '+' + diff : diff})`);
 
   }
   // TODO move to stacksApi

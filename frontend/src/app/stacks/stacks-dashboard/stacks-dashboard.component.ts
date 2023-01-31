@@ -1,15 +1,14 @@
 import { ChangeDetectionStrategy, Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { combineLatest, merge, Observable, of } from 'rxjs';
 import { filter, map, scan, share, switchMap, tap } from 'rxjs/operators';
-import { BlockExtended, OptimizedMempoolStats } from '../../interfaces/node-api.interface';
-import { MempoolInfo, TransactionStripped } from '../../interfaces/websocket.interface';
+import { OptimizedMempoolStats } from '../../interfaces/node-api.interface';
+import { MempoolInfo } from '../../interfaces/websocket.interface';
 import { ApiService } from '../../services/api.service';
 import { StateService } from '../../services/state.service';
 import { WebsocketService } from '../../services/websocket.service';
 import { SeoService } from '../../services/seo.service';
 import { StorageService } from '../../services/storage.service';
-// this is trash, make a set of interfaces for frontend
-import { StacksBlockExtended, StacksTransactionStripped } from '../../../../../backend/src/api/stacks/stacks-api.interface';
+import { StacksBlockExtended, StacksTransactionStripped } from '../stacks.interfaces';
 
 interface MempoolBlocksData {
   blocks: number;
@@ -35,16 +34,14 @@ interface MempoolStatsData {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StacksDashboardComponent implements OnInit {
-  featuredAssets$: Observable<any>;
   network$: Observable<string>;
   mempoolBlocksData$: Observable<MempoolBlocksData>;
   mempoolInfoData$: Observable<MempoolInfoData>;
   mempoolLoadingStatus$: Observable<number>;
-  vBytesPerSecondLimit = 1667;
-  // blocks$: Observable<BlockExtended[]>;
+  vBytesPerSecondLimit = 50;
+  
   blocks$: Observable<StacksBlockExtended[]>;
 
-  // transactions$: Observable<TransactionStripped[]>;
   transactions$: Observable<StacksTransactionStripped[]>;
 
   latestBlockHeight: number;
@@ -52,7 +49,6 @@ export class StacksDashboardComponent implements OnInit {
   mempoolStats$: Observable<MempoolStatsData>;
   transactionsWeightPerSecondOptions: any;
   isLoadingWebSocket$: Observable<boolean>;
-  liquidPegsMonth$: Observable<any>;
 
   constructor(
     @Inject(LOCALE_ID) private locale: string,
@@ -82,19 +78,19 @@ export class StacksDashboardComponent implements OnInit {
         const percent = Math.round((Math.min(vbytesPerSecond, this.vBytesPerSecondLimit) / this.vBytesPerSecondLimit) * 100);
 
         let progressColor = '#7CB342';
-        if (vbytesPerSecond > 1667) {
+        if (vbytesPerSecond > 50) {
           progressColor = '#FDD835';
         }
-        if (vbytesPerSecond > 2000) {
+        if (vbytesPerSecond > 60) {
           progressColor = '#FFB300';
         }
-        if (vbytesPerSecond > 2500) {
+        if (vbytesPerSecond > 75) {
           progressColor = '#FB8C00';
         }
-        if (vbytesPerSecond > 3000) {
+        if (vbytesPerSecond > 90) {
           progressColor = '#F4511E';
         }
-        if (vbytesPerSecond > 3500) {
+        if (vbytesPerSecond > 105) {
           progressColor = '#D81B60';
         }
 
@@ -128,20 +124,6 @@ export class StacksDashboardComponent implements OnInit {
           };
         })
       );
-
-    this.featuredAssets$ = this.apiService.listFeaturedAssets$()
-      .pipe(
-        map((featured) => {
-          const newArray = [];
-          for (const feature of featured) {
-            if (feature.ticker !== 'L-BTC' && feature.asset) {
-              newArray.push(feature);
-            }
-          }
-          return newArray.slice(0, 4);
-        }),
-      );
-
     this.blocks$ = this.stateService.blocks$
       .pipe(
         tap(([block]) => {
@@ -153,15 +135,6 @@ export class StacksDashboardComponent implements OnInit {
           }
           acc.unshift(block);
           acc = acc.slice(0, 6);
-
-          if (this.stateService.env.MINING_DASHBOARD === true) {
-            for (const block of acc) {
-              // @ts-ignore: Need to add an extra field for the template
-              block.extras.pool.logo = `/resources/mining-pools/` +
-                block.extras.pool.name.toLowerCase().replace(' ', '').replace('.', '') + '.svg';
-            }
-          }
-
           return acc;
         }, []),
       );
@@ -182,8 +155,6 @@ export class StacksDashboardComponent implements OnInit {
       .pipe(
         filter((state) => state === 2),
         switchMap(() => this.apiService.list2HStatistics$()),
-        // switchMap(() => this.apiService.list24HStatistics$()),
-
         switchMap((mempoolStats) => {
           return merge(
             this.stateService.live2Chart$
@@ -205,22 +176,6 @@ export class StacksDashboardComponent implements OnInit {
         }),
         share(),
       );
-
-    if (this.stateService.network === 'liquid' || this.stateService.network === 'liquidtestnet') {
-      this.liquidPegsMonth$ = this.apiService.listLiquidPegsMonth$()
-        .pipe(
-          map((pegs) => {
-            const labels = pegs.map(stats => stats.date);
-            const series = pegs.map(stats => parseFloat(stats.amount) / 100000000);
-            series.reduce((prev, curr, i) => series[i] = prev + curr, 0);
-            return {
-              series,
-              labels
-            };
-          }),
-          share(),
-        );
-    }
   }
 
   handleNewMempoolData(mempoolStats: OptimizedMempoolStats[]) {

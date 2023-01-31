@@ -41,6 +41,13 @@ import stacksBlocks from './api/stacks/stacks-blocks';
 import stacksApi from './api/stacks/stacks-api';
 import stacksRoutes from './api/stacks/stacks.routes';
 
+import { execFile } from 'child_process';
+// import * as fs from 'fs';
+import * as fs from 'fs';
+
+import { join } from 'path';
+import stacksMempoolBlocks from './api/stacks/stacks-mempool-blocks';
+
 class Server {
   private wss: WebSocket.Server | undefined;
   private server: http.Server | undefined;
@@ -132,6 +139,7 @@ class Server {
     }
 
     fiatConversion.startService();
+    
 
     this.setUpHttpApiRoutes();
     // if (config.MEMPOOL.ENABLED) {
@@ -174,7 +182,8 @@ class Server {
       // await poolsUpdater.updatePoolsJson();
       // await blocks.$updateBlocks();
       // await memPool.$updateMempool();
-      // indexer.$run();
+      indexer.$run();
+      // await stacksMempoolBlocks.updateProjection();
       await stacksMempool.$updateStacksMempool();
       await stacksBlocks.$updateBlocks();
 

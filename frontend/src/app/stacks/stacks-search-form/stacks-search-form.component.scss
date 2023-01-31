@@ -1,0 +1,58 @@
+:host ::ng-deep {
+  .dropdown-item {
+    white-space: nowrap;
+    width: calc(100% - 34px);
+  }
+  .dropdown-menu {
+    width: calc(100% - 34px);
+  }
+  @media (min-width: 768px) {
+    .dropdown-item {
+      width: 410px;
+    }
+    .dropdown-menu {
+      width: 410px;
+    }
+  }
+}
+
+form {
+  margin-top: 5px;
+  @media (min-width: 576px) {
+    margin-top: 0px;
+    margin-left: 8px;
+  }
+  @media (min-width: 992px) {
+    width: 100%;
+  }
+}
+
+.btn-block {
+  width: 62px;
+}
+
+.search-box-container {
+  position: relative;
+  width: 100%;
+  @media (min-width: 768px) {
+    min-width: 400px;
+  }
+  @media (min-width: 992px) {
+    min-width: 200px;
+  }
+  @media (min-width: 1200px) {
+    min-width: 300px;
+  }
+  input {
+    border: 0px;
+  }
+  .btn {
+    width: 100px;
+  }
+}
+
+.spinner-border {
+  vertical-align: text-top;
+  margin-top: 1px;
+  margin-right: 2px;
+}

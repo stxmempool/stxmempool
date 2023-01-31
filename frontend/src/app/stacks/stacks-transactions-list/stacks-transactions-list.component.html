@@ -128,6 +128,16 @@
                         </span>
                       </a>
                     </ng-container>
+                    <ng-container *ngSwitchCase="tx.tx_type === 'poison_microblock'">
+                      <p>Poison Microblock</p>
+                      <p>Broadcast By:</p><a class="shortable-address" *ngIf="tx.sender_address" [routerLink]="['/address/' | relativeUrl, tx.sender_address]" title="{{ tx.sender_address }}">
+                        <span class="d-block d-lg-none">{{ tx.sender_address | shortenString : 16 }}</span>
+                        <span class="d-none d-lg-inline-flex justify-content-start">
+                          <span class="addr-left flex-grow-1" [style]="tx.sender_address.length > 40 ? 'max-width: 235px' : ''">{{ tx.sender_address }}</span>
+                          <span *ngIf="tx.sender_address.length > 40" class="addr-right">{{ tx.sender_address | capAddress: 40: 10 }}</span>
+                        </span>
+                      </a>
+                    </ng-container>
                     <!-- Get Rid of this eventually -->
                     <!-- Do we need a poison microblock???? -->
                     <ng-container *ngSwitchDefault>{{tx.tx_type}}</ng-container>
@@ -252,19 +262,32 @@
               <td>
                 <div [ngSwitch]="true">
                   <ng-container *ngSwitchCase="tx.tx_type === 'coinbase'">
-                    <p>Reward: <app-stacks-amount  [satoshis]="1000000000"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="1000000000"></app-stacks-fiat></span></p>
+                    <p>Reward: <app-stacks-amount  [uSTX]="1000000000"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="1000000000"></app-stacks-fiat></span></p>
                   </ng-container>
                   <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
                     <p>Function Name: <span>{{ tx.contract_call?.function_name }}</span></p>
-                    <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="tx.feeRateAsNumber"></app-stacks-fiat></span></p>
                     <p>Contract Name: <span>{{ parseContractName(tx.contract_call?.contract_id) | titlecase }}</span></p>
+                    <!-- <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="tx.feeRateAsNumber"></app-stacks-fiat></span></p> -->
+                    <p>Fees: <app-stacks-amount [uSTX]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
                   </ng-container>
                   <ng-container *ngSwitchCase="tx.tx_type === 'token_transfer'">
-                    <p>Amount Sent <app-stacks-amount [satoshis]="convertStringToInt(tx.token_transfer.amount)"></app-stacks-amount></p>
-                    <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount></p>
+                    <p>Amount Sent <app-stacks-amount [uSTX]="convertStringToInt(tx.token_transfer.amount)"></app-stacks-amount></p>
+                    <!-- <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount></p> -->
+                    <p>Fees: <app-stacks-amount [uSTX]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
                   </ng-container>
                   <ng-container *ngSwitchCase="tx.tx_type === 'smart_contract'">
-                    <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount></p>
+                    <!-- <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount></p> -->
+                    <p>Fees: <app-stacks-amount [uSTX]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
+                  </ng-container>
+                  <ng-container *ngSwitchCase="tx.tx_type === 'poison_microblock'">
+                    <p>Microblock Header 1: <span>{{ tx.poison_microblock?.microblock_header_1 | shortenString:16 }}</span></p>
+                    <p>Microblock Header 2: <span>{{ tx.poison_microblock?.microblock_header_1 | shortenString:16 }}</span></p>
+                    <!-- <p>Fees: <app-stacks-amount [satoshis]="tx.feeRateAsNumber"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="tx.feeRateAsNumber"></app-stacks-fiat></span></p> -->
+                    <p>Fees: <app-stacks-amount [uSTX]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
                   </ng-container>
                   <ng-container *ngSwitchDefault>{{tx.tx_type}}</ng-container>
                 </div>
@@ -272,6 +295,20 @@
               <!-- <td class="text-right nowrap amount">
                 <app-stacks-amount  [satoshis]="1000000000"></app-stacks-amount>
               </td> -->
+              <div class="float-right">
+              <ng-container *ngIf="showConfirmations && latestBlock$ | async as latestBlock">
+                <!-- <button *ngIf="tx.status.confirmed; else unconfirmedButton" type="button" class="btn btn-sm btn-success mt-2"> -->
+                <button *ngIf="tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition'; else unconfirmedButton" type="button" class="btn btn-sm btn-success mt-2">
+      
+                  <ng-container *ngTemplateOutlet="latestBlock.height - tx.block_height + 1 == 1 ? confirmationSingular : confirmationPlural; context: {$implicit: latestBlock.height - tx.block_height + 1}"></ng-container>
+                  <ng-template #confirmationSingular let-i i18n="shared.confirmation-count.singular|Transaction singular confirmation count">{{ i }} confirmation</ng-template>
+                  <ng-template #confirmationPlural let-i i18n="shared.confirmation-count.plural|Transaction plural confirmation count">{{ i }} confirmations</ng-template>
+                </button>
+                <ng-template #unconfirmedButton>
+                  <button type="button" class="btn btn-sm btn-danger mt-2" i18n="transaction.unconfirmed|Transaction unconfirmed state">Unconfirmed</button>
+                </ng-template>
+              </ng-container>
+            </div>
             </tr>
             <!-- <ng-template ngFor let-vout let-vindex="index" [ngForOf]="tx.vout.slice(0, getVoutLimit(tx))" [ngForTrackBy]="trackByIndexFn">
               <tr [ngClass]="{
@@ -387,9 +424,8 @@
         </table>
       </div>
     </div>
-    <!-- Section for summary of total BTC -->
-    <!--
-    <div class="summary">
+    <!-- Section for summary of total BTC --> 
+    <!-- <div class="summary">
       <div class="float-left mt-2-5" *ngIf="!transactionPage && !tx.vin[0].is_coinbase && tx.fee !== -1">
         {{ tx.fee / (tx.weight / 4) | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">sat/vB</span> <span class="d-none d-sm-inline-block">&nbsp;&ndash; {{ tx.fee | number }} <span class="symbol" i18n="shared.sat|sat">sat</span> <span class="fiat"><app-fiat [value]="tx.fee"></app-fiat></span></span>
       </div>
@@ -397,8 +433,11 @@
 
       <div class="float-right">
         <ng-container *ngIf="showConfirmations && latestBlock$ | async as latestBlock">
+
           <button *ngIf="tx.status.confirmed; else unconfirmedButton" type="button" class="btn btn-sm btn-success mt-2">
-            <ng-container *ngTemplateOutlet="latestBlock.height - tx.status.block_height + 1 == 1 ? confirmationSingular : confirmationPlural; context: {$implicit: latestBlock.height - tx.status.block_height + 1}"></ng-container>
+          <button *ngIf="tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition'; else unconfirmedButton" type="button" class="btn btn-sm btn-success mt-2">
+
+            <ng-container *ngTemplateOutlet="latestBlock.height - tx.block_height + 1 == 1 ? confirmationSingular : confirmationPlural; context: {$implicit: latestBlock.height - tx.block_height + 1}"></ng-container>
             <ng-template #confirmationSingular let-i i18n="shared.confirmation-count.singular|Transaction singular confirmation count">{{ i }} confirmation</ng-template>
             <ng-template #confirmationPlural let-i i18n="shared.confirmation-count.plural|Transaction plural confirmation count">{{ i }} confirmations</ng-template>
           </button>
@@ -419,8 +458,7 @@
         </ng-template>
       </div>
       <div class="clearfix"></div>
-    </div>
-  -->
+    </div> -->
   </div>
 
   <br />

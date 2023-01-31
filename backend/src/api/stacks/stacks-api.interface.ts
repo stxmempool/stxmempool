@@ -52,6 +52,7 @@ export interface StacksTransactionStripped {
   fee: number;
   vsize: number;
   type: 'token_transfer' | 'smart_contract' | 'contract_call' | 'poison_microblock' | 'coinbase';
+  execution_cost_read_count: number | undefined;
 }
 export interface StacksBlockSummary {
   id: string;
@@ -68,9 +69,40 @@ type Midpoint = MempoolTransaction | Transaction
 
 export type StacksTransactionExtended = Midpoint & {
   feeRateAsNumber: number;
-  firstSeen?: number;
+  firstSeen?: number | null;
   vsize: number;
   feePerVsize: number;
   effectiveFeePerVsize: number;
   deleteAfter?: number;
+  execution_cost_read_count?: number;
+}
+
+export type ProjectedMempoolBlockDetails = {
+  Miner: string;
+  // block_hash: string;
+  // height: number;
+  tx_count: number;
+  // parent_stacks_block_hash: string;
+  // parent_stacks_microblock: string;
+  // parent_stacks_microblock_seq: number;
+  block_size: number;
+  execution_consumed: { 
+    runtime: number; 
+    write_len: number; 
+    write_cnt: number; 
+    read_len: number; 
+    read_cnt: number;
+  };
+  percentage: number;
+  // assembly_time_ms: number;
+  tx_fees_microstacks: number;
+}
+export interface RawProjectedMempoolBlock {
+  tx_ids: string[];
+  blockDetails?: ProjectedMempoolBlockDetails;
+}
+export interface ProjectedMempoolBlock {
+  tx_ids: StacksTransactionExtended[];
+  blockDetails: ProjectedMempoolBlockDetails;
+  transactions: StacksTransactionStripped[];
 }

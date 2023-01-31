@@ -77,11 +77,15 @@ class TransactionUtils {
       vsize: size,
       feePerVsize: feePerVbytes,
       effectiveFeePerVsize: feePerVbytes,
-      firstSeen: 1,
+      firstSeen: null,
     }, transaction);
     if (transaction.tx_status === 'pending') {
       // transactionExtended['firstSeen'] = Math.round((new Date().getTime() / 1000));
       transactionExtended['firstSeen'] = transaction.receipt_time;
+    }
+    // if (transaction.execution_cost_read_count) {
+    if ((<Transaction>transaction).execution_cost_read_count >= 0) {
+      transactionExtended.execution_cost_read_count = (<Transaction>transaction).execution_cost_read_count;
     }
     return transactionExtended;
   }

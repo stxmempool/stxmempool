@@ -86,6 +86,7 @@ export class Common {
       vsize: tx.vsize,
       // place holder value
       type: tx.tx_type,
+      execution_cost_read_count: tx.execution_cost_read_count || 0,
     };
   }
 
@@ -194,6 +195,12 @@ export class Common {
     return (
       Common.indexingEnabled() &&
       config.MEMPOOL.BLOCKS_SUMMARIES_INDEXING === true
+    );
+  }
+  static stacksBlocksSummariesIndexingEnabled(): boolean {
+    return (
+      Common.indexingEnabled() &&
+      config.STACKS.BLOCKS_SUMMARIES_INDEXING === true
     );
   }
 

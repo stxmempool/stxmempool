@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import {
   Block,
   MempoolTransactionListResponse,
@@ -6,12 +6,15 @@ import {
   Transaction,
   MempoolTransaction,
   RosettaBlock,
+  AddressBalanceResponse,
+  AddressTransactionsListResponse,
   RosettaTransaction,
   BlockListResponse,
   TransactionList
 } from '@stacks/stacks-blockchain-api-types';
 import { StacksTransactionCostsAndFees, CustomTransactionList } from "./stacks-api.interface";
 import logger from '../../logger';
+import stacksMempool from './stacks-mempool';
 
 class StacksApi {
   protected network_identifier: { blockchain: string, network: string } = {
@@ -119,6 +122,33 @@ class StacksApi {
     return data.block;
   }
   public async $getVerboseTransactions(transactionIds: string[]): Promise<CustomTransactionList | undefined> {
+  // public async $getVerboseTransactions(transactionIds: string[]): Promise<any> {
+
+    // a solution to get around API rate limiting and query string limits
+    const preparedStrings = transactionIds.map(tx => 'tx_id=' + tx + '&');
+    const chunkSize  = 50;
+    const queryArray: string[][] = [];
+    // const promiseArray: AxiosResponse<CustomTransactionList> []= [];
+    const promiseArray: any = [];
+
+    for (let i = 0; i < preparedStrings.length; i += chunkSize) {
+      queryArray.push(preparedStrings.slice(i, i + chunkSize));
+    }
+    try {
+      for (let i = 0; i < queryArray.length; i++) {
+        const query = queryArray[i].join('');
+        promiseArray.push(axios.get(`https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/multiple?${query}`));
+      }
+      const result: AxiosResponse<CustomTransactionList>[] = await Promise.all(promiseArray);
+      let obj: CustomTransactionList = {};
+      for (let i = 0; i < result.length; i++) {
+        obj = {...obj, ...result[i].data};
+      }
+      return obj;
+    } catch (error) {
+      console.log('error in $getVerbose-->', error);
+    }
+    /*
     // this is a super janky way of splitting up the query strings. Will refactor for an await Promise.all(pendingPromises) solution
     if (transactionIds.length > 50 && transactionIds.length <= 100) {
       try {
@@ -193,6 +223,7 @@ class StacksApi {
         console.log('error in $getVerbose-->', error);
       }
     }
+    */
   }
   public async $getStacksFees(): Promise<MempoolTransactionStatsResponse> {
     const { data } = await axios.get<MempoolTransactionStatsResponse>('https://stacks-node-api.mainnet.stacks.co/extended/v1/tx/mempool/stats');
@@ -202,6 +233,37 @@ class StacksApi {
   public async $getBlockByHash(hash: string): Promise<Block> {
     const { data } = await axios.get<Block>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/block/${hash}`);
     return data;
+  }
+
+  public async $getAddress(address: string): Promise<AddressBalanceResponse> {
+    const { data } = await axios.get<AddressBalanceResponse>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/address/${address}/balances`);
+    return data;
+  }
+
+  // public async $getAddressTransactions(address: string): Promise<(Transaction | MempoolTransaction)[]> {
+  public async $getAddressTransactions(address: string, offset: string = '0'): Promise<{ total: number, transactions: (Transaction | MempoolTransaction)[]}> {
+    const { data } = await axios.get<AddressTransactionsListResponse>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/address/${address}/transactions?limit=25&offset=${offset}`);
+    // return data.results;
+    return {
+      total: data.total,
+      transactions: data.results,
+    };
+  }
+  public async $getAddressPrefix(prefix: string): Promise<string[]> {
+    const found: { [address: string]: string } = {};
+    const mp = stacksMempool.getMempool();
+    for (const tx in mp) {
+      if(mp[tx].sender_address.includes(prefix)) {
+        found[mp[tx].sender_address] = '';
+        if (Object.keys(found).length >= 10) {
+          return Object.keys(found);
+        }
+      } 
+    }
+    return Object.keys(found);
+  }
+  public async $getAddressTotalNumberOfTransactions(address: string) {
+    const { data } = await axios.get(`https://stacks-node-api.mainnet.stacks.co/extended/v1/address/${address}/transactions`)
   }
 }
 

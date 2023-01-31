@@ -9,8 +9,8 @@ import { StacksTransactionStripped } from '../stacks.interfaces';
   styleUrls: ['./stacks-block-overview-tooltip.component.scss'],
 })
 export class StacksBlockOverviewTooltipComponent implements OnChanges {
-  @Input() tx: TransactionStripped | void;
-  // @Input() tx: StacksTransactionStripped | void;
+  // @Input() tx: TransactionStripped | void;
+  @Input() tx: StacksTransactionStripped | void;
 
   @Input() cursorPosition: Position;
   @Input() clickable: boolean;
@@ -20,6 +20,7 @@ export class StacksBlockOverviewTooltipComponent implements OnChanges {
   value = 0;
   vsize = 1;
   feeRate = 0;
+  readCount = 0;
 
   tooltipPosition: Position = { x: 0, y: 0 };
 

@@ -27,9 +27,7 @@ import { StacksBlockComponent } from '../stacks/stacks-block/stacks-block.compon
 import { StacksMempoolBlocksComponent } from '../stacks/stacks-mempool-blocks/stacks-mempool-blocks.component';
 import { StacksMempoolBlockComponent } from './stacks-mempool-block/stacks-mempool-block.component';
 import { StacksTransactionComponent } from './stacks-transaction/stacks-transaction.component';
-
-
-
+import { StacksAddressComponent } from './stacks-address/stacks-address.component';
 
 
 
@@ -71,6 +69,15 @@ const routes: Routes = [
         }
       },
     ],
+  },
+  {
+    path: 'address/:id',
+    children: [],
+    component: StacksAddressComponent,
+    data: {
+      ogImage: true,
+      networkSpecific: true,
+    }
   },
   {
     path: 'tx',

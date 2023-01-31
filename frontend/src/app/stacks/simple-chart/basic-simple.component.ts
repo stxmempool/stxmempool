@@ -1,11 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-basic-simple',
   templateUrl: './basic-simple.component.html',
   styleUrls: ['./basic-simple.component.scss'],
 })
-export class BasicSimpleComponent implements OnInit {
+export class BasicSimpleComponent implements OnChanges {
   @Input() readCount: number;
   @Input() readLength: number;
   @Input() runtime: number;
@@ -16,11 +16,13 @@ export class BasicSimpleComponent implements OnInit {
   readLengthLimit: number = 100000000;
   writeCountLimit: number = 15000;
   writeLengthLimit: number = 15000000;
+  showGraph = false;
 
   options: any;
   constructor() { }
 
-  ngOnInit(): void {
+  ngOnChanges(): void {
+    this.showGraph = false;
     const xAxisData = ['Runtime', 'Read Count', 'Read Length', 'Write Count', 'Write Length'];
     this.options = {
       xAxis: {
@@ -97,5 +99,6 @@ export class BasicSimpleComponent implements OnInit {
       animationDelayUpdate: (idx) => idx * 5,
     };
     console.log(this.options);
+    this.showGraph = true;
   }
 }

@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 import { AssetsService } from '../../services/assets.service';
 import { filter, map, tap, switchMap } from 'rxjs/operators';
 import { BlockExtended } from '../../interfaces/node-api.interface';
-import { StacksTransactionExtended, MinedStacksTransactionExtended } from '../stacks.interfaces';
+import { StacksTransactionExtended, MinedStacksTransactionExtended, StacksBlockExtended } from '../stacks.interfaces';
 import { ApiService } from '../../services/api.service';
 import { MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
 
@@ -40,8 +40,8 @@ import { MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
   styleUrls: ['./stacks-transactions-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-// export class StacksTransactionsListComponent implements OnInit, OnChanges {
-export class StacksTransactionsListComponent implements OnInit {
+export class StacksTransactionsListComponent implements OnInit, OnChanges {
+// export class StacksTransactionsListComponent implements OnInit {
 
   network = '';
   nativeAssetId = this.stateService.network === 'liquidtestnet' ? environment.nativeTestAssetId : environment.nativeAssetId;
@@ -63,7 +63,11 @@ export class StacksTransactionsListComponent implements OnInit {
 
   @Output() loadMore = new EventEmitter();
 
-  latestBlock$: Observable<BlockExtended>;
+  // latestBlock$: Observable<BlockExtended>;
+  // latestBlock$: Observable<StacksBlockExtended>;
+  latestBlock$: Observable<any>;
+
+
   outspendsSubscription: Subscription;
   refreshOutspends$: ReplaySubject<string[]> = new ReplaySubject();
   refreshChannels$: ReplaySubject<string[]> = new ReplaySubject();
@@ -77,19 +81,21 @@ export class StacksTransactionsListComponent implements OnInit {
     public stateService: StateService,
     private electrsApiService: ElectrsApiService,
     private apiService: ApiService,
-    private assetsService: AssetsService,
+    // private assetsService: AssetsService,
     private ref: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
     this.latestBlock$ = this.stateService.blocks$.pipe(map(([block]) => block));
+    // this.latestBlock$ = this.stateService.stacksBlocks$.pipe(map(([block]) => block));
+
     this.stateService.networkChanged$.subscribe((network) => this.network = network);
 
-    if (this.network === 'liquid' || this.network === 'liquidtestnet') {
-      this.assetsService.getAssetsMinimalJson$.subscribe((assets) => {
-        this.assetsMinimal = assets;
-      });
-    }
+    // if (this.network === 'liquid' || this.network === 'liquidtestnet') {
+    //   this.assetsService.getAssetsMinimalJson$.subscribe((assets) => {
+    //     this.assetsMinimal = assets;
+    //   });
+    // }
 
     // this.outspendsSubscription = merge(
     //   this.refreshOutspends$
@@ -132,60 +138,60 @@ export class StacksTransactionsListComponent implements OnInit {
     // ).subscribe(() => this.ref.markForCheck());
   }
 
-  // ngOnChanges(changes): void {
-  //   if (changes.inputIndex || changes.outputIndex || changes.rowLimit) {
-  //     this.inputRowLimit = Math.max(this.rowLimit, (this.inputIndex || 0) + 3);
-  //     this.outputRowLimit = Math.max(this.rowLimit, (this.outputIndex || 0) + 3);
-  //     if ((this.inputIndex || this.outputIndex) && !changes.transactions) {
-  //       setTimeout(() => {
-  //         const assetBoxElements = document.getElementsByClassName('assetBox');
-  //         if (assetBoxElements && assetBoxElements[0]) {
-  //           assetBoxElements[0].scrollIntoView({block: "center"});
-  //         }
-  //       }, 10);
-  //     }
-  //   }
-  //   if (changes.transactions || changes.address) {
-  //     if (!this.transactions || !this.transactions.length) {
-  //       return;
-  //     }
+  ngOnChanges(changes): void {
+    if (changes.inputIndex || changes.outputIndex || changes.rowLimit) {
+      this.inputRowLimit = Math.max(this.rowLimit, (this.inputIndex || 0) + 3);
+      this.outputRowLimit = Math.max(this.rowLimit, (this.outputIndex || 0) + 3);
+      if ((this.inputIndex || this.outputIndex) && !changes.transactions) {
+        setTimeout(() => {
+          const assetBoxElements = document.getElementsByClassName('assetBox');
+          if (assetBoxElements && assetBoxElements[0]) {
+            assetBoxElements[0].scrollIntoView({block: "center"});
+          }
+        }, 10);
+      }
+    }
+    if (changes.transactions || changes.address) {
+      if (!this.transactions || !this.transactions.length) {
+        return;
+      }
 
-  //     this.transactionsLength = this.transactions.length;
-  //     this.stateService.setTxCache(this.transactions);
+      this.transactionsLength = this.transactions.length;
+      this.stateService.setTxCache(this.transactions);
 
-  //     this.transactions.forEach((tx) => {
-  //       tx['@voutLimit'] = true;
-  //       tx['@vinLimit'] = true;
-  //       if (tx['addressValue'] !== undefined) {
-  //         return;
-  //       }
+      // this.transactions.forEach((tx) => {
+      //   tx['@voutLimit'] = true;
+      //   tx['@vinLimit'] = true;
+      //   if (tx['addressValue'] !== undefined) {
+      //     return;
+      //   }
 
-  //       if (this.address) {
-  //         const addressIn = tx.vout
-  //           .filter((v: Vout) => v.scriptpubkey_address === this.address)
-  //           .map((v: Vout) => v.value || 0)
-  //           .reduce((a: number, b: number) => a + b, 0);
+      //   if (this.address) {
+      //     const addressIn = tx.vout
+      //       .filter((v: Vout) => v.scriptpubkey_address === this.address)
+      //       .map((v: Vout) => v.value || 0)
+      //       .reduce((a: number, b: number) => a + b, 0);
 
-  //         const addressOut = tx.vin
-  //           .filter((v: Vin) => v.prevout && v.prevout.scriptpubkey_address === this.address)
-  //           .map((v: Vin) => v.prevout.value || 0)
-  //           .reduce((a: number, b: number) => a + b, 0);
+      //     const addressOut = tx.vin
+      //       .filter((v: Vin) => v.prevout && v.prevout.scriptpubkey_address === this.address)
+      //       .map((v: Vin) => v.prevout.value || 0)
+      //       .reduce((a: number, b: number) => a + b, 0);
 
-  //         tx['addressValue'] = addressIn - addressOut;
-  //       }
-  //     });
-  //     const txIds = this.transactions.filter((tx) => !tx._outspends).map((tx) => tx.txid);
-  //     if (txIds.length) {
-  //       this.refreshOutspends$.next(txIds);
-  //     }
-  //     if (this.stateService.env.LIGHTNING) {
-  //       const txIds = this.transactions.filter((tx) => !tx._channels).map((tx) => tx.txid);
-  //       if (txIds.length) {
-  //         this.refreshChannels$.next(txIds);
-  //       }
-  //     }
-  //   }
-  // }
+      //     tx['addressValue'] = addressIn - addressOut;
+      //   }
+      // });
+      // const txIds = this.transactions.filter((tx) => !tx._outspends).map((tx) => tx.txid);
+      // if (txIds.length) {
+      //   this.refreshOutspends$.next(txIds);
+      // }
+      // if (this.stateService.env.LIGHTNING) {
+      //   const txIds = this.transactions.filter((tx) => !tx._channels).map((tx) => tx.txid);
+      //   if (txIds.length) {
+      //     this.refreshChannels$.next(txIds);
+      //   }
+      // }
+    }
+  }
 
   onScroll(): void {
     const scrollHeight = document.body.scrollHeight;
@@ -193,6 +199,7 @@ export class StacksTransactionsListComponent implements OnInit {
     if (scrollHeight > 0){
       const percentageScrolled = scrollTop * 100 / scrollHeight;
       if (percentageScrolled > 70){
+        console.log(percentageScrolled);
         this.loadMore.emit();
       }
     }
@@ -222,6 +229,9 @@ export class StacksTransactionsListComponent implements OnInit {
 
   trackByIndexFn(index: number): number {
     return index;
+  }
+  convertStrToNum(string: string): number {
+    return Number(string);
   }
 
   formatHex(num: number): string {

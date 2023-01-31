@@ -22,7 +22,7 @@
             </tr>
             <tr>
               <td i18n="block.total-fees|Total fees in a block">Total fees</td>
-              <td><app-stacks-amount [satoshis]="mempoolBlock.totalFees" [digitsInfo]="'1.2-2'" [noFiat]="true"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="mempoolBlock.totalFees" digitsInfo="1.0-3"></app-stacks-fiat></span></td>
+              <td><app-stacks-amount [uSTX]="mempoolBlock.totalFees" [digitsInfo]="'1.2-2'" [noFiat]="true"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="mempoolBlock.totalFees" digitsInfo="1.0-3"></app-stacks-fiat></span></td>
             </tr>
             <tr>
               <td i18n="mempool-block.transactions">Transactions</td>

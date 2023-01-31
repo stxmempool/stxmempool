@@ -15,6 +15,14 @@
   right: 0px;
   left: 0px;
 }
+.block-height {
+  position: absolute;
+  font-size: 16px;
+  bottom: 160px;
+  width: 100%;
+  left: -12px;
+  z-index: 1;
+}
 
 .flashing {
   /* force compositing */

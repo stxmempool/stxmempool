@@ -75,7 +75,7 @@
                   <tr>
                     <td i18n="block.total-fees|Total fees in a block">Total fees</td>
                     <td *ngIf="network !== 'liquid' && network !== 'liquidtestnet'; else liquidTotalFees">
-                      <app-stacks-amount [satoshis]="block.extras.totalFees" digitsInfo="1.2-3" [noFiat]="true"></app-stacks-amount>
+                      <app-stacks-amount [uSTX]="block.extras.totalFees" digitsInfo="1.2-3" [noFiat]="true"></app-stacks-amount>
                       <span class="fiat">
                         <app-stacks-fiat [value]="block.extras.totalFees" digitsInfo="1.0-0"></app-stacks-fiat>
                       </span>
@@ -90,7 +90,7 @@
                   <tr *ngIf="network !== 'liquid' && network !== 'liquidtestnet'">
                     <td i18n="block.subsidy-and-fees|Total subsidy and fees in a block">Subsidy + fees:</td>
                     <td>
-                      <app-stacks-amount [satoshis]="block.extras.reward + block.extras.totalFees" digitsInfo="1.2-3" [noFiat]="true"></app-stacks-amount>
+                      <app-stacks-amount [uSTX]="block.extras.reward + block.extras.totalFees" digitsInfo="1.2-3" [noFiat]="true"></app-stacks-amount>
                       <span class="fiat">
                         <app-stacks-fiat [value]="(blockSubsidy + fees) * 100000000" digitsInfo="1.0-0"></app-stacks-fiat>
                       </span>
@@ -120,7 +120,9 @@
 
                     <!-- <span placement="bottom" class="badge" > -->
                       <!-- [class]="block.extras.pool.name === 'Unknown' ? 'badge-secondary' : 'badge-primary'"> -->
+                    <a placement="bottom" [routerLink]="['/address' | relativeUrl, block.minerAddress]">
                       {{ block.minerAddress | shortenString: 16 }}
+                    </a>
                   <!-- </span> -->
                   </td>
                 </tr>
@@ -259,8 +261,8 @@
           <app-stacks-block-overview-graph
             #blockGraphActual
             [isLoading]="isLoadingOverview"
-            [resolution]="75"
-            [blockLimit]="stateService.blockVSize"
+            [resolution]="45"
+            [blockLimit]="15000"
             [orientation]="'top'"
             [flip]="false"
             (txClickEvent)="onTxClick($event)"
@@ -285,76 +287,32 @@
     <div class="row">
       <div class="col-sm">
         <h3 class="block-subtitle" *ngIf="!isMobile" i18n="block.projected-block">Projected Block</h3>
-        <app-block-overview-graph #blockGraphProjected [isLoading]="isLoadingOverview" [resolution]="75"
+        <!-- <app-block-overview-graph #blockGraphProjected [isLoading]="isLoadingOverview" [resolution]="75"
           [blockLimit]="stateService.blockVSize" [orientation]="'top'" [flip]="false" [mirrorTxid]="hoverTx"
-          (txClickEvent)="onTxClick($event)" (txHoverEvent)="onTxHover($event)" [unavailable]="!isMobile && !auditEnabled"></app-block-overview-graph> 
+          (txClickEvent)="onTxClick($event)" (txHoverEvent)="onTxHover($event)" [unavailable]="!isMobile && !auditEnabled"></app-block-overview-graph> -->
+        <app-stacks-block-overview-graph #blockGraphProjected [isLoading]="isLoadingOverview" [resolution]="75"
+          [blockLimit]="stateService.blockVSize" [orientation]="'top'" [flip]="false" [mirrorTxid]="hoverTx"
+          (txClickEvent)="onTxClick($event)" (txHoverEvent)="onTxHover($event)" [unavailable]="!isMobile && !auditEnabled"></app-stacks-block-overview-graph>
       </div>
       <div class="col-sm" *ngIf="!isMobile">
         <h3 class="block-subtitle" *ngIf="!isMobile" i18n="block.actual-block">Actual Block</h3>
-        <app-block-overview-graph #blockGraphActual [isLoading]="isLoadingOverview" [resolution]="75"
+        <!-- <app-block-overview-graph #blockGraphActual [isLoading]="isLoadingOverview" [resolution]="75"
           [blockLimit]="stateService.blockVSize" [orientation]="'top'" [flip]="false" [mirrorTxid]="hoverTx" mode="mined"
-          (txClickEvent)="onTxClick($event)" (txHoverEvent)="onTxHover($event)" [unavailable]="isMobile && !auditEnabled"></app-block-overview-graph>
+          (txClickEvent)="onTxClick($event)" (txHoverEvent)="onTxHover($event)" [unavailable]="isMobile && !auditEnabled"></app-block-overview-graph> -->
+          <app-stacks-block-overview-graph #blockGraphActual [isLoading]="isLoadingOverview" [resolution]="75"
+          [blockLimit]="stateService.blockVSize" [orientation]="'top'" [flip]="false" [mirrorTxid]="hoverTx" mode="mined"
+          (txClickEvent)="onTxClick($event)" (txHoverEvent)="onTxHover($event)" [unavailable]="isMobile && !auditEnabled"></app-stacks-block-overview-graph>
       </div>
     </div>
   </div>
   
   <ng-template [ngIf]="!isLoadingBlock && !error">
-    <div [hidden]="!showDetails" id="details">
-      <br>
-
-      <div class="box">
-        <div class="row">
-          <div class="col-sm">
-            <table class="table table-borderless table-striped">
-              <tbody>
-                <tr>
-                  <td class="td-width" i18n="transaction.version">Version</td>
-                  <td>{{ block.version | decimal2hex }} <span *ngIf="displayTaprootStatus() && hasTaproot(block.version)" class="badge badge-success ml-1" >Taproot</span></td>
-                </tr>
-                <tr *ngIf="network !== 'liquid' && network !== 'liquidtestnet'">
-                  <td i18n="block.bits">Bits</td>
-                  <td>{{ block.bits | decimal2hex }}</td>
-                </tr>
-                <tr>
-                  <td i18n="block.merkle-root">Merkle root</td>
-                  <td><p class="break-all">{{ block.merkle_root }}</p></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="col-sm" *ngIf="network !== 'liquid' && network !== 'liquidtestnet'">
-            <table class="table table-borderless table-striped">
-              <tbody>
-                <tr *ngIf="isMobile"></tr>
-                <tr>
-                  <td class="td-width" i18n="block.difficulty">Difficulty</td>
-                  <td>{{ block.difficulty }}</td>
-                </tr>
-                <tr>
-                  <td i18n="block.nonce">Nonce</td>
-                  <td>{{ block.nonce | decimal2hex }}</td>
-                </tr>
-                <tr>
-                  <td i18n="block.header">Block Header Hex</td>
-                  <td><a target="_blank" href="{{ network === '' ? '' : '/' + network }}/api/block/{{block.id}}/header"><fa-icon [icon]="['fas', 'external-link-alt']" [fixedWidth]="true"></fa-icon></a></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- <div class="text-right mt-3">
-      <button type="button" class="btn btn-outline-info btn-sm btn-details" (click)="toggleShowDetails()" i18n="transaction.details|Transaction Details">Details</button>
-    </div> -->
     <br>
     <div class="title float-left">
       <h2 id="flow" i18n="transaction.flow|Execution Costs">Execution Costs</h2>
     </div>
     <div class="clearfix"></div>
     <div class="box">
-      <!-- <div class="graph-container" #graphContainer> -->
         <div class="col-sm chart-container">
         <app-basic-simple
         [readCount]="block.execution_cost_read_count"

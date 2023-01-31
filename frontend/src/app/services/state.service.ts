@@ -7,6 +7,7 @@ import { Router, NavigationStart } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { map, shareReplay } from 'rxjs/operators';
 import { StorageService } from './storage.service';
+import { StacksBlockExtended } from '../stacks/stacks.interfaces';
 
 interface MarkBlockState {
   blockHeight?: number;
@@ -90,6 +91,8 @@ export class StateService {
   networkChanged$ = new ReplaySubject<string>(1);
   lightningChanged$ = new ReplaySubject<boolean>(1);
   blocks$: ReplaySubject<[BlockExtended, boolean]>;
+  stacksBlocks$: ReplaySubject<[StacksBlockExtended, boolean]>;
+
   transactions$ = new ReplaySubject<TransactionStripped>(6);
   conversions$ = new ReplaySubject<any>(1);
   bsqPrice$ = new ReplaySubject<number>(1);
@@ -97,8 +100,14 @@ export class StateService {
   // mempoolBlocks$ = new ReplaySubject<MempoolBlock[]>(1);
   mempoolBlocks$ = new ReplaySubject<any[]>(1);
 
-  mempoolBlockTransactions$ = new Subject<TransactionStripped[]>();
-  mempoolBlockDelta$ = new Subject<MempoolBlockDelta>();
+  // THIS WILL HAVE TO BE CHANGED WHEN WE GET CLOSER TO CHOOSING HOW TO REPRESENT THE MEMPOOL, WILL IT BE A STATIC BLOCK?
+
+  // mempoolBlockTransactions$ = new Subject<TransactionStripped[]>();
+  // mempoolBlockDelta$ = new Subject<MempoolBlockDelta>();
+  
+  mempoolBlockTransactions$ = new Subject<any[]>();
+  mempoolBlockDelta$ = new Subject<any>();
+
   txReplaced$ = new Subject<ReplacedTransaction>();
   utxoSpent$ = new Subject<object>();
   difficultyAdjustment$ = new ReplaySubject<DifficultyAdjustment>(1);
@@ -160,12 +169,18 @@ export class StateService {
     });
 
     this.blocks$ = new ReplaySubject<[BlockExtended, boolean]>(this.env.KEEP_BLOCKS_AMOUNT);
+    this.stacksBlocks$ = new ReplaySubject<[StacksBlockExtended, boolean]>(this.env.KEEP_BLOCKS_AMOUNT);
+
     if (this.env.BASE_MODULE === 'bisq') {
       this.network = this.env.BASE_MODULE;
       this.networkChanged$.next(this.env.BASE_MODULE);
     }
+    if (this.env.STACKS_ENABLED) {
+      this.blockVSize = 15000;
+    } else {
+      this.blockVSize = this.env.BLOCK_WEIGHT_UNITS / 4;
+    }
 
-    this.blockVSize = this.env.BLOCK_WEIGHT_UNITS / 4;
 
     const savedTimePreference = this.storageService.getValue('time-preference-ltr');
     const rtlLanguage = (this.locale.startsWith('ar') || this.locale.startsWith('fa') || this.locale.startsWith('he'));

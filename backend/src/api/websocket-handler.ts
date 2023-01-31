@@ -124,11 +124,15 @@ class WebsocketHandler {
             if (Number.isInteger(parsedMessage['track-mempool-block']) && parsedMessage['track-mempool-block'] >= 0) {
               const index = parsedMessage['track-mempool-block'];
               client['track-mempool-block'] = index;
-              // const mBlocksWithTransactions = mempoolBlocks.getMempoolBlocksWithTransactions();
-              const mBlocksWithTransactions = stacksMempoolBlocks.getMempoolBlocksWithTransactions();
+              const mBlocksWithTransactions = mempoolBlocks.getMempoolBlocksWithTransactions();
+              // const mBlocksWithTransactions = stacksMempoolBlocks.getMempoolBlocksWithTransactions();
+              // const mBlocksWithTransactions = stacksMempoolBlocks.getMempoolBlocksWithTransactions();
+              // const mBlocksWithTransactions = stacksMempoolBlocks.getProjectedBlockWithTransactions();
+              // console.log('mBlocksWithTransactions', mBlocksWithTransactions);
               response['projected-block-transactions'] = {
                 index: index,
                 blockTransactions: mBlocksWithTransactions[index]?.transactions || [],
+                // blockTransactions: mBlocksWithTransactions.transactions || [],
               };
             } else {
               client['track-mempool-block'] = null;
@@ -218,6 +222,11 @@ class WebsocketHandler {
       // _blocks = blocks.getBlocks().slice(-config.MEMPOOL.INITIAL_BLOCKS_AMOUNT);
       const _blocks = stacksBlocks.getBlocks().slice(-2);
     }
+    // const mBlocks = stacksMempoolBlocks.getMempoolBlocks();
+    // const mProjectedBlock = stacksMempoolBlocks.getProjectedBlock();
+    // const mProjectedBlock = stacksMempoolBlocks.getProjectedBlockWithTransactions();
+    // const allMBlocks = mBlocks;
+    // allMBlocks.unshift(mProjectedBlock);
     // return {
     //   'mempoolInfo': memPool.getMempoolInfo(),
     //   'vBytesPerSecond': memPool.getVBytesPerSecond(),
@@ -237,6 +246,8 @@ class WebsocketHandler {
       'blocks': _blocks,
       'conversions': fiatConversion.getConversionRates(),
       'mempool-blocks': stacksMempoolBlocks.getMempoolBlocks(),
+      // 'mempool-blocks': stacksMempoolBlocks.getProjectedBlock(),
+      // 'mempool-blocks': allMBlocks,
       'transactions': stacksMempool.getLatestTransactions(),
       'backendInfo': backendInfo.getBackendInfo(),
       'loadingIndicators': loadingIndicators.getLoadingIndicators(),
@@ -273,7 +284,11 @@ class WebsocketHandler {
     // stacksMempoolBlocks.updateMempoolBlocks(newMempool);
     stacksMempoolBlocks.updateMempoolBlocks(newMempool);
     const mBlocks = stacksMempoolBlocks.getMempoolBlocks();
-    const mBlockDeltas = stacksMempoolBlocks.getMempoolBlockDeltas();
+    // const mProjectedBlock = stacksMempoolBlocks.getProjectedBlock();
+    // const mProjectedBlock = stacksMempoolBlocks.getProjectedBlockWithTransactions();
+    // const allMBlocks = mBlocks;
+    // allMBlocks.unshift(mProjectedBlock);
+    // const mBlockDeltas = stacksMempoolBlocks.getMempoolBlockDeltas();
     const mempoolInfo = stacksMempool.getMempoolInfo();
     const vBytesPerSecond = stacksMempool.getVBytesPerSecond();
     const da = difficultyAdjustment.getDifficultyAdjustment();
@@ -299,17 +314,19 @@ class WebsocketHandler {
       }
       if (client['want-mempool-blocks']) {
         response['mempool-blocks'] = mBlocks;
+        // response['mempool-blocks'] = allMBlocks;
+
       }
 
-      if (client['track-mempool-block'] >= 0) {
-        const index = client['track-mempool-block'];
-        if (mBlockDeltas[index]) {
-          response['projected-block-transactions'] = {
-            index: index,
-            delta: mBlockDeltas[index],
-          };
-        }
-      }
+      // if (client['track-mempool-block'] >= 0) {
+      //   const index = client['track-mempool-block'];
+      //   if (mBlockDeltas[index]) {
+      //     response['projected-block-transactions'] = {
+      //       index: index,
+      //       delta: mBlockDeltas[index],
+      //     };
+      //   }
+      // }
       if (Object.keys(response).length) {
         client.send(JSON.stringify(response));
       }

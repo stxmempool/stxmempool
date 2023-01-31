@@ -411,6 +411,12 @@ export class StacksTransactionComponent implements OnInit, AfterViewInit, OnDest
   }
 
   setFlowEnabled() {
+    // console.log(this.tx);
+    // if((this.tx.tx_status === 'success' || this.tx.tx_status === 'abort_by_response' || this.tx.tx_status === 'abort_by_post_condition') && (this.tx.tx_type !== 'coinbase' && this.tx.tx_type !== 'token_transfer')) {
+    //   this.flowEnabled = true;
+    // } else {
+    //   this.flowEnabled = false;
+    // }
     this.flowEnabled = (this.overrideFlowPreference != null ? this.overrideFlowPreference : !this.hideFlow);
   }
 
@@ -434,6 +440,12 @@ export class StacksTransactionComponent implements OnInit, AfterViewInit, OnDest
       }
     }
   }
+  parseContractName (contractId: string): string {
+    return contractId.slice(contractId.indexOf('.') + 1);
+  }
+  convertTxType(txType: string): string {
+    return txType.replace(/_/g, ' ');
+  }
 
   @HostListener('window:resize', ['$event'])
   setGraphSize(): void {
@@ -444,7 +456,7 @@ export class StacksTransactionComponent implements OnInit, AfterViewInit, OnDest
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-    this.fetchCpfpSubscription.unsubscribe();
+    // this.fetchCpfpSubscription.unsubscribe();
     this.txReplacedSubscription.unsubscribe();
     this.blocksSubscription.unsubscribe();
     this.queryParamsSubscription.unsubscribe();

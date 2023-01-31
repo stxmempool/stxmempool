@@ -131,6 +131,8 @@ interface IConfig {
     BLOCK_MAX_SIZE: number;
     INITIAL_BLOCKS_AMOUNT: number;
     MEMPOOL_BLOCKS_AMOUNT: number;
+    BLOCKS_SUMMARIES_INDEXING: boolean;
+    INDEXING_BLOCKS_AMOUNT: number;
   },
 }
 
@@ -263,6 +265,8 @@ const defaults: IConfig = {
     'BLOCK_MAX_SIZE': 2000000,
     'INITIAL_BLOCKS_AMOUNT': 8,
     'MEMPOOL_BLOCKS_AMOUNT': 8,
+    'BLOCKS_SUMMARIES_INDEXING': true,
+    'INDEXING_BLOCKS_AMOUNT': 11000, // 0 = disable indexing, -1 = index all blocks
   },
 };
 

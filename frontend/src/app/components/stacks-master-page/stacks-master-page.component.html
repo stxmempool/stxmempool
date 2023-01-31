@@ -16,21 +16,6 @@
     </ng-container>
   </a>
 
-  <!-- <div ngbDropdown (window:resize)="onResize($event)" class="dropdown-container" *ngIf="env.TESTNET_ENABLED || env.SIGNET_ENABLED || env.LIQUID_ENABLED || env.BISQ_ENABLED || env.LIQUID_TESTNET_ENABLED || env.STACKS_ENABLED">
-    <button ngbDropdownToggle type="button" class="btn btn-secondary dropdown-toggle-split" aria-haspopup="true">
-      <app-svg-images name="stacks" width="25" height="25" viewBox="0 0 75 75" style="width: 25px; height: 25px;" class="mainnet mr-1"></app-svg-images>
-    </button>
-    <div ngbDropdownMenu [ngClass]="{'dropdown-menu-right' : isMobile}">
-      <a [href]="env.MEMPOOL_WEBSITE_URL + urlLanguage + (networkPaths['mainnet'] || '/')" ngbDropdownItem class="mainnet"><app-svg-images name="bitcoin" width="22" height="22" viewBox="0 0 65 65" style="width: 25px; height: 25px;" class="mainnet mr-1"></app-svg-images> Mainnet</a>
-      <a [href]="env.MEMPOOL_WEBSITE_URL + urlLanguage + (networkPaths['signet'] || '/signet')" ngbDropdownItem *ngIf="env.SIGNET_ENABLED" class="signet"><app-svg-images name="signet" width="22" height="22" viewBox="0 0 65 65" style="width: 25px; height: 25px;" class="mainnet mr-1"></app-svg-images> Signet</a>
-      <a [href]="env.MEMPOOL_WEBSITE_URL + urlLanguage + (networkPaths['testnet'] || '/testnet')" ngbDropdownItem *ngIf="env.TESTNET_ENABLED" class="testnet"><app-svg-images name="testnet" width="22" height="22" viewBox="0 0 65 65" style="width: 25px; height: 25px;" class="mainnet mr-1"></app-svg-images> Testnet</a>
-      <h6 class="dropdown-header" i18n="master-page.layer2-networks-header">Layer 2 Networks</h6>
-      <a ngbDropdownItem class="mainnet active" [routerLink]="networkPaths['bisq'] || '/'"><app-svg-images name="bisq" width="20" height="20" viewBox="0 0 75 75" style="width: 25px; height: 25px;" class="mainnet mr-1"></app-svg-images> Bisq</a>
-      <a [href]="env.LIQUID_WEBSITE_URL + urlLanguage + (networkPaths['liquid'] || '/')" ngbDropdownItem *ngIf="env.LIQUID_ENABLED" class="liquid"><app-svg-images name="liquid" width="22" height="22" viewBox="0 0 125 125" style="width: 25px; height: 25px;" class="mainnet mr-1"></app-svg-images> Liquid</a>
-      <a [href]="env.LIQUID_WEBSITE_URL + urlLanguage + (networkPaths['liquidtestnet'] || '/testnet')" ngbDropdownItem *ngIf="env.LIQUID_TESTNET_ENABLED" class="liquidtestnet"><app-svg-images name="liquidtestnet" width="22" height="22" viewBox="0 0 125 125" style="width: 25px; height: 25px;" class="mainnet mr-1"></app-svg-images> Liquid Testnet</a>
-      <a [href]="env.STACKS_WEBSITE_URL + urlLanguage + (networkPaths['stacks'] || '/')" ngbDropdownItem *ngIf="env.STACKS_ENABLED" class="liquid"><app-svg-images name="stacks" width="22" height="22" viewBox="0 0 125 125" style="width: 25px; height: 25px;" class="mainnet mr-1"></app-svg-images> Stacks</a>
-    </div>
-  </div> -->
   <div style="height: 35px; width: 35px; margin-right: 15px;">
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 159.8 159.8" style="enable-background:new 0 0 159.8 159.8;" xml:space="preserve">
       <style type="text/css">
@@ -43,27 +28,7 @@
   </div>
   
   <div class="navbar-collapse" id="navbarCollapse">
-    <!-- <ul class="navbar-nav">
-      <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" id="btn-home">
-        <a class="nav-link" [routerLink]="['/' | relativeUrl]" (click)="collapse()"><fa-icon [icon]="['fas', 'tachometer-alt']" [fixedWidth]="true" i18n-title="master-page.dashboard" title="Dashboard"></fa-icon></a>
-      </li>
-      <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" id="btn-transactions">
-        <a class="nav-link" [routerLink]="['/transactions']" (click)="collapse()"><fa-icon [icon]="['fas', 'list']" [fixedWidth]="true" i18n-title="master-page.transactions" title="Transactions"></fa-icon></a>
-      </li>
-      <li class="nav-item" routerLinkActive="active" id="btn-blocks">
-        <a class="nav-link" [routerLink]="['/blocks']" (click)="collapse()"><fa-icon [icon]="['fas', 'cubes']" [fixedWidth]="true" i18n-title="master-page.blocks" title="Blocks"></fa-icon></a>
-      </li>
-      <li class="nav-item" routerLinkActive="active" id="btn-stats">
-        <a class="nav-link" [routerLink]="['/stats']" (click)="collapse()"><fa-icon [icon]="['fas', 'file-alt']" [fixedWidth]="true"  i18n-title="master-page.stats" title="Stats"></fa-icon></a>
-      </li>
-      <li class="nav-item" routerLinkActive="active" id="btn-docs">
-        <a class="nav-link" [routerLink]="['/docs']" (click)="collapse()"><fa-icon [icon]="['fas', 'book']" [fixedWidth]="true"  i18n-title="master-page.docs" title="Docs"></fa-icon></a>
-      </li>
-      <li class="nav-item" routerLinkActive="active" id="btn-about">
-        <a class="nav-link" [routerLink]="['/about']" (click)="collapse()"><fa-icon [icon]="['fas', 'info-circle']" [fixedWidth]="true" i18n-title="master-page.about" title="About"></fa-icon></a>
-      </li>
-    </ul> -->
-    <app-search-form class="search-form-container" location="top" (searchTriggered)="collapse()"></app-search-form>
+    <app-stacks-search-form class="search-form-container" location="top" (searchTriggered)="collapse()"></app-stacks-search-form>
   </div>
 </nav>
 </header>
