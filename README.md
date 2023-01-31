@@ -2,7 +2,7 @@
 
 Stxmempool is an adaptation of The Mempool Open Source Project™. Stxmempool is a mempool visualizer for the the Stacks blockchain ecosystem. A live site is available at [stxmempool.space](https://stxmempool.space/).
 
-It is an open-source project developed and operated for the benefit of the Bitcoin and Stacks community, with a focus on the emerging transaction fee market.
+The open-source project is developed and operated for the benefit of the Bitcoin and Stacks community, with a focus on the emerging transaction fee market.
 
 ![mempool](https://stxmempool.space/resources/screenshots/stacks-v1.1-dashboard.png)
 
