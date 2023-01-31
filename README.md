@@ -10,7 +10,7 @@ The open-source project is developed and operated for the benefit of the Bitcoin
 
 ## Operating System
 
-This repo was adapted on a M1 Macbook Pro. We suggest using a Lunux or Mac OS. However, there are limitations with M1 chips, see below.
+This repo was developed on a M1 Macbook Pro. We suggest using Linux or Mac OS. However, there are limitations with M1 chips, see below.
 
 ### Running a fully independant instance
 
