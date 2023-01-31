@@ -1,4 +1,5 @@
 import { Block, Transaction, MempoolTransaction, TransactionFound } from '@stacks/stacks-blockchain-api-types';
+import { IBackendInfo, IConversionRates, IDifficultyAdjustment, ILoadingIndicators } from '../../mempool.interfaces';
 
 export interface BlockExtension {
   totalFees?: number;
@@ -75,6 +76,13 @@ export type StacksTransactionExtended = Midpoint & {
   effectiveFeePerVsize: number;
   deleteAfter?: number;
   execution_cost_read_count?: number;
+  status?: Status;
+}
+export interface Status {
+  confirmed: boolean;
+  block_height?: number;
+  block_hash?: string;
+  block_time?: number;
 }
 
 export type ProjectedMempoolBlockDetails = {
@@ -94,7 +102,6 @@ export type ProjectedMempoolBlockDetails = {
     read_cnt: number;
   };
   percentage: number;
-  // assembly_time_ms: number;
   tx_fees_microstacks: number;
 }
 export interface RawProjectedMempoolBlock {
@@ -105,4 +112,32 @@ export interface ProjectedMempoolBlock {
   tx_ids: StacksTransactionExtended[];
   blockDetails: ProjectedMempoolBlockDetails;
   transactions: StacksTransactionStripped[];
+}
+export interface GetStacksInitData {
+  mempoolInfo: MempoolInfo;
+  vBytesPerSecond: number;
+  blocks: StacksBlockExtended[];
+  conversions: IConversionRates;
+  'mempool-blocks': StacksMempoolBlock[];
+  transactions: StacksTransactionStripped[];
+  backendInfo: IBackendInfo;
+  loadingIndicators: ILoadingIndicators;
+  da: IDifficultyAdjustment | null;
+  fees: {
+    fastestFee: number;
+    halfHourFee: number;
+    hourFee: number;
+    economyFee: number;
+    minimumFee: number;
+  }
+}
+export type MempoolInfo = {
+  loaded: boolean;
+  size: number;
+  bytes: number;
+  usage: number;
+  total_fee: number;
+  maxmempool: number;
+  mempoolminfee: number;
+  minrelaytxfee: number;
 }

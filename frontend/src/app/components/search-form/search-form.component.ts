@@ -69,7 +69,6 @@ export class SearchFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.stateService.networkChanged$.subscribe((network) => this.network = network);
-    console.log(this.network);
 
     this.searchForm = this.formBuilder.group({
       searchText: ['', Validators.required],

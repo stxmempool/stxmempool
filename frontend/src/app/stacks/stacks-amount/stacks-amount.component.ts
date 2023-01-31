@@ -15,12 +15,10 @@ export class StacksAmountComponent implements OnInit, OnDestroy {
 
   stateSubscription: Subscription;
 
-  // @Input() satoshis: number | string;
-  // @Input() satoshis: number;
   @Input() uSTX: number;
 
 
-  @Input() digitsInfo = '1.8-8';
+  @Input() digitsInfo = '1.6-6';
   @Input() noFiat = false;
   @Input() addPlus = false;
 

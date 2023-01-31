@@ -2,11 +2,18 @@ import config from '../../config';
 import loadingIndicators from '../loading-indicators';
 import transactionUtils from '../transaction-utils';
 import { VbytesPerSecond } from '../../mempool.interfaces';
-import { Block, MempoolTransactionListResponse, Transaction, MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
-import { StacksTransactionExtended } from './stacks-api.interface';
+import { MempoolInfo, StacksTransactionExtended, StacksTransactionStripped } from './stacks-api.interface';
 import { Common } from '../common';
 import logger from '../../logger';
-import axios from 'axios';
+import stacksApi from './stacks-api';
+
+// Stacks-inspect related imports
+import { execFile } from 'child_process';
+import * as fs from 'fs';
+import { join } from 'path';
+import util from 'util';
+import DB from '../../database';
+
 
 class StacksMempool {
   private static WEBSOCKET_REFRESH_RATE_MS = 10000;
@@ -15,7 +22,7 @@ class StacksMempool {
   private mempoolCacheDelta: number = -1;
   private mempoolCache: { [txId: string] : StacksTransactionExtended} = {};
   // fake info as a placeholder because Stacks does not have an equivalent endpoint
-  private mempoolInfo: any = { loaded: true, size: 2213, bytes: 739446, usage: 3984000, total_fee: 1,
+  private mempoolInfo: MempoolInfo = { loaded: true, size: 2213, bytes: 739446, usage: 3984000, total_fee: 1,
     maxmempool: 300000000, mempoolminfee: 0.00001000, minrelaytxfee: 0.00001000 };
 
   private mempoolChangedCallback: ((newMempool: {[txId: string]: StacksTransactionExtended; }, newTransactions: StacksTransactionExtended[],
@@ -28,7 +35,7 @@ class StacksMempool {
   private vBytesPerSecond: number = 0;
   private vBytesPerSecondArray: VbytesPerSecond[] = [];
   private mempoolProtection = 0;
-  private latestTransactions: any[] = [];
+  private latestTransactions: StacksTransactionStripped[] = [];
 
   constructor() {
     setInterval(this.updateTxPerSecond.bind(this), 1000);
@@ -41,7 +48,7 @@ class StacksMempool {
     if (this.inSync) {
       return false;
     } else {
-      return this.mempoolCacheDelta == -1 || this.mempoolCacheDelta > 25;
+      return this.mempoolCacheDelta === -1 || this.mempoolCacheDelta > 25;
     }
   }
 
@@ -54,16 +61,16 @@ class StacksMempool {
     loadingIndicators.setProgress('mempool', 99);
   }
 
-  public getLatestTransactions(): any[] {
+  public getLatestTransactions(): StacksTransactionStripped[] {
     return this.latestTransactions;
   }
 
   public setMempoolChangedCallback(fn: (newMempool: { [txId: string]: StacksTransactionExtended; },
-    newTransactions: StacksTransactionExtended[], deletedTransactions: StacksTransactionExtended[]) => void) {
+    newTransactions: StacksTransactionExtended[], deletedTransactions: StacksTransactionExtended[]) => void): void {
     this.mempoolChangedCallback = fn;
   }
   public setAsyncMempoolChangedCallback(fn: (newMempool: { [txId: string]: StacksTransactionExtended; },
-    newTransactions: StacksTransactionExtended[], deletedTransactions: StacksTransactionExtended[]) => Promise<void>) {
+    newTransactions: StacksTransactionExtended[], deletedTransactions: StacksTransactionExtended[]) => Promise<void>): void {
     this.asyncMempoolChangedCallback = fn;
   }
 
@@ -87,7 +94,7 @@ class StacksMempool {
     this.mempoolInfo = await this.$getMempoolInfo();
   }
   */
-  public getMempoolInfo(): any {
+  public getMempoolInfo(): MempoolInfo {
     return this.mempoolInfo;
   }
   public getTxPerSecond(): number {
@@ -98,51 +105,77 @@ class StacksMempool {
   }
 
 
-  public async $updateStacksMempool() {
+  public async $updateStacksMempool(): Promise<void> {
     logger.debug('Updating Stacks mempool');
     const start = new Date().getTime();
     let hasChange: boolean = false;
     const currentMempoolSize = Object.keys(this.mempoolCache).length;
-    const transactions = await this.$getStacksMempoolTransactions();
+    const transactions = await stacksApi.$getStacksMempoolTransactions();
+
+
     const diff = transactions.length - currentMempoolSize;
+
     const newTransactions: StacksTransactionExtended[] = [];
     this.mempoolCacheDelta = Math.abs(diff);
 
     if (!this.inSync) {
       loadingIndicators.setProgress('mempool', Object.keys(this.mempoolCache).length / transactions.length * 100);
     }
-
-    for (const txid of transactions) {
-
-      if (!this.mempoolCache[txid]) {
-        try {
-          const transaction: StacksTransactionExtended = await transactionUtils.$getStacksMempoolTransactionExtended(txid);
-          this.mempoolCache[txid] = transaction;
-          if (this.inSync) {
-            this.txPerSecondArray.push(new Date().getTime());
+    // Experimental algo to speed up intitial mempool sync but will quickly hit rate limits
+    if (config.STACKS.DEDICATED_API) {
+      try {
+        const promiseArray: Promise<StacksTransactionExtended>[] = [];
+        for (const txid of transactions) {
+          if (!this.mempoolCache[txid]) {
+            promiseArray.push(transactionUtils.$getStacksMempoolTransactionExtended(txid));
+          }
+          if ((new Date().getTime()) - start > StacksMempool.WEBSOCKET_REFRESH_RATE_MS) {
+            break;
+          }
+        }
+        const resolvedPromises = await Promise.all(promiseArray);
+        resolvedPromises.forEach(tx => this.mempoolCache[tx.tx_id] = tx);
+        if (this.inSync) {
+          this.txPerSecondArray.push(new Date().getTime());
+          resolvedPromises.forEach(tx => {
             this.vBytesPerSecondArray.push({
               unixTime: new Date().getTime(),
-              // @ts-ignore
-              vSize: transaction.vsize,
+              vSize: tx.vsize,
             });
+          });
+        }
+        hasChange = true;
+        newTransactions.push(...resolvedPromises);
+      } catch (e) {
+        logger.debug('Error finding transaction in Stacks mempool: ' + (e instanceof Error ? e.message : e));
+      }
+    // If using the public node
+    } else {
+      for (const txid of transactions) {
+
+        if (!this.mempoolCache[txid]) {
+          try {
+            const transaction: StacksTransactionExtended = await transactionUtils.$getStacksMempoolTransactionExtended(txid);
+            this.mempoolCache[txid] = transaction;
+            if (this.inSync) {
+              this.txPerSecondArray.push(new Date().getTime());
+              this.vBytesPerSecondArray.push({
+                unixTime: new Date().getTime(),
+                vSize: transaction.vsize,
+              });
+            }
+            hasChange = true;
+            newTransactions.push(transaction);
+          } catch (e) {
+            logger.debug('Error finding transaction in Stacks mempool: ' + (e instanceof Error ? e.message : e));
           }
-          hasChange = true;
-          // Fetched Transactions
-          // if (diff > 0) {
-          //   logger.debug('Fetched Stacks transaction ' + txCount + ' / ' + diff);
-          // } else {
-          //   logger.debug('Fetched Stacks transaction ' + txCount);
-          // }
-          newTransactions.push(transaction);
-        } catch (e) {
-          logger.debug('Error finding transaction in Stacks mempool: ' + (e instanceof Error ? e.message : e));
+        }
+  
+        if ((new Date().getTime()) - start > StacksMempool.WEBSOCKET_REFRESH_RATE_MS) {
+          break;
         }
       }
-
-      if ((new Date().getTime()) - start > StacksMempool.WEBSOCKET_REFRESH_RATE_MS) {
-        break;
-      }
-    }
+    }   
 
     // Prevent mempool from clear on bitcoind restart by delaying the deletion
     if (this.mempoolProtection === 0
@@ -178,7 +211,6 @@ class StacksMempool {
 
     const newTransactionsStripped = newTransactions.map((tx) => Common.stripStacksTransaction(tx));
     this.latestTransactions = newTransactionsStripped.concat(this.latestTransactions).slice(0, 6);
-    console.log('Sync-->', this.inSync, 'transactions length-->', transactions.length, 'mempoolCache length' , Object.keys(this.mempoolCache).length)
 
     if (!this.inSync && transactions.length === Object.keys(this.mempoolCache).length) {
       this.inSync = true;
@@ -196,28 +228,10 @@ class StacksMempool {
     }
     const end = new Date().getTime();
     const time = end - start;
-    // logger.debug(`New Stacks mempool size: ${Object.keys(this.mempoolCache).length} Change: ${diff}`);
-    // logger.debug('Stacks Mempool updated in ' + time / 1000 + ' seconds');
     logger.debug(`Mempool updated in ${time / 1000} seconds. New size: ${Object.keys(this.mempoolCache).length} (${diff > 0 ? '+' + diff : diff})`);
-    // logger.debug(`Mempool updated in ${time / 1000} seconds. New size: ${cacheSize} (${diff > 0 ? '+' + diff : diff})`);
-
-  }
-  // TODO move to stacksApi
-  public async $getStacksMempoolTransactions(): Promise<string[]> {
-    const response = await axios.post('https://stacks-node-api.mainnet.stacks.co/rosetta/v1/mempool', 
-    // const response = await axios.post('http://localhost:3999/rosetta/v1/mempool', 
-    
-    {
-      network_identifier: {
-        blockchain: 'stacks',
-        network: 'mainnet'
-    }
-    });
-    const transactionArray: string[] = response.data.transaction_identifiers.map(({ hash }) => hash);
-    return transactionArray;
   }
 
-  private updateTxPerSecond() {
+  private updateTxPerSecond(): void {
     const nowMinusTimeSpan = new Date().getTime() - (1000 * config.STATISTICS.TX_PER_SECOND_SAMPLE_PERIOD);
     this.txPerSecondArray = this.txPerSecondArray.filter((unixTime) => unixTime > nowMinusTimeSpan);
     this.txPerSecond = this.txPerSecondArray.length / config.STATISTICS.TX_PER_SECOND_SAMPLE_PERIOD || 0;
@@ -230,13 +244,125 @@ class StacksMempool {
     }
   }
   
-  private deleteExpiredTransactions() {
+  private deleteExpiredTransactions(): void {
     const now = new Date().getTime();
     for (const tx in this.mempoolCache) {
       const lazyDeleteAt = this.mempoolCache[tx].deleteAfter;
       if (lazyDeleteAt && lazyDeleteAt < now) {
         delete this.mempoolCache[tx];
       }
+    }
+  }
+  // In development, not ready for production. Here we are using the stacks-inspect tool to create mining simulations.
+  public async runProjection() {
+    type StacksInspectLog = {
+      msg: string;
+      // msg: 'Include tx' | 'Tx successfully processed.' | 'Contract-call successfully processed' | 'Miner: mined anchored block' | string;
+      level: string;
+      // level: 'INFO';
+      ts: string;
+      thread: string;
+      //thread: 'main';
+      line: number;
+      file: string;
+      //file : 'src/chainstate/stacks/miner.rs' | 'src/chainstate/stacks/db/transactions.rs';
+      origin?: string;
+      payload?: string;
+      //payload?: 'Coinbase' | 'ContractCall' | 'SmartContract';
+      tx?: string;
+      tx_id?: string;
+      event_type?: string;
+      // event_type?: 'success';
+      event_name?: string;
+      // event_name?: 'transaction_result';
+      cost?: string;
+      return_value?: string;
+      function_args?: string;
+      function_name?: string;
+      contract_name?: string;
+      tx_fees_microstacks?: number;
+      percentage: number;
+      tx_count?: number;
+      execution_consumed?: {
+        runtime: number;
+        write_len: number;
+        write_cnt: number;
+        read_len: number;
+        read_cnt: number;
+      };
+      block_size?: number;
+    }
+    const obj = {
+      blockDetails: null,
+      tx_ids: [],
+    };
+    const exec = util.promisify(execFile);
+    const { stdout, stderr } = await exec(config.STACKS.STACKS_INSPECT.PATH_TO_STACKS_INSPECT, config.STACKS.STACKS_INSPECT.ARGUMENTS, config.STACKS.STACKS_INSPECT.ENV);
+
+
+    const array = stderr.split('\n');
+    //This creates a local .txt file, which is gitignored
+    fs.writeFile(join(process.cwd(), 'src', 'api', 'stacks', 'stacks-inspect-log.txt'), stderr + stdout, (err) => {
+      if (err) throw err;
+      console.log('The file has been saved!');
+    });
+    const parsedArray: any[] = [];
+    array.slice(0, -1).forEach(message => parsedArray.push(JSON.parse(message)));
+    // parsedArray.splice(parsedArray.indexOf(element => element.msg === 'Include tx'));
+    const finalArray: StacksInspectLog[] = parsedArray.slice(parsedArray.findIndex(element => element.payload === 'Coinbase'));
+    for (let i = 0; i < finalArray.length; i++) {
+      if (finalArray[i].msg === 'Include Tx') {
+
+      }
+    }
+    // console.log(parsedArray);
+
+    // for (let i = 0; i < array.length; i++) {
+      // if(array[i].includes('rs:1614')) {
+      //   // @ts-ignore
+      //   // txArray.push(array[i].match(/(?<=x: )(.*?)(?=,)/g)[0]);
+      //   obj.tx_ids.push(JSON.parse(array[i].match(/(?<=x: )(.*?)(?=,)/g)[0]));
+      // }
+      // if (array[i].includes('rs:2555')) {
+      //   // console.log(this.parseBlockDetails(blockDetails + array[i].slice(array[i].indexOf('M')) + '}'));
+      //   // obj.blockDetails = parseBlockDetails(blockDetails + array[i].slice(array[i].indexOf('M')) + '}');
+      //   console.log('rs:2555--->', array[i]);
+      // }
+      // parsedArray.push(JSON.parse(array[i]));
+    // }
+
+    // console.log(parsedArray);
+    // parsedArray.forEach(message => console.log(message.line));
+    // for (let i = 0; i < array.length; i++) {
+    //   if(array[i].includes('rs:1614')) {
+    //     // @ts-ignore
+    //     // txArray.push(array[i].match(/(?<=x: )(.*?)(?=,)/g)[0]);
+    //     obj.tx_ids.push(array[i].match(/(?<=x: )(.*?)(?=,)/g)[0]);
+    //   }
+    //   if (array[i].includes('rs:2555')) {
+    //     // console.log(this.parseBlockDetails(blockDetails + array[i].slice(array[i].indexOf('M')) + '}'));
+    //     // obj.blockDetails = parseBlockDetails(blockDetails + array[i].slice(array[i].indexOf('M')) + '}');
+    //     console.log('rs:2555--->', array[i]);
+    //   }
+    // }
+  };
+  private async saveProjection(projectedBlock) {
+    try {
+      const query = `INSERT INTO projections(
+        blockTimestamp,            size,                       tx_count,                   fees,
+        fee_span,                  median_fee,                 reward,                     avg_fee,
+        avg_fee_rate               transactions,               execution_cost_read_count   execution_cost_read_length
+        execution_cost_runtime     execution_cost_write_count  execution_cost_write_length
+      ) VALUE (
+        ?, ?, FROM_UNIXTIME(?), ?,
+        ?, ?, ?, ?,
+        ?, ?, ?, ?,
+        ?, ?, ?, ?,
+        ?, ?, ?, ?
+      )`;
+      const params = [];
+      await DB.query(query, params);
+    } catch (error) {
     }
   }
 }

@@ -1,5 +1,4 @@
 import { Component, ElementRef, ViewChild, Input, OnChanges, ChangeDetectionStrategy } from '@angular/core';
-import { TransactionStripped } from '../../interfaces/websocket.interface';
 import { Position } from '../../components/block-overview-graph/sprite-types.js';
 import { StacksTransactionStripped } from '../stacks.interfaces';
 
@@ -9,7 +8,6 @@ import { StacksTransactionStripped } from '../stacks.interfaces';
   styleUrls: ['./stacks-block-overview-tooltip.component.scss'],
 })
 export class StacksBlockOverviewTooltipComponent implements OnChanges {
-  // @Input() tx: TransactionStripped | void;
   @Input() tx: StacksTransactionStripped | void;
 
   @Input() cursorPosition: Position;
@@ -18,7 +16,7 @@ export class StacksBlockOverviewTooltipComponent implements OnChanges {
   txid = '';
   fee = 0;
   value = 0;
-  vsize = 1;
+  size = 1;
   feeRate = 0;
   readCount = 0;
 
@@ -50,8 +48,9 @@ export class StacksBlockOverviewTooltipComponent implements OnChanges {
       this.txid = tx.txid || '';
       this.fee = tx.fee || 0;
       this.value = tx.value || 0;
-      this.vsize = tx.vsize || 1;
-      this.feeRate = this.fee / this.vsize;
+      this.size = tx.size || 1;
+      this.feeRate = this.fee / this.size;
+      this.readCount = tx.execution_cost_read_count;
     }
   }
   convertTxType(txType: string | number): string {

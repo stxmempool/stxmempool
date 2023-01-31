@@ -4,6 +4,7 @@ import { TransactionStripped } from '../../interfaces/websocket.interface';
 import { SpriteUpdateParams, Square, Color, ViewUpdateParams } from './sprite-types';
 import { feeLevels, mempoolFeeColors } from '../../app.constants';
 import BlockScene from './block-scene';
+import { StacksTransactionStripped } from '../stacks.interfaces';
 
 const hoverTransitionTime = 300;
 const defaultHoverColor = hexToColor('1bd8f4');
@@ -29,14 +30,15 @@ function toSpriteUpdate(params: ViewUpdateParams): SpriteUpdateParams {
   };
 }
 
-export default class TxView implements TransactionStripped {
+export default class TxView implements StacksTransactionStripped {
   txid: string;
   fee: number;
   vsize: number;
   value: number;
   feerate: number;
+  size: number;
+  execution_cost_read_count: number;
   type: 'token_transfer' | 'smart_contract' | 'contract_call' | 'poison_microblock' | 'coinbase';
-  status?: 'found' | 'missing' | 'fresh' | 'added' | 'censored' | 'selected';
   context?: 'projected' | 'actual';
 
   initialised: boolean;
@@ -53,24 +55,20 @@ export default class TxView implements TransactionStripped {
   constructor(tx: any, vertexArray: FastVertexArray) {
     this.context = tx.context;
     this.txid = tx.txid;
-    // this.txid = tx.type;
-
     this.fee = tx.fee;
-    // this.fee = tx.execution_cost_read_count;
-
-    // this.vsize = tx.vsize;
-    // this.vsize = 100;
-
-    // this.vsize = typeof tx.execution_cost_read_count === 'number' ? tx.execution_cost_read_count : tx.vsize;
-    this.vsize = typeof tx.execution_cost_read_count === 'number' ? tx.execution_cost_read_count : 0;
+    // In the original mempool.space the transactions are rendered based on vsize. Here, when applicable, we render based on 
+    // read_count (the most common block capacity bottleneck). 
+    this.vsize = tx.execution_cost_read_count;
+    // This is purely for the tooltip
+    this.size = tx.vsize;
+    this.execution_cost_read_count = tx.execution_cost_read_count;
 
 
     // this.value = tx.value;
+    // We replace value with type for the tooltip, as a contract call, etc. does not have value
     this.value = tx.type;
     this.feerate = tx.fee / tx.vsize;
-    // this.feerate = tx.vsize;
 
-    this.status = tx.status;
     this.initialised = false;
     this.vertexArray = vertexArray;
 
@@ -146,7 +144,6 @@ export default class TxView implements TransactionStripped {
   // Temporarily override the tx color
   // returns minimum transition end time
   setHover(hoverOn: boolean, color: Color | void = defaultHoverColor): number {
-    console.log(this.vsize);
     if (hoverOn) {
       this.hover = true;
       this.hoverColor = color;
@@ -171,27 +168,7 @@ export default class TxView implements TransactionStripped {
   getColor(): Color {
     const feeLevelIndex = feeLevels.findIndex((feeLvl) => Math.max(1, this.feerate) < feeLvl) - 1;
     const feeLevelColor = feeColors[feeLevelIndex] || feeColors[mempoolFeeColors.length - 1];
-    // Block audit
-    switch(this.status) {
-      case 'censored':
-        return auditColors.censored;
-      case 'missing':
-        return auditColors.missing;
-      case 'fresh':
-        return auditColors.missing;
-      case 'added':
-        return auditColors.added;
-      case 'selected':
-        return auditColors.selected;
-      case 'found':
-        if (this.context === 'projected') {
-          return auditFeeColors[feeLevelIndex] || auditFeeColors[mempoolFeeColors.length - 1];
-        } else {
-          return feeLevelColor;
-        }
-      default:
         return feeLevelColor;
-    }
   }
 }
 

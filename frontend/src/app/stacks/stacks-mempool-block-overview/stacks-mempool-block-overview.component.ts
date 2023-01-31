@@ -3,7 +3,6 @@ import { Component, ComponentRef, ViewChild, HostListener, Input, Output, EventE
 import { StateService } from '../../services/state.service';
 import { MempoolBlockDelta, TransactionStripped } from '../../interfaces/websocket.interface';
 import { StacksTransactionStripped, StacksMempoolBlockDelta } from '../stacks.interfaces';
-// import { BlockOverviewGraphComponent } from '../../components/block-overview-graph/block-overview-graph.component';
 import { StacksBlockOverviewGraphComponent } from '../stacks-block-overview-graph/stacks-block-overview-graph.component';
 
 import { Subscription, BehaviorSubject, merge, of } from 'rxjs';
@@ -81,7 +80,6 @@ export class StacksMempoolBlockOverviewComponent implements OnInit, OnDestroy, O
     this.websocketService.stopTrackMempoolBlock();
   }
 
-  // replaceBlock(transactionsStripped: TransactionStripped[]): void {
   replaceBlock(transactionsStripped: StacksTransactionStripped[]): void {
 
     const blockMined = (this.stateService.latestBlockHeight > this.lastBlockHeight);
@@ -97,7 +95,6 @@ export class StacksMempoolBlockOverviewComponent implements OnInit, OnDestroy, O
     this.isLoading$.next(false);
   }
 
-  // updateBlock(delta: MempoolBlockDelta): void {
   updateBlock(delta: StacksMempoolBlockDelta): void {
 
     const blockMined = (this.stateService.latestBlockHeight > this.lastBlockHeight);

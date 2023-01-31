@@ -91,6 +91,8 @@ export class StateService {
   networkChanged$ = new ReplaySubject<string>(1);
   lightningChanged$ = new ReplaySubject<boolean>(1);
   blocks$: ReplaySubject<[BlockExtended, boolean]>;
+  // blocks$: ReplaySubject<[BlockExtended, boolean]>;
+
   stacksBlocks$: ReplaySubject<[StacksBlockExtended, boolean]>;
 
   transactions$ = new ReplaySubject<TransactionStripped>(6);
@@ -145,7 +147,6 @@ export class StateService {
     // @ts-ignore
     const browserWindowEnv = browserWindow.__env || {};
     this.env = Object.assign(defaultEnv, browserWindowEnv);
-    console.log('this.env-->', this.env);
 
     if (defaultEnv.BASE_MODULE !== 'mempool') {
       this.env.MINING_DASHBOARD = false;
@@ -176,7 +177,7 @@ export class StateService {
       this.networkChanged$.next(this.env.BASE_MODULE);
     }
     if (this.env.STACKS_ENABLED) {
-      this.blockVSize = 15000;
+      this.blockVSize = 1000000;
     } else {
       this.blockVSize = this.env.BLOCK_WEIGHT_UNITS / 4;
     }
@@ -203,7 +204,6 @@ export class StateService {
 
   setNetworkBasedonUrl(url: string) {
     if (this.env.BASE_MODULE !== 'mempool' && this.env.BASE_MODULE !== 'liquid') {
-      console.log('returning');
 
       return;
     }

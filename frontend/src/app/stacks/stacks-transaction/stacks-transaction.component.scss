@@ -23,7 +23,7 @@
 }
 .tx-link {
   margin-bottom: 0px;
-  margin-top: 8px;
+  margin-top: 0px;
   display: inline-block;
   width: 100%;
   flex-shrink: 0;
@@ -194,6 +194,11 @@
 }
 .external-link {
   padding-top: 5px;
+  display: flex;
+  justify-content: center;
+}
+.external-link-unconfirmed {
+  padding-top: 10px;
   display: flex;
   justify-content: center;
 }

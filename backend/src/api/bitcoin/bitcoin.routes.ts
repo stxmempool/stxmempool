@@ -348,8 +348,7 @@ class BitcoinRoutes {
 
   private async getBlock(req: Request, res: Response) {
     try {
-      // const block = await blocks.$getBlock(req.params.hash);
-      const block = await stacksBlocks.$getBlock(req.params.hash);
+      const block = await blocks.$getBlock(req.params.hash);
 
 
       const blockAge = new Date().getTime() / 1000 - block.timestamp;

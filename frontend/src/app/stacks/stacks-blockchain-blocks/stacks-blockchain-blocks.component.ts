@@ -4,7 +4,6 @@ import { StateService } from '../../services/state.service';
 import { specialBlocks } from '../../app.constants';
 import { BlockExtended } from '../../interfaces/node-api.interface';
 import { Location } from '@angular/common';
-import { config } from 'process';
 
 @Component({
   selector: 'app-stacks-blockchain-blocks',
@@ -169,7 +168,6 @@ export class StacksBlockchainBlocksComponent implements OnInit, OnDestroy {
   }
 
   getStyleForBlock(block: any) {
-    // const greenBackgroundHeight = 100 - (block.weight / this.stateService.env.BLOCK_WEIGHT_UNITS) * 100;
     const greenBackgroundHeight = 100 - (block.execution_cost_read_count / 15000) * 100;
 
     let addLeft = 0;

@@ -84,23 +84,17 @@
     <div class="col" style="max-height: 410px">
       <div class="card">
         <div class="card-body">
-          <a class="title-link" href="" [routerLink]="['/blocks' | relativeUrl]">
             <h5 class="card-title d-inline" i18n="dashboard.latest-blocks">Latest blocks</h5>
-            <span>&nbsp;</span>
-            <fa-icon [icon]="['fas', 'external-link-alt']" [fixedWidth]="true" style="vertical-align: 'text-top'; font-size: 13px; color: '#4a68b9'"></fa-icon>
-          </a>
           <table class="table lastest-blocks-table">
             <thead>
               <th class="table-cell-height" i18n="dashboard.latest-blocks.height">Height</th>
-              <th *ngIf="!stateService.env.MINING_DASHBOARD" class="table-cell-mined pl-lg-4" i18n="dashboard.latest-blocks.mined">Miner Address</th>
-              <th *ngIf="stateService.env.MINING_DASHBOARD" class="table-cell-mined pl-lg-4" i18n="mining.pool-name">Pool</th>
+              <th class="table-cell-mined pl-lg-4" i18n="dashboard.latest-blocks.mined">Miner Address</th>
               <th class="table-cell-transaction-count" i18n="dashboard.latest-blocks.transaction-count">TXs</th>
               <th class="table-cell-size" i18n="dashboard.latest-blocks.size">Size</th>
             </thead>
             <tbody>
               <tr *ngFor="let block of blocks$ | async; let i = index; trackBy: trackByBlock">
                 <td class="table-cell-height" ><a [routerLink]="['/block' | relativeUrl, block.id]" [state]="{ data: { block: block } }">{{ block.height }}</a></td>
-                <td *ngIf="stateService.env.MINING_DASHBOARD" class="table-cell-mined" ><app-time-since [time]="block.timestamp" [fastRender]="true"></app-time-since></td>
                 <td *ngIf="!stateService.env.MINING_DASHBOARD" class="table-cell-mined">
                   <a class="clear-link" [routerLink]="[('/address/' + block.minerAddress) | relativeUrl]">
                     <span class="pool-name">{{ block.minerAddress | shortenString: 12 }}</span>
@@ -128,14 +122,13 @@
           <table class="table latest-transactions">
             <thead>
               <th class="table-cell-txid" i18n="dashboard.latest-transactions.txid">TXID</th>
-              <th class="table-cell-satoshis" i18n="dashboard.latest-transactions.amount">Transaction Type</th>
+              <th class="table-cell-mined" i18n="dashboard.latest-transactions.amount">TX Type</th>
               <th class="table-cell-fees" i18n="transaction.fee|Transaction fee">Fee</th>
             </thead>
             <tbody>
               <tr *ngFor="let transaction of transactions$ | async; let i = index;">
                 <td class="table-cell-txid"><a [routerLink]="['/tx' | relativeUrl, transaction.txid]">{{ transaction.txid | shortenString : 10 }}</a></td>
                 <td class="table-cell-mined">{{ convertTxType(transaction.type) | titlecase }}</td>
-
                 <td class="table-cell-fees">{{ transaction.fee / transaction.vsize | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">uSTX/B</span></td>
               </tr>
             </tbody>
@@ -190,10 +183,10 @@
 <ng-template #mempoolTable let-mempoolInfoData>
   <div class="mempool-info-data">
     <div class="item">
-      <h5 *ngIf="!mempoolInfoData.value || mempoolInfoData.value.memPoolInfo.mempoolminfee === 0.00001 || (stateService.env.BASE_MODULE === 'liquid' && mempoolInfoData.value.memPoolInfo.mempoolminfee === 0.000001) else purgingText" class="card-title" i18n="dashboard.minimum-fee|Minimum mempool fee">Minimum fee</h5>
+      <h5 *ngIf="!mempoolInfoData.value || mempoolInfoData.value.memPoolInfo.mempoolminfee > 0.00001 || (stateService.env.BASE_MODULE === 'liquid' && mempoolInfoData.value.memPoolInfo.mempoolminfee === 0.000001) else purgingText" class="card-title" i18n="dashboard.minimum-fee|Minimum mempool fee">Minimum fee</h5>
       <ng-template #purgingText><h5 class="card-title" i18n="dashboard.purging|Purgin below fee">Purging</h5></ng-template>
       <p class="card-text" *ngIf="(isLoadingWebSocket$ | async) === false && mempoolInfoData.value; else loading">
-        <ng-template [ngIf]="mempoolInfoData.value.memPoolInfo.mempoolminfee > 0.00001">&lt; </ng-template>{{ mempoolInfoData.value.memPoolInfo.mempoolminfee * 100000 | feeRounding }} <span><ng-container i18n="shared.sat-vbyte|sat/vB">uSTX/B</ng-container></span>
+        {{ mempoolInfoData.value.memPoolInfo.mempoolminfee }} <span><ng-container i18n="shared.sat-vbyte|sat/vB">uSTX/B</ng-container></span>
       </p>
     </div>
     <div class="item">

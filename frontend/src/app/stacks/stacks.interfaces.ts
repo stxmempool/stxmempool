@@ -1,4 +1,7 @@
 import { Block, Transaction, MempoolTransaction, TransactionFound } from '@stacks/stacks-blockchain-api-types';
+import { DifficultyAdjustment } from '../interfaces/node-api.interface';
+import { IBackendInfo, MempoolInfo, Recommendedfees } from '../interfaces/websocket.interface';
+import { ILoadingIndicators } from '../services/state.service';
 
 export interface BlockExtension {
   totalFees?: number;
@@ -7,7 +10,7 @@ export interface BlockExtension {
   avgFee?: number;
   avgFeeRate?: number;
   usd?: number | null;
-  reward: number;
+  reward: number; 
 }
 
 export interface StacksBlockExtended extends Block {
@@ -33,6 +36,7 @@ export interface StacksTransactionStripped {
   fee: number;
   vsize: number;
   type: 'token_transfer' | 'smart_contract' | 'contract_call' | 'poison_microblock' | 'coinbase';
+  execution_cost_read_count: number | undefined;
 }
 export interface StacksMempoolBlockWithTransactions extends StacksMempoolBlock {
   transactionIds: string[];
@@ -107,4 +111,29 @@ export type MinedStacksTransactionExtended = Transaction & {
 export interface StacksMempoolBlockDelta {
   added: StacksTransactionStripped[],
   removed: string[];
+}
+
+export interface StacksWebsocketResponse {
+  block?: StacksBlockExtended;
+  blocks?: StacksBlockExtended[];
+  conversions?: any;
+  txConfirmed?: boolean;
+  historicalDate?: string;
+  mempoolInfo?: MempoolInfo;
+  vBytesPerSecond?: number;
+  previousRetarget?: number;
+  action?: string;
+  data?: string[];
+  tx?: Transaction;
+  transactions?: StacksTransactionStripped[];
+  loadingIndicators?: ILoadingIndicators;
+  backendInfo?: IBackendInfo;
+  da?: DifficultyAdjustment;
+  fees?: Recommendedfees;
+  'track-tx'?: string;
+  'track-address'?: string;
+  'track-asset'?: string;
+  'track-mempool-block'?: number;
+  'watch-mempool'?: boolean;
+  'track-bisq-market'?: string;
 }

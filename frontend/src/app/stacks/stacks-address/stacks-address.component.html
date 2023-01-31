@@ -19,24 +19,17 @@
         <div class="col-md">
           <table class="table table-borderless table-striped">
             <tbody>
-              <!-- <ng-template [ngIf]="!address.electrum"> -->
                 <tr>
                   <td i18n="address.total-received">Total received</td>
-                  <!-- <td *ngIf="address.chain_stats.funded_txo_sum !== undefined; else confidentialTd"><app-amount [satoshis]="received" [noFiat]="true"></app-amount></td> -->
                   <td><app-stacks-amount [uSTX]="address.stx.total_received" [noFiat]="true"></app-stacks-amount></td>
-                  <!-- <td>{{address.stx.total_received}}</td> -->
-
                 </tr>
                 <tr>
                   <td i18n="address.total-sent">Total sent</td>
-                  <!-- <td *ngIf="address.chain_stats.spent_txo_sum !== undefined; else confidentialTd"><app-amount [satoshis]="sent" [noFiat]="true"></app-amount></td> -->
                   <td><app-stacks-amount [uSTX]="address.stx.total_sent" [noFiat]="true"></app-stacks-amount></td>
 
                 </tr>
-              <!-- </ng-template> -->
               <tr>
                 <td i18n="address.balance">Balance</td>
-                <!-- <td *ngIf="address.chain_stats.funded_txo_sum !== undefined; else confidentialTd"><app-amount [satoshis]="received - sent" [noFiat]="true"></app-amount> <span class="fiat"><app-fiat [value]="received - sent"></app-fiat></span></td> -->
                 <td><app-stacks-amount [uSTX]="address.stx.balance" [noFiat]="true"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="address.stx.balance"></app-stacks-fiat></span></td>
               </tr>
               <tr *ngIf="address.stx.total_miner_rewards_received !== '0'">
@@ -136,14 +129,13 @@
       <ng-template #displayServerError><i class="small">({{ error.error }})</i></ng-template>
       <ng-template [ngIf]="error.status === 413 || error.status === 405 || error.status === 504" [ngIfElse]="displayServerError">
         <ng-container i18n="Electrum server limit exceeded error">
-          <i>There many transactions on this address, more than your backend can handle. See more on <a href="/docs/faq#address-lookup-issues">setting up a stronger backend</a>.</i>
+          <i>There many transactions on this address, more than your backend can handle.</i>
           <br><br>
-          Consider viewing this address on the official Mempool website instead:
+          Consider viewing this address on Stacks Explorer website instead:
         </ng-container>
         <br>
-        <a href="https://mempool.space/address/{{ addressString }}" target="_blank">https://mempool.space/address/{{ addressString }}</a>
+        <a href="https://explorer.stacks.co/address/{{ addressString }}?chain=mainnet" target="_blank">https://explorer.stacks.co/address/{{ addressString }}?chain=mainnet</a>
         <br>
-        <a href="http://mempoolhqx4isw62xs7abwphsq7ldayuidyx2v2oethdhhj6mlo2r6ad.onion/address/{{ addressString }}" target="_blank">http://mempoolhqx4isw62xs7abwphsq7ldayuidyx2v2oethdhhj6mlo2r6ad.onion/address/{{ addressString }}</a>
         <br><br>
         <i class="small">({{ error.error }})</i>
       </ng-template>

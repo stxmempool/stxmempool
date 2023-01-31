@@ -42,7 +42,7 @@ export class StacksSearchFormComponent implements OnInit {
 
 
   /*
-    For future iterations, if you want to add ContractId search support here is a good place to start
+    For future iterations, if you want to add ContractId search support, here is a good place to start
 
     validateContractId(contract_id) {
       if (!contract_id.includes(".")) return false;
@@ -60,7 +60,7 @@ export class StacksSearchFormComponent implements OnInit {
     };
   */
 
-  // Unfortunately, the regex for a STX's Block Hash or Transaction is identical
+  // Unfortunately, the regex for a STX's Block Hash and a Transaction ID is identical
   regexTransaction = /0x[A-Fa-f0-9]{64}/;
   regexBlockheight = /^[0-9]{1,9}$/;
 
@@ -112,7 +112,6 @@ export class StacksSearchFormComponent implements OnInit {
         this.isTypeaheading$.next(true);
         if (!this.stateService.env.LIGHTNING) {
           return zip(
-            // this.electrsApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
             this.stacksApiService.getAddressesByPrefix$(text).pipe(catchError(() => of([]))),
 
             [{ nodes: [], channels: [] }],
@@ -173,42 +172,21 @@ export class StacksSearchFormComponent implements OnInit {
                 }
               },
               error: (e) => {
-                console.log(e);
                 this.isBlockHash = false;
               },
-              complete: () => console.log('done'),
+              complete: () => {
+                console.log('done');
+              },
             });
-          // this.stacksApiService.searchStacksApi$(searchText).subscribe((data) => {
-          //   console.log(data);
-          //   if (data.found === true && data.result.entity_type === 'block_hash'){
-          //     // this.navigate('/block/', searchText);
-          //     this.isBlockHash = true;
-          //   } else {
-          //     this.isBlockHash = false;
-          //   }
-          //   // if (data.found === true && data.result.entity_type === 'tx_id'){
-          //   //   // this.navigate('/block/', searchText);
-          //   //   matchesBlockHash = false;
-          //   // }
-          // });
           const matchesBlockHeight = this.regexBlockheight.test(searchText);
-
-          // const matchesTxId = this.regexTransaction.test(searchText) && !this.regexBlockhash.test(searchText);
           const matchesTxId = this.regexTransaction.test(searchText) && this.isBlockHash === false;
-          // console.log('matchesTxId-->', matchesTxId, 'isBlockHash', this.isBlockHash);
-          // const matchesBlockHash = this.regexBlockhash.test(searchText);
-          // const matchesAddress = this.regexAddress.test(searchText);
           const matchesAddress = this.validateStacksAddress(searchText);
-
 
           return {
             searchText: searchText,
-            // hashQuickMatch: +(matchesBlockHeight || matchesBlockHash || matchesTxId || matchesAddress),
             hashQuickMatch: +(matchesBlockHeight || this.isBlockHash || matchesTxId || matchesAddress),
-
             blockHeight: matchesBlockHeight,
             txId: matchesTxId,
-            // blockHash: matchesBlockHash,
             blockHash: this.isBlockHash,
             address: matchesAddress,
             addresses: addressPrefixSearchResults,
@@ -244,18 +222,13 @@ export class StacksSearchFormComponent implements OnInit {
 
     if (searchText) {
       this.isSearching = true;
-      console.log('searchText', searchText);
       this.stacksApiService.searchStacksApi$(searchText).subscribe((data) => {
-        console.log(data);
         if (data.found === true && data.result.entity_type === 'block_hash'){
-          // this.navigate('/block/', searchText);
           this.navigate('/block/', data.result.entity_id);
         }
       })
-      // if (this.regexAddress.test(searchText)) {
       if (this.validateStacksAddress(searchText)) {
         this.navigate('/address/', searchText);
-      // } else if (this.regexBlockhash.test(searchText) || this.regexBlockheight.test(searchText)) {
       } else if (this.regexBlockheight.test(searchText)) {
         this.navigate('/block/', searchText);
       } else if (this.regexTransaction.test(searchText)) {

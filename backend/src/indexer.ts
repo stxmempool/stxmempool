@@ -45,19 +45,19 @@ class Indexer {
   }
 
   public async $run() {
-    console.log('!Common.indexingEnabled()-->', !Common.indexingEnabled());
-    console.log('this.runIndexer === false-->', this.runIndexer === false);
-    console.log('this.indexerRunning === true-->', this.indexerRunning === true);
-    console.log('stacksMempool.hasPriority()',  stacksMempool.hasPriority());
-
-    // if (!Common.indexingEnabled() || this.runIndexer === false ||
-    //   this.indexerRunning === true || mempool.hasPriority() || stacksMempool.hasPriority()
-    // ) {
-    if (!Common.indexingEnabled() || this.runIndexer === false ||
-      this.indexerRunning === true || stacksMempool.hasPriority()
-    ) {
-      console.log('didnot make it past conditional');
-      return;
+    if (config.STACKS.ENABLED) {
+      if (!Common.indexingEnabled() || this.runIndexer === false ||
+        this.indexerRunning === true || stacksMempool.hasPriority()
+      ) {
+        return;
+      }
+    }
+    if (config.MEMPOOL.ENABLED) {
+      if (!Common.indexingEnabled() || this.runIndexer === false ||
+        this.indexerRunning === true || mempool.hasPriority()
+      ) {
+        return;
+      }
     }
 
     // Do not attempt to index anything unless Bitcoin Core is fully synced

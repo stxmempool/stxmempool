@@ -48,7 +48,6 @@ export class WebsocketService {
         .pipe(take(1))
         .subscribe((response) => this.handleResponse(response));
     } else {
-      console.log('this.network-->', this.network);
       this.network = this.stateService.network === 'bisq' && !this.stateService.env.BISQ_SEPARATE_BACKEND ? '' : this.stateService.network;
       this.websocketSubject = webSocket<WebsocketResponse>(this.webSocketUrl.replace('{network}', this.network ? '/' + this.network : ''));
 
@@ -261,7 +260,6 @@ export class WebsocketService {
     }
 
     if (response['mempool-blocks']) {
-      console.log('response --> mempool-blocks', response['mempool-blocks']);
       this.stateService.mempoolBlocks$.next(response['mempool-blocks']);
     }
 

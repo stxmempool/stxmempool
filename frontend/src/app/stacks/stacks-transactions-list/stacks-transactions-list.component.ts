@@ -12,28 +12,6 @@ import { ApiService } from '../../services/api.service';
 import { MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
 
 
-/*
-  Types of transactions = tx_type
-    - Contract Call
-    - Token Transfer
-    - Coinbase
-    - Smart Contract
-    - Poison Microblock
-  Token Transfer
-    - Transaction Id = tx_id
-    - Sender Address = sender_address
-    - Receipient Address = token_transfer?.recipient_address
-    - Amount/ Value = token_transfer?amount (type string)
-    - Fee = feeRateAsNumber
-    - Successfull = tx_status
-  Contract Call
-    - Function name = .contract_call.function_name
-    - Result = tx_status = 'success'
-    - Fees = fee_rate
-  Smart Contract
-    - 
-*/
-
 @Component({
   selector: 'app-stacks-transactions-list',
   templateUrl: './stacks-transactions-list.component.html',
@@ -41,14 +19,11 @@ import { MempoolTransaction } from '@stacks/stacks-blockchain-api-types';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StacksTransactionsListComponent implements OnInit, OnChanges {
-// export class StacksTransactionsListComponent implements OnInit {
 
   network = '';
   nativeAssetId = this.stateService.network === 'liquidtestnet' ? environment.nativeTestAssetId : environment.nativeAssetId;
   showMoreIncrement = 1000;
 
-  // @Input() transactions: Transaction[];
-  // @Input() transactions: StacksTransactionExtended[];
   @Input() transactions: MinedStacksTransactionExtended[];
 
 
@@ -64,11 +39,10 @@ export class StacksTransactionsListComponent implements OnInit, OnChanges {
   @Output() loadMore = new EventEmitter();
 
   // latestBlock$: Observable<BlockExtended>;
-  // latestBlock$: Observable<StacksBlockExtended>;
   latestBlock$: Observable<any>;
 
 
-  outspendsSubscription: Subscription;
+  // outspendsSubscription: Subscription;
   refreshOutspends$: ReplaySubject<string[]> = new ReplaySubject();
   refreshChannels$: ReplaySubject<string[]> = new ReplaySubject();
   showDetails$ = new BehaviorSubject<boolean>(false);
@@ -80,62 +54,13 @@ export class StacksTransactionsListComponent implements OnInit, OnChanges {
   constructor(
     public stateService: StateService,
     private electrsApiService: ElectrsApiService,
-    private apiService: ApiService,
-    // private assetsService: AssetsService,
     private ref: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
     this.latestBlock$ = this.stateService.blocks$.pipe(map(([block]) => block));
-    // this.latestBlock$ = this.stateService.stacksBlocks$.pipe(map(([block]) => block));
 
     this.stateService.networkChanged$.subscribe((network) => this.network = network);
-
-    // if (this.network === 'liquid' || this.network === 'liquidtestnet') {
-    //   this.assetsService.getAssetsMinimalJson$.subscribe((assets) => {
-    //     this.assetsMinimal = assets;
-    //   });
-    // }
-
-    // this.outspendsSubscription = merge(
-    //   this.refreshOutspends$
-    //     .pipe(
-    //       switchMap((txIds) => this.apiService.getOutspendsBatched$(txIds)),
-    //       tap((outspends: Outspend[][]) => {
-    //         if (!this.transactions) {
-    //           return;
-    //         }
-    //         const transactions = this.transactions.filter((tx) => !tx._outspends);
-    //         outspends.forEach((outspend, i) => {
-    //           transactions[i]._outspends = outspend;
-    //         });
-    //       }),
-    //     ),
-    //   this.stateService.utxoSpent$
-    //     .pipe(
-    //       tap((utxoSpent) => {
-    //         for (const i in utxoSpent) {
-    //           this.transactions[0]._outspends[i] = {
-    //             spent: true,
-    //             txid: utxoSpent[i].txid,
-    //             vin: utxoSpent[i].vin,
-    //           };
-    //         }
-    //       }),
-    //     ),
-    //     this.refreshChannels$
-    //       .pipe(
-    //         filter(() => this.stateService.env.LIGHTNING),
-    //         switchMap((txIds) => this.apiService.getChannelByTxIds$(txIds)),
-    //         tap((channels) => {
-    //           const transactions = this.transactions.filter((tx) => !tx._channels);
-    //           channels.forEach((channel, i) => {
-    //             transactions[i]._channels = channel;
-    //           });
-    //         }),
-    //       )
-    //     ,
-    // ).subscribe(() => this.ref.markForCheck());
   }
 
   ngOnChanges(changes): void {
@@ -158,38 +83,6 @@ export class StacksTransactionsListComponent implements OnInit, OnChanges {
 
       this.transactionsLength = this.transactions.length;
       this.stateService.setTxCache(this.transactions);
-
-      // this.transactions.forEach((tx) => {
-      //   tx['@voutLimit'] = true;
-      //   tx['@vinLimit'] = true;
-      //   if (tx['addressValue'] !== undefined) {
-      //     return;
-      //   }
-
-      //   if (this.address) {
-      //     const addressIn = tx.vout
-      //       .filter((v: Vout) => v.scriptpubkey_address === this.address)
-      //       .map((v: Vout) => v.value || 0)
-      //       .reduce((a: number, b: number) => a + b, 0);
-
-      //     const addressOut = tx.vin
-      //       .filter((v: Vin) => v.prevout && v.prevout.scriptpubkey_address === this.address)
-      //       .map((v: Vin) => v.prevout.value || 0)
-      //       .reduce((a: number, b: number) => a + b, 0);
-
-      //     tx['addressValue'] = addressIn - addressOut;
-      //   }
-      // });
-      // const txIds = this.transactions.filter((tx) => !tx._outspends).map((tx) => tx.txid);
-      // if (txIds.length) {
-      //   this.refreshOutspends$.next(txIds);
-      // }
-      // if (this.stateService.env.LIGHTNING) {
-      //   const txIds = this.transactions.filter((tx) => !tx._channels).map((tx) => tx.txid);
-      //   if (txIds.length) {
-      //     this.refreshChannels$.next(txIds);
-      //   }
-      // }
     }
   }
 
@@ -199,7 +92,6 @@ export class StacksTransactionsListComponent implements OnInit, OnChanges {
     if (scrollHeight > 0){
       const percentageScrolled = scrollTop * 100 / scrollHeight;
       if (percentageScrolled > 70){
-        console.log(percentageScrolled);
         this.loadMore.emit();
       }
     }
@@ -222,7 +114,6 @@ export class StacksTransactionsListComponent implements OnInit, OnChanges {
   }
 
   trackByFn(index: number, tx: StacksTransactionExtended): string {
-    // return tx.txid + tx.status.confirmed;
     const bool = tx.tx_status === 'success';
     return tx.tx_id + bool;
   }
@@ -303,8 +194,4 @@ export class StacksTransactionsListComponent implements OnInit, OnChanges {
   parseContractName (contractId: string): string {
     return contractId.slice(contractId.indexOf('.') + 1);
   }
-
-  // ngOnDestroy(): void {
-  //   this.outspendsSubscription.unsubscribe();
-  // }
 }

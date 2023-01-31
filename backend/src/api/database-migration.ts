@@ -791,7 +791,7 @@ class DatabaseMigration {
       avg_fee_rate BIGINT UNSIGNED NOT NULL DEFAULT "0",
       execution_cost_read_count INT UNSIGNED NOT NULL DEFAULT "0",
       execution_cost_read_length INT UNSIGNED NOT NULL DEFAULT "0",
-      execution_cost_runtime INT UNSIGNED NOT NULL DEFAULT "0",
+      execution_cost_runtime BIGINT UNSIGNED NOT NULL DEFAULT "0",
       execution_cost_write_count INT UNSIGNED NOT NULL DEFAULT "0",
       execution_cost_write_length INT UNSIGNED NOT NULL DEFAULT "0",
       PRIMARY KEY (height),
@@ -824,7 +824,6 @@ class DatabaseMigration {
       height int(10) unsigned NOT NULL,
       id varchar(65) NOT NULL,
       transactions JSON NOT NULL,
-      template NULL,
       PRIMARY KEY (id),
       INDEX (height)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`;
@@ -834,6 +833,7 @@ class DatabaseMigration {
       height int(10) unsigned NOT NULL,
       id varchar(66) NOT NULL,
       transactions JSON NOT NULL,
+      template JSON DEFAULT NULL,
       PRIMARY KEY (id),
       INDEX (height)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`;
