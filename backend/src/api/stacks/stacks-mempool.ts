@@ -7,6 +7,14 @@ import { Common } from '../common';
 import logger from '../../logger';
 import stacksApi from './stacks-api';
 
+// Stacks-inspect related imports
+import { execFile } from 'child_process';
+import * as fs from 'fs';
+import { join } from 'path';
+import util from 'util';
+import DB from '../../database';
+
+
 class StacksMempool {
   private static WEBSOCKET_REFRESH_RATE_MS = 10000;
   private static LAZY_DELETE_AFTER_SECONDS = 30;
@@ -243,6 +251,118 @@ class StacksMempool {
       if (lazyDeleteAt && lazyDeleteAt < now) {
         delete this.mempoolCache[tx];
       }
+    }
+  }
+  // In development, not ready for production. Here we are using the stacks-inspect tool to create mining simulations.
+  public async runProjection() {
+    type StacksInspectLog = {
+      msg: string;
+      // msg: 'Include tx' | 'Tx successfully processed.' | 'Contract-call successfully processed' | 'Miner: mined anchored block' | string;
+      level: string;
+      // level: 'INFO';
+      ts: string;
+      thread: string;
+      //thread: 'main';
+      line: number;
+      file: string;
+      //file : 'src/chainstate/stacks/miner.rs' | 'src/chainstate/stacks/db/transactions.rs';
+      origin?: string;
+      payload?: string;
+      //payload?: 'Coinbase' | 'ContractCall' | 'SmartContract';
+      tx?: string;
+      tx_id?: string;
+      event_type?: string;
+      // event_type?: 'success';
+      event_name?: string;
+      // event_name?: 'transaction_result';
+      cost?: string;
+      return_value?: string;
+      function_args?: string;
+      function_name?: string;
+      contract_name?: string;
+      tx_fees_microstacks?: number;
+      percentage: number;
+      tx_count?: number;
+      execution_consumed?: {
+        runtime: number;
+        write_len: number;
+        write_cnt: number;
+        read_len: number;
+        read_cnt: number;
+      };
+      block_size?: number;
+    }
+    const obj = {
+      blockDetails: null,
+      tx_ids: [],
+    };
+    const exec = util.promisify(execFile);
+    const { stdout, stderr } = await exec(config.STACKS.STACKS_INSPECT.PATH_TO_STACKS_INSPECT, config.STACKS.STACKS_INSPECT.ARGUMENTS, config.STACKS.STACKS_INSPECT.ENV);
+
+
+    const array = stderr.split('\n');
+    //This creates a local .txt file, which is gitignored
+    fs.writeFile(join(process.cwd(), 'src', 'api', 'stacks', 'stacks-inspect-log.txt'), stderr + stdout, (err) => {
+      if (err) throw err;
+      console.log('The file has been saved!');
+    });
+    const parsedArray: any[] = [];
+    array.slice(0, -1).forEach(message => parsedArray.push(JSON.parse(message)));
+    // parsedArray.splice(parsedArray.indexOf(element => element.msg === 'Include tx'));
+    const finalArray: StacksInspectLog[] = parsedArray.slice(parsedArray.findIndex(element => element.payload === 'Coinbase'));
+    for (let i = 0; i < finalArray.length; i++) {
+      if (finalArray[i].msg === 'Include Tx') {
+
+      }
+    }
+    // console.log(parsedArray);
+
+    // for (let i = 0; i < array.length; i++) {
+      // if(array[i].includes('rs:1614')) {
+      //   // @ts-ignore
+      //   // txArray.push(array[i].match(/(?<=x: )(.*?)(?=,)/g)[0]);
+      //   obj.tx_ids.push(JSON.parse(array[i].match(/(?<=x: )(.*?)(?=,)/g)[0]));
+      // }
+      // if (array[i].includes('rs:2555')) {
+      //   // console.log(this.parseBlockDetails(blockDetails + array[i].slice(array[i].indexOf('M')) + '}'));
+      //   // obj.blockDetails = parseBlockDetails(blockDetails + array[i].slice(array[i].indexOf('M')) + '}');
+      //   console.log('rs:2555--->', array[i]);
+      // }
+      // parsedArray.push(JSON.parse(array[i]));
+    // }
+
+    // console.log(parsedArray);
+    // parsedArray.forEach(message => console.log(message.line));
+    // for (let i = 0; i < array.length; i++) {
+    //   if(array[i].includes('rs:1614')) {
+    //     // @ts-ignore
+    //     // txArray.push(array[i].match(/(?<=x: )(.*?)(?=,)/g)[0]);
+    //     obj.tx_ids.push(array[i].match(/(?<=x: )(.*?)(?=,)/g)[0]);
+    //   }
+    //   if (array[i].includes('rs:2555')) {
+    //     // console.log(this.parseBlockDetails(blockDetails + array[i].slice(array[i].indexOf('M')) + '}'));
+    //     // obj.blockDetails = parseBlockDetails(blockDetails + array[i].slice(array[i].indexOf('M')) + '}');
+    //     console.log('rs:2555--->', array[i]);
+    //   }
+    // }
+  };
+  private async saveProjection(projectedBlock) {
+    try {
+      const query = `INSERT INTO projections(
+        blockTimestamp,            size,                       tx_count,                   fees,
+        fee_span,                  median_fee,                 reward,                     avg_fee,
+        avg_fee_rate               transactions,               execution_cost_read_count   execution_cost_read_length
+        execution_cost_runtime     execution_cost_write_count  execution_cost_write_length
+      ) VALUE (
+        ?, ?, FROM_UNIXTIME(?), ?,
+        ?, ?, ?, ?,
+        ?, ?, ?, ?,
+        ?, ?, ?, ?,
+        ?, ?, ?, ?
+      )`;
+      const params = [];
+      await DB.query(query, params);
+    } catch (error) {
     }
   }
 }

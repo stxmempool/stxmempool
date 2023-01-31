@@ -13,7 +13,7 @@
       </span>
 
       <div class="container-buttons">
-        <ng-template *ngIf="tx?.tx_status === 'success' || tx?.tx_status === 'abort_by_response' || tx?.tx_status === 'abort_by_post_condition'">
+        <ng-template [ngIf]="tx?.tx_status === 'success' || tx?.tx_status === 'abort_by_response' || tx?.tx_status === 'abort_by_post_condition'">
           <button *ngIf="latestBlock" type="button" class="btn btn-sm btn-success">
             <ng-container *ngTemplateOutlet="latestBlock.height - tx.block_height + 1 == 1 ? confirmationSingular : confirmationPlural; context: {$implicit: latestBlock.height - tx.block_height + 1}"></ng-container>
             <ng-template #confirmationSingular let-i i18n="shared.confirmation-count.singular|Transaction singular confirmation count">{{ i }} confirmation</ng-template>
@@ -65,6 +65,15 @@
             <td><a class="tx-link" [routerLink]="[('/address/' + tx.sender_address) | relativeUrl]">
               {{ tx.sender_address | shortenString: 12 }}
             </a></td>
+          </tr>
+          <tr>
+            <td i18n="block.timestamp">Timestamp</td>
+            <td>
+              &lrm;{{ tx.burn_block_time * 1000 | date:'yyyy-MM-dd HH:mm' }}
+              <div class="lg-inline">
+                <i class="symbol">(<app-time-since [time]="tx.burn_block_time" [fastRender]="true"></app-time-since>)</i>
+              </div>
+            </td>
           </tr>
         </ng-container>
         <ng-container *ngSwitchCase="tx.tx_type === 'smart_contract'">
@@ -137,7 +146,7 @@
             <td>{{ tx.poison_microblock.microblock_header_2 | shortenString:16 }}</td>
           </tr>
         </ng-container>
-        <ng-container *ngIf="tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition'">
+        <ng-container *ngIf="tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition' || tx.tx_type === 'smart_contract'">
           <tr>
             <td i18n="block.timestamp">Nonce</td>
             <td>{{tx.nonce}}</td>
@@ -215,6 +224,9 @@
             </table>
             <ng-container *ngTemplateOutlet="feeTable"></ng-container>
           </div>
+        </div>
+        <div class="external-link-unconfirmed">
+          <p>Find this <a href="https://explorer.stacks.co/txid/{{ txId }}?chain=mainnet" target="_blank">TX </a>on Stacks Explorer</p>
         </div>
       </div>
     </ng-template>
@@ -423,7 +435,7 @@
           {{ tx.feeRateAsNumber / tx.vsize | feeRounding }} <span class="symbol" i18n="shared.sat-vbyte|sat/vB">uSTX/B</span>
         </td>
       </tr>
-      <ng-container *ngIf="tx.tx_status !== 'success' && tx.tx_status !== 'abort_by_response' && tx.tx_status !== 'abort_by_post_condition'">
+      <ng-container *ngIf="(tx.tx_status !== 'success' && tx.tx_status !== 'abort_by_response' && tx.tx_status !== 'abort_by_post_condition') && tx.tx_type !== 'smart_contract'">
         <tr>
           <td i18n="block.timestamp">Nonce</td>
           <td>{{tx.nonce}}</td>
@@ -438,15 +450,17 @@
           <td>Block hash</td>
           <td>{{ tx.block_hash | shortenString:16 }}</td>
         </tr>
-        <tr>
-          <td i18n="block.timestamp">Timestamp</td>
-          <td>
-            &lrm;{{ tx.burn_block_time * 1000 | date:'yyyy-MM-dd HH:mm' }}
-            <div class="lg-inline">
-              <i class="symbol">(<app-time-since [time]="tx.burn_block_time" [fastRender]="true"></app-time-since>)</i>
-            </div>
-          </td>
-        </tr>
+        <ng-container *ngIf="tx.tx_type !== 'coinbase'">
+          <tr>
+            <td i18n="block.timestamp">Timestamp</td>
+            <td>
+              &lrm;{{ tx.burn_block_time * 1000 | date:'yyyy-MM-dd HH:mm' }}
+              <div class="lg-inline">
+                <i class="symbol">(<app-time-since [time]="tx.burn_block_time" [fastRender]="true"></app-time-since>)</i>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
       </ng-container>
       
       <tr *ngIf="cpfpInfo && (cpfpInfo?.bestDescendant || cpfpInfo?.descendants?.length || cpfpInfo?.ancestors?.length)">

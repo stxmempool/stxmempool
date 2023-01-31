@@ -57,9 +57,8 @@ export default class TxView implements StacksTransactionStripped {
     this.txid = tx.txid;
     this.fee = tx.fee;
     // In the original mempool.space the transactions are rendered based on vsize. Here, when applicable, we render based on 
-    // read_count (the most common block capacity bottleneck). For mempool transactions, we render based on size of the transcation
-    // because read_count is not yet known
-    this.vsize = tx.execution_cost_read_count !== 0 ? tx.execution_cost_read_count : tx.vsize;
+    // read_count (the most common block capacity bottleneck). 
+    this.vsize = tx.execution_cost_read_count;
     // This is purely for the tooltip
     this.size = tx.vsize;
     this.execution_cost_read_count = tx.execution_cost_read_count;

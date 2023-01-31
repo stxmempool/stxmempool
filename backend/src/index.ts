@@ -163,7 +163,9 @@ class Server {
     try {
       if (config.STACKS.ENABLED) {
         indexer.$run();
-        // await stacksMempoolBlocks.updateProjection();
+        // In development, DO NOT uncomment
+        // await stacksMempool.runProjection();
+
         await stacksMempool.$updateStacksMempool();
         await stacksBlocks.$updateBlocks();
       } else {

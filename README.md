@@ -1,21 +1,65 @@
 # The Stxmempool Open Source Project
 
-Stxmempool is an adaptation of the The Mempool Open Source Project™. Stxmempool is a mempool visualizer for the the Stacks blockchain ecosystem. A live site is available at [stxmempool.space](https://stxmempool.space/).
+Stxmempool is an adaptation of The Mempool Open Source Project™. Stxmempool is a mempool visualizer for the the Stacks blockchain ecosystem. A live site is available at [stxmempool.space](https://stxmempool.space/).
 
 It is an open-source project developed and operated for the benefit of the Bitcoin and Stacks community, with a focus on the emerging transaction fee market.
 
 ![mempool](https://stxmempool.space/resources/screenshots/stacks-v1.1-dashboard.png)
 
+# System Requirements
+
+## Operating System
+
+This repo was adapted on a M1 Macbook Pro. We suggest using a Lunux or Mac OS. However, there are limitations with M1 chips, see below.
+
+### Running a fully independant instance
+
+Running a full independant instance requires running a local Hiro API, Stacks Blockchain node, and a Bitcoin node. This can be done on a Linux distro.
+
+DO NOT ATTEMPT to host a local Hiro API with an Apple M1 chip. There are serious I/O issues with the Hiro API on a M1 chip.
+
+However, a Bitcoin node and a Stacks node can be run on an M1.
+
+### Using the Hiro public node
+
+For miminal setup, one can use the public Hiro API and skip the neccesity of a Stacks node. This setup is M1 friendly and only requires a BTC node for difficulty adjustments.
+
+## Memory
+
+A minimum of 8 GB is suggested. If you decide to run a full Hiro API and a local Stacks Blockchain node, you will need more.
+
+## Storage
+
+Storage: Anywhere from 15 GB to over 700 GB
+
+### Minimal Storage Example
+
+If you are running completely on the public Hiro API, then you will just need a Bitcoin node and space for this repo. The space you designate for the Bitcoin node is up to you.
+
+### Stacks Development Example (using public Hiro API)
+
+- Pruned BTC node: ~15GB
+- Stxmempool Repo: ~2.5GB
+
+### Full instance with an ability to launch mempool.space or stxmempool.space
+
+- Full BTC node with indexing enabled: ~550GB
+
+- Synced Stacks node: 80GB+
+
+- Synced local API: ~30GB
+
+This setup will allow you to work with mempool.space and stxmempool.space.
+
 # Installation Methods
 
 Currently Stxmempool supports a local installation with limited production support. Stxmempool is primarily focused on development. Later we wish to provide more support to non-developers.
 
-This codebase does not support being able to switch between networks like The Mempool Open Source Project™. The following guide will help you setup a enviroment similar to [stxmempool.space](https://stxmempool.space/).
+This codebase does not support the functionality to switch between networks like mempool.space does (i.e. click a dropdown memu and switch to a locally hosted memmpool.space, bisq.markets or liquid.network). The following guide will help you setup a enviroment similar to [stxmempool.space](https://stxmempool.space/).
 
 ## Backend
 
-
-### 1. Clone Mempool Repository
+### 1. Clone Stxmempool Repository
 
 Get the latest Stxmempool code:
 
@@ -25,10 +69,10 @@ cd mempool
 ```
 ### 2. Configure Bitcoin Core
 
-Turn on `txindex`, enable RPC, and set RPC credentials in `bitcoin.conf`:
+If you want to run mempool.space, set `txindex` to `1`. Otherwise, just enable RPC, and set RPC credentials in `bitcoin.conf`:
 
 ```
-txindex=1
+txindex=0
 server=1
 rpcuser=mempool
 rpcpassword=mempool
@@ -62,7 +106,7 @@ MariaDB [(none)]> grant all privileges on mempool.* to 'mempool'@'%' identified 
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-### 4. Prepare Mempool Backend
+### 4. Prepare Stxmempool Backend
 
 #### Build
 
@@ -103,9 +147,22 @@ Here is a example of the `STACKS` block that has block indexing enabled for up t
     "BLOCKS_SUMMARIES_INDEXING": true,
     "INDEXING_BLOCKS_AMOUNT": 10,
     "DEDICATED_API": false,
-    "DEDICATED_API_URL": "http://localhost:3999"
+    "DEDICATED_API_URL": "http://localhost:3999",
+    "STACKS_INSPECT": {
+      "PATH_TO_STACKS_INSPECT": "path/to/debug/stacks-inspect",
+      "ARGUMENTS": ["try-mine", "path/to/chaindata/", "10", "30000"],
+      "ENV": {
+        "env": {
+          "STACKS_LOG_JSON": "1"
+        }
+      }
+    }
   }
 ```
+
+
+`STACKS-INSPECT` is a work in progress, leave as placeholder strings for now.
+
 
 In particular, make sure:
 - the correct Bitcoin Core RPC credentials are specified in `CORE_RPC`
@@ -134,7 +191,7 @@ Everytime you make changes and rebuild the backend, it will requery the past num
 
 ## Frontend
 
-### 1. Clone Mempool Repository
+### 1. Clone Stxmempool Repository
 
 Get the latest Stxmempool code:
 
@@ -193,14 +250,8 @@ npm run build
 
 #### Development
 
-To run your local Stxmempool frontend with your local StxMempool backend:
+To run your local Stxmempool frontend with your local Stxmempool backend:
 
 ```
 npm run serve
 ```
-
-#### Production
-
-The `npm run build` command from step 1 above should have generated a `dist` directory. Put the contents of `dist/` onto your web server.
-
-You will probably want to set up a reverse proxy, TLS, etc. There are sample nginx configuration files in the top level of the repository for reference, but note that support for such tasks is outside the scope of this project.

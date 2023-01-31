@@ -129,6 +129,15 @@
     "BLOCKS_SUMMARIES_INDEXING": false,
     "INDEXING_BLOCKS_AMOUNT": 11000,
     "DEDICATED_API": false,
-    "DEDICATED_API_URL": "http://localhost:3999"
+    "DEDICATED_API_URL": "http://localhost:3999",
+    "STACKS_INSPECT": {
+      "PATH_TO_STACKS_INSPECT": "path/to/debug/stacks-inspect",
+      "ARGUMENTS": ["try-mine", "path/to/chaindata/", "10", "30000"],
+      "ENV": {
+        "env": {
+          "STACKS_LOG_JSON": "1"
+        }
+      }
+    }
   }
 }

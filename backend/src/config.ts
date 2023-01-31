@@ -135,6 +135,15 @@ interface IConfig {
     INDEXING_BLOCKS_AMOUNT: number;
     DEDICATED_API: boolean;
     DEDICATED_API_URL: string;
+    STACKS_INSPECT: {
+      PATH_TO_STACKS_INSPECT: string;
+      ARGUMENTS: string[];
+      ENV: {
+        env: {
+          STACKS_LOG_JSON: string;
+        }
+      }
+    }
   },
 }
 
@@ -270,7 +279,16 @@ const defaults: IConfig = {
     'BLOCKS_SUMMARIES_INDEXING': true,
     'INDEXING_BLOCKS_AMOUNT': 11000, // 0 = disable indexing, -1 = index all blocks
     'DEDICATED_API': false,
-    'DEDICATED_API_URL': 'http://localhost:3999'
+    'DEDICATED_API_URL': 'http://localhost:3999',
+    'STACKS_INSPECT': {
+      'PATH_TO_STACKS_INSPECT': 'path/to/debug/stacks-inspect',
+      'ARGUMENTS': ['try-mine', 'path/to/chaindata/', '10', '30000'],
+      'ENV': {
+        'env': {
+          'STACKS_LOG_JSON': '1'
+        }
+      }
+    }
   },
 };
 
