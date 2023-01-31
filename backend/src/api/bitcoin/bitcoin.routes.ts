@@ -18,6 +18,7 @@ import blocks from '../blocks';
 import bitcoinClient from './bitcoin-client';
 import difficultyAdjustment from '../difficulty-adjustment';
 import transactionRepository from '../../repositories/TransactionRepository';
+import stacksBlocks from '../stacks/stacks-blocks';
 
 class BitcoinRoutes {
   public initRoutes(app: Application) {
@@ -335,7 +336,9 @@ class BitcoinRoutes {
 
   private async getStrippedBlockTransactions(req: Request, res: Response) {
     try {
-      const transactions = await blocks.$getStrippedBlockTransactions(req.params.hash);
+      // const transactions = await blocks.$getStrippedBlockTransactions(req.params.hash);
+      const transactions = await stacksBlocks.$getStrippedBlockTransactions(req.params.hash);
+
       res.setHeader('Expires', new Date(Date.now() + 1000 * 3600 * 24 * 30).toUTCString());
       res.json(transactions);
     } catch (e) {
@@ -346,6 +349,7 @@ class BitcoinRoutes {
   private async getBlock(req: Request, res: Response) {
     try {
       const block = await blocks.$getBlock(req.params.hash);
+
 
       const blockAge = new Date().getTime() / 1000 - block.timestamp;
       const day = 24 * 3600;

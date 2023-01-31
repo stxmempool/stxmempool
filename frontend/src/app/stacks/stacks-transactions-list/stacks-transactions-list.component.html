@@ -1,0 +1,174 @@
+<ng-container *ngFor="let tx of transactions; let i = index; trackBy: trackByFn">
+  <div *ngIf="!transactionPage" class="header-bg box tx-page-container">
+    <a class="float-left" [routerLink]="['/tx/' | relativeUrl, tx.tx_id]">
+      <span style="float: left;" class="d-block d-md-none">{{ tx.tx_id | shortenString : 16 }}</span>
+      <span style="float: left;" class="d-none d-md-block">{{ tx.tx_id }}</span>
+    </a>
+    <div class="float-right">
+      <ng-template [ngIf]="tx.tx_status === 'success' ">&lrm;{{ tx.burn_block_time * 1000 | date:'yyyy-MM-dd HH:mm' }}</ng-template>
+      <ng-template [ngIf]="tx.tx_status === 'abort_by_post_condition'">&lrm;{{ tx.burn_block_time * 1000 | date:'yyyy-MM-dd HH:mm' }}</ng-template>
+      <ng-template [ngIf]="tx.tx_status === 'abort_by_response'">&lrm;{{ tx.burn_block_time * 1000 | date:'yyyy-MM-dd HH:mm' }}</ng-template>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+
+  <div class="header-bg box" infiniteScroll [alwaysCallback]="true" [infiniteScrollDistance]="2" [infiniteScrollUpDistance]="1.5" [infiniteScrollThrottle]="50" (scrolled)="onScroll()" [attr.data-cy]="'tx-' + i">
+
+    <div *ngIf="errorUnblinded" class="error-unblinded">{{ errorUnblinded }}</div>
+    <div class="row">
+      <div class="col">
+        <table class="table table-borderless smaller-text table-sm table-tx-vin">
+          <tbody>
+              <tr >
+                <!-- To show the arrows next to the transactions -->
+                <td class="arrow-td">
+                  <div *ngIf="tx.tx_status === 'success'; else notSuccessful">
+                    <span class="green">
+                      <fa-icon [icon]="['fas', 'circle-check']" [fixedWidth]="true"></fa-icon>
+                    </span>
+                  </div>
+                  <ng-template #notSuccessful>
+                    <ng-template [ngIf]="tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition'" [ngIfElse]="pending">
+                      <span class="red">
+                        <fa-icon [icon]="['fas', 'circle-xmark']" [fixedWidth]="true"></fa-icon>
+                      </span>
+                    </ng-template>
+                    <ng-template #pending>
+                      <span class="grey">
+                        <fa-icon [icon]="['fas', 'arrow-alt-circle-right']" [fixedWidth]="true"></fa-icon>
+                      </span>
+                    </ng-template>
+                  </ng-template>
+                </td>
+                <td>
+                  <div [ngSwitch]="true">
+                    <ng-container *ngSwitchCase="tx.tx_type === 'coinbase'">
+                      <p>Coinbase</p>
+                      <p>Mined By:</p><a class="shortable-address" *ngIf="tx.sender_address" [routerLink]="['/address/' | relativeUrl, tx.sender_address]" title="{{ tx.sender_address }}">
+                        <span class="d-block d-lg-none">{{ tx.sender_address | shortenString : 16 }}</span>
+                        <span class="d-none d-lg-inline-flex justify-content-start">
+                          <span class="addr-left flex-grow-1" [style]="tx.sender_address.length > 40 ? 'max-width: 235px' : ''">{{ tx.sender_address }}</span>
+                          <span *ngIf="tx.sender_address.length > 40" class="addr-right">{{ tx.sender_address | capAddress: 40: 10 }}</span>
+                        </span>
+                      </a>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
+                      <p>Contract Call</p>
+                      <p>Called By:</p><a class="shortable-address" *ngIf="tx.sender_address" [routerLink]="['/address/' | relativeUrl, tx.sender_address]" title="{{ tx.sender_address }}">
+                        <span class="d-block d-lg-none">{{ tx.sender_address | shortenString : 16 }}</span>
+                        <span class="d-none d-lg-inline-flex justify-content-start">
+                          <span class="addr-left flex-grow-1" [style]="tx.sender_address.length > 40 ? 'max-width: 235px' : ''">{{ tx.sender_address }}</span>
+                          <span *ngIf="tx.sender_address.length > 40" class="addr-right">{{ tx.sender_address | capAddress: 40: 10 }}</span>
+                        </span>
+                      </a>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="tx.tx_type === 'token_transfer'">
+                      <p>Token Transfer</p>
+                      <p>Sender:</p><a class="shortable-address" *ngIf="tx.sender_address" [routerLink]="['/address/' | relativeUrl, tx.sender_address]" title="{{ tx.sender_address }}">
+                        <span class="d-block d-lg-none">{{ tx.sender_address | shortenString : 16 }}</span>
+                        <span class="d-none d-lg-inline-flex justify-content-start">
+                          <span class="addr-left flex-grow-1" [style]="tx.sender_address.length > 40 ? 'max-width: 235px' : ''">{{ tx.sender_address }}</span>
+                          <span *ngIf="tx.sender_address.length > 40" class="addr-right">{{ tx.sender_address | capAddress: 40: 10 }}</span>
+                        </span>
+                      </a>
+                      <p>Reciepient:</p><a class="shortable-address" *ngIf="tx.token_transfer" [routerLink]="['/address/' | relativeUrl, tx.sender_address]" title="{{ tx.token_transfer.recipient_address }}">
+                        <span class="d-block d-lg-none">{{ tx.token_transfer.recipient_address | shortenString : 16 }}</span>
+                        <span class="d-none d-lg-inline-flex justify-content-start">
+                          <span class="addr-left flex-grow-1" [style]="tx.token_transfer.recipient_address.length > 40 ? 'max-width: 235px' : ''">{{ tx.token_transfer.recipient_address }}</span>
+                          <span *ngIf="tx.token_transfer.recipient_address.length > 40" class="addr-right">{{ tx.token_transfer.recipient_address | capAddress: 40: 10 }}</span>
+                        </span>
+                      </a>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="tx.tx_type === 'smart_contract'">
+                      <p>Smart Contract</p>
+                      <p>Deployed By:</p><a class="shortable-address" *ngIf="tx.sender_address" [routerLink]="['/address/' | relativeUrl, tx.sender_address]" title="{{ tx.sender_address }}">
+                        <span class="d-block d-lg-none">{{ tx.sender_address | shortenString : 16 }}</span>
+                        <span class="d-none d-lg-inline-flex justify-content-start">
+                          <span class="addr-left flex-grow-1" [style]="tx.sender_address.length > 40 ? 'max-width: 235px' : ''">{{ tx.sender_address }}</span>
+                          <span *ngIf="tx.sender_address.length > 40" class="addr-right">{{ tx.sender_address | capAddress: 40: 10 }}</span>
+                        </span>
+                      </a>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="tx.tx_type === 'poison_microblock'">
+                      <p>Poison Microblock</p>
+                      <p>Broadcast By:</p><a class="shortable-address" *ngIf="tx.sender_address" [routerLink]="['/address/' | relativeUrl, tx.sender_address]" title="{{ tx.sender_address }}">
+                        <span class="d-block d-lg-none">{{ tx.sender_address | shortenString : 16 }}</span>
+                        <span class="d-none d-lg-inline-flex justify-content-start">
+                          <span class="addr-left flex-grow-1" [style]="tx.sender_address.length > 40 ? 'max-width: 235px' : ''">{{ tx.sender_address }}</span>
+                          <span *ngIf="tx.sender_address.length > 40" class="addr-right">{{ tx.sender_address | capAddress: 40: 10 }}</span>
+                        </span>
+                      </a>
+                    </ng-container>
+                  </div>
+                </td>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Not Sure what this is -->
+      <div class="w-100 d-block d-md-none"></div>
+      
+      <!-- Right Side of Transaction block -->
+      <div class="col mobile-bottomcol">
+        <table class="table table-borderless smaller-text table-sm table-tx-vout">
+          <tbody>
+            <tr>
+              <td>
+                <div [ngSwitch]="true">
+                  <ng-container *ngSwitchCase="tx.tx_type === 'coinbase'">
+                    <p>Reward: <app-stacks-amount  [uSTX]="1000000000"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="1000000000"></app-stacks-fiat></span></p>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="tx.tx_type === 'contract_call'">
+                    <p>Function Name: <span>{{ tx.contract_call?.function_name }}</span></p>
+                    <p>Contract Name: <span>{{ parseContractName(tx.contract_call?.contract_id) | titlecase }}</span></p>
+                    <p>Fees: <app-stacks-amount [uSTX]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
+                  </ng-container>
+                  <ng-container *ngSwitchCase="tx.tx_type === 'token_transfer'">
+                    <p>Amount Sent <app-stacks-amount [uSTX]="convertStringToInt(tx.token_transfer.amount)"></app-stacks-amount></p>
+                    <p>Fees: <app-stacks-amount [uSTX]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
+                  </ng-container>
+                  <ng-container *ngSwitchCase="tx.tx_type === 'smart_contract'">
+                    <p>Fees: <app-stacks-amount [uSTX]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
+                  </ng-container>
+                  <ng-container *ngSwitchCase="tx.tx_type === 'poison_microblock'">
+                    <p>Microblock Header 1: <span>{{ tx.poison_microblock?.microblock_header_1 | shortenString:16 }}</span></p>
+                    <p>Microblock Header 2: <span>{{ tx.poison_microblock?.microblock_header_1 | shortenString:16 }}</span></p>
+                    <p>Fees: <app-stacks-amount [uSTX]="convertStringToInt(tx.fee_rate)"></app-stacks-amount> <span class="fiat"><app-stacks-fiat [value]="convertStringToInt(tx.fee_rate)"></app-stacks-fiat></span></p>
+
+                  </ng-container>
+                  <ng-container *ngSwitchDefault>{{tx.tx_type}}</ng-container>
+                </div>
+              </td>
+              <div class="float-right">
+              <ng-container *ngIf="showConfirmations && latestBlock$ | async as latestBlock">
+                <button *ngIf="tx.tx_status === 'success' || tx.tx_status === 'abort_by_response' || tx.tx_status === 'abort_by_post_condition'; else unconfirmedButton" type="button" class="btn btn-sm btn-success mt-2">
+      
+                  <ng-container *ngTemplateOutlet="latestBlock.height - tx.block_height + 1 == 1 ? confirmationSingular : confirmationPlural; context: {$implicit: latestBlock.height - tx.block_height + 1}"></ng-container>
+                  <ng-template #confirmationSingular let-i i18n="shared.confirmation-count.singular|Transaction singular confirmation count">{{ i }} confirmation</ng-template>
+                  <ng-template #confirmationPlural let-i i18n="shared.confirmation-count.plural|Transaction plural confirmation count">{{ i }} confirmations</ng-template>
+                </button>
+                <ng-template #unconfirmedButton>
+                  <button type="button" class="btn btn-sm btn-danger mt-2" i18n="transaction.unconfirmed|Transaction unconfirmed state">Unconfirmed</button>
+                </ng-template>
+              </ng-container>
+            </div>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <br />
+</ng-container>
+
+<ng-template #assetBox let-item>
+  {{ item.value / pow(10, assetsMinimal[item.asset][3]) | number: '1.' + assetsMinimal[item.asset][3] + '-' + assetsMinimal[item.asset][3] }} {{ assetsMinimal[item.asset][1] }}
+  <br />
+  {{ assetsMinimal[item.asset][0] }}
+  <br />
+  <a [routerLink]="['/assets/asset/' | relativeUrl, item.asset]">{{ item.asset | shortenString : 13 }}</a>
+</ng-template>

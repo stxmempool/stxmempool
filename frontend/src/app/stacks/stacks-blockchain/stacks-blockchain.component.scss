@@ -1,0 +1,126 @@
+#divider {
+  width: 2px;
+  height: 200px;
+  left: 0;
+  top: -50px;
+  position: absolute;
+  margin-bottom: 120px;
+}
+
+#divider > img {
+  position: absolute;
+  left: -100px;
+  top: -28px;
+}
+
+.blockchain-wrapper {
+  height: 250px;
+
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}
+
+.position-container {
+  position: absolute;
+  left: 0;
+  top: 75px;
+  transform: translateX(50vw);
+}
+
+.position-container.liquid, .position-container.liquidtestnet {
+  transform: translateX(420px);
+}
+
+@media (min-width: 768px) {
+  .blockchain-wrapper.time-ltr {
+    .position-container.liquid, .position-container.liquidtestnet {
+      transform: translateX(calc(100vw - 420px));
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .blockchain-wrapper {
+    .position-container {
+      transform: translateX(95vw);
+    }
+    .position-container.liquid, .position-container.liquidtestnet {
+      transform: translateX(50vw);
+    }
+    .position-container.loading {
+      transform: translateX(50vw);
+    }
+  }
+  .blockchain-wrapper.time-ltr {
+    .position-container {
+      transform: translateX(5vw);
+    }
+    .position-container.liquid, .position-container.liquidtestnet {
+      transform: translateX(50vw);
+    }
+    .position-container.loading {
+      transform: translateX(50vw);
+    }
+  }
+}
+
+.black-background {
+  background-color: #11131f;
+  z-index: 100;
+  position: relative;
+}
+
+.loading-block {
+  position: absolute;
+  text-align: center;
+  margin: auto;
+  width: 300px;
+  left: -150px;
+  top: 0px;
+}
+
+.time-toggle {
+  color: white;
+  font-size: 0.8rem;
+  position: absolute;
+  bottom: -1.8em;
+  left: 1px;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  outline: none;
+  margin: 0;
+  padding: 0;
+}
+
+.blockchain-wrapper.ltr-transition .blocks-wrapper,
+.blockchain-wrapper.ltr-transition .position-container,
+.blockchain-wrapper.ltr-transition .time-toggle {
+  transition: transform 1s;
+}
+
+.blockchain-wrapper.time-ltr {
+  .blocks-wrapper {
+    transform: scaleX(-1);
+  }
+
+  .time-toggle {
+    transform: translateX(-50%) scaleX(-1);
+  }
+}
+
+:host-context(.ltr-layout) {
+  .blockchain-wrapper.time-ltr .blocks-wrapper,
+  .blockchain-wrapper .blocks-wrapper {
+    direction: ltr;
+  }
+}
+
+:host-context(.rtl-layout) {
+  .blockchain-wrapper.time-ltr .blocks-wrapper,
+  .blockchain-wrapper .blocks-wrapper {
+    direction: rtl;
+  }
+}

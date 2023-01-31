@@ -1,0 +1,163 @@
+.bitcoin-block {
+  width: 125px;
+  height: 125px;
+  transition: background 2s, right 2s, transform 1s;
+}
+
+.block-size {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.mempool-blocks-container {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  left: 0px;
+}
+.block-height {
+  position: absolute;
+  font-size: 16px;
+  bottom: 160px;
+  width: 100%;
+  left: -12px;
+  z-index: 1;
+}
+
+.flashing {
+  /* force compositing */
+  will-change: opacity;
+  transform: translateZ(0);
+  /* effective max frame rate = (#keyframes - 1) x steps / duration */
+  animation: opacityPulse 2s steps(30, end);
+  animation-iteration-count: infinite;
+  opacity: 1;
+}
+
+.mempool-block {
+  position: absolute;
+  top: 0;
+}
+
+.block-body {
+  text-align: center;
+  transition: transform 1s;
+}
+
+@keyframes opacityPulse {
+  0% {opacity: 0.7;}
+  50% {opacity: 1.0;}
+  100% {opacity: 0.7;}
+}
+
+.time-difference {
+  font-size: 13px;
+}
+
+.fees {
+  font-size: 12px;
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
+
+.fee-span {
+  font-size: 11px;
+  margin-bottom: 5px;
+  color: #fff000;
+}
+
+.transaction-count {
+  font-size: 10px;
+  margin-top: 3px;
+  margin-bottom: 4px;
+}
+
+.bitcoin-block::after {
+  content: '';
+  width: 125px;
+  height: 24px;
+  position:absolute;
+  top: -24px;
+  left: -20px;
+  background-color: #232838;
+  transform:skew(40deg);
+  transform-origin:top;
+  transition: transform 1s, left 1s;
+}
+
+.bitcoin-block::before {
+  content: '';
+  width: 20px;
+  height: 125px;
+  position: absolute;
+  top: -12px;
+  left: -20px;
+  background-color: #191c27;
+  z-index: -1;
+
+  transform: skewY(50deg);
+  transform-origin: top;
+  transition: transform 1s, left 1s;
+}
+
+.mempool-block.bitcoin-block::after {
+  background-color: #403834;
+}
+
+.mempool-block.bitcoin-block::before {
+  background-color: #2d2825;
+}
+
+.black-background {
+  background-color: #11131f;
+  z-index: 100;
+  position: relative;
+}
+
+#arrow-up {
+  position: relative;
+  right: 75px;
+  top: 140px;
+  width: 0;
+  height: 0;
+  border-left: 35px solid transparent;
+  border-right: 35px solid transparent;
+  border-bottom: 35px solid #FFF;
+}
+
+.blockLink {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  z-index: 10;
+}
+
+.blockLink.disabled {
+  pointer-events: none;
+}
+
+.blockLink:hover {
+  text-decoration: none;
+}
+
+.time-ltr {
+  .bitcoin-block::after {
+    transform: skew(-40deg);
+    left: 20px;
+  }
+
+  .bitcoin-block::before {
+    transform: skewY(-50deg);
+    left: 125px;
+  }
+  .block-body {
+    transform: scaleX(-1);
+  }
+}
+
+:host-context(.rtl-layout) {
+  #arrow-up {
+    transform: translateX(70px);
+  }
+}

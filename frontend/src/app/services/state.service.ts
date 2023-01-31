@@ -7,6 +7,7 @@ import { Router, NavigationStart } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { map, shareReplay } from 'rxjs/operators';
 import { StorageService } from './storage.service';
+import { StacksBlockExtended } from '../stacks/stacks.interfaces';
 
 interface MarkBlockState {
   blockHeight?: number;
@@ -23,6 +24,7 @@ export interface Env {
   LIQUID_TESTNET_ENABLED: boolean;
   BISQ_ENABLED: boolean;
   BISQ_SEPARATE_BACKEND: boolean;
+  STACKS_ENABLED: boolean,
   ITEMS_PER_PAGE: number;
   KEEP_BLOCKS_AMOUNT: number;
   OFFICIAL_MEMPOOL_SPACE: boolean;
@@ -37,6 +39,7 @@ export interface Env {
   MEMPOOL_WEBSITE_URL: string;
   LIQUID_WEBSITE_URL: string;
   BISQ_WEBSITE_URL: string;
+  STACKS_WEBSITE_URL: string;
   MINING_DASHBOARD: boolean;
   LIGHTNING: boolean;
   MAINNET_BLOCK_AUDIT_START_HEIGHT: number;
@@ -49,6 +52,7 @@ const defaultEnv: Env = {
   'SIGNET_ENABLED': false,
   'LIQUID_ENABLED': false,
   'LIQUID_TESTNET_ENABLED': false,
+  'STACKS_ENABLED': false,
   'BASE_MODULE': 'mempool',
   'BISQ_ENABLED': false,
   'BISQ_SEPARATE_BACKEND': false,
@@ -65,6 +69,7 @@ const defaultEnv: Env = {
   'MEMPOOL_WEBSITE_URL': 'https://mempool.space',
   'LIQUID_WEBSITE_URL': 'https://liquid.network',
   'BISQ_WEBSITE_URL': 'https://bisq.markets',
+  "STACKS_WEBSITE_URL": 'https://localhost:4200',
   'MINING_DASHBOARD': true,
   'LIGHTNING': false,
   'MAINNET_BLOCK_AUDIT_START_HEIGHT': 0,
@@ -86,13 +91,25 @@ export class StateService {
   networkChanged$ = new ReplaySubject<string>(1);
   lightningChanged$ = new ReplaySubject<boolean>(1);
   blocks$: ReplaySubject<[BlockExtended, boolean]>;
+  // blocks$: ReplaySubject<[BlockExtended, boolean]>;
+
+  stacksBlocks$: ReplaySubject<[StacksBlockExtended, boolean]>;
+
   transactions$ = new ReplaySubject<TransactionStripped>(6);
   conversions$ = new ReplaySubject<any>(1);
   bsqPrice$ = new ReplaySubject<number>(1);
   mempoolInfo$ = new ReplaySubject<MempoolInfo>(1);
-  mempoolBlocks$ = new ReplaySubject<MempoolBlock[]>(1);
-  mempoolBlockTransactions$ = new Subject<TransactionStripped[]>();
-  mempoolBlockDelta$ = new Subject<MempoolBlockDelta>();
+  // mempoolBlocks$ = new ReplaySubject<MempoolBlock[]>(1);
+  mempoolBlocks$ = new ReplaySubject<any[]>(1);
+
+  // THIS WILL HAVE TO BE CHANGED WHEN WE GET CLOSER TO CHOOSING HOW TO REPRESENT THE MEMPOOL, WILL IT BE A STATIC BLOCK?
+
+  // mempoolBlockTransactions$ = new Subject<TransactionStripped[]>();
+  // mempoolBlockDelta$ = new Subject<MempoolBlockDelta>();
+  
+  mempoolBlockTransactions$ = new Subject<any[]>();
+  mempoolBlockDelta$ = new Subject<any>();
+
   txReplaced$ = new Subject<ReplacedTransaction>();
   utxoSpent$ = new Subject<object>();
   difficultyAdjustment$ = new ReplaySubject<DifficultyAdjustment>(1);
@@ -153,13 +170,18 @@ export class StateService {
     });
 
     this.blocks$ = new ReplaySubject<[BlockExtended, boolean]>(this.env.KEEP_BLOCKS_AMOUNT);
+    this.stacksBlocks$ = new ReplaySubject<[StacksBlockExtended, boolean]>(this.env.KEEP_BLOCKS_AMOUNT);
 
     if (this.env.BASE_MODULE === 'bisq') {
       this.network = this.env.BASE_MODULE;
       this.networkChanged$.next(this.env.BASE_MODULE);
     }
+    if (this.env.STACKS_ENABLED) {
+      this.blockVSize = 1000000;
+    } else {
+      this.blockVSize = this.env.BLOCK_WEIGHT_UNITS / 4;
+    }
 
-    this.blockVSize = this.env.BLOCK_WEIGHT_UNITS / 4;
 
     const savedTimePreference = this.storageService.getValue('time-preference-ltr');
     const rtlLanguage = (this.locale.startsWith('ar') || this.locale.startsWith('fa') || this.locale.startsWith('he'));
@@ -182,6 +204,7 @@ export class StateService {
 
   setNetworkBasedonUrl(url: string) {
     if (this.env.BASE_MODULE !== 'mempool' && this.env.BASE_MODULE !== 'liquid') {
+
       return;
     }
     // horrible network regex breakdown:

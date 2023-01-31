@@ -47,6 +47,8 @@ export class SeoService {
       return this.baseTitle + ' - Liquid Testnet';
     if (this.network === 'bisq')
       return this.baseTitle + ' - Bisq Markets';
+    if (this.network === '' && this.stateService.env.STACKS_ENABLED)
+      return this.baseTitle + ' - Stacks Explorer';
     return this.baseTitle + ' - ' + (this.network ? this.ucfirst(this.network) : 'Bitcoin') + ' Explorer';
   }
 

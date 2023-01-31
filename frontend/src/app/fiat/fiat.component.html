@@ -1,1 +1,2 @@
-<span class="green-color">{{ (conversions$ | async)?.USD * value / 100000000 | currency:'USD':'symbol':digitsInfo }}</span>
+<span class="green-color">{{ (conversions$ | async)?.USD * value / 1000000 | currency:'USD':'symbol':digitsInfo }}</span>
+<!-- <span class="green-color">{{ (conversions$ | async)?.USD * value / | currency:'USD':'symbol':digitsInfo }}</span> -->

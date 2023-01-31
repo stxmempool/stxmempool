@@ -36,6 +36,9 @@ import liquidRoutes from './api/liquid/liquid.routes';
 import bitcoinRoutes from './api/bitcoin/bitcoin.routes';
 import fundingTxFetcher from './tasks/lightning/sync-tasks/funding-tx-fetcher';
 import forensicsService from './tasks/lightning/forensics.service';
+import stacksMempool from './api/stacks/stacks-mempool';
+import stacksBlocks from './api/stacks/stacks-blocks';
+import stacksRoutes from './api/stacks/stacks.routes';
 
 class Server {
   private wss: WebSocket.Server | undefined;
@@ -128,10 +131,10 @@ class Server {
     }
 
     fiatConversion.startService();
-
+    
     this.setUpHttpApiRoutes();
 
-    if (config.MEMPOOL.ENABLED) {
+    if (config.MEMPOOL.ENABLED || config.STACKS.ENABLED) {
       this.runMainUpdateLoop();
     }
 
@@ -146,6 +149,7 @@ class Server {
       this.$runLightningBackend();
     }
 
+
     this.server.listen(config.MEMPOOL.HTTP_PORT, () => {
       if (worker) {
         logger.info(`Mempool Server worker #${process.pid} started`);
@@ -157,20 +161,29 @@ class Server {
 
   async runMainUpdateLoop(): Promise<void> {
     try {
-      try {
-        await memPool.$updateMemPoolInfo();
-      } catch (e) {
-        const msg = `updateMempoolInfo: ${(e instanceof Error ? e.message : e)}`;
-        if (config.MEMPOOL.USE_SECOND_NODE_FOR_MINFEE) {
-          logger.warn(msg);
-        } else {
-          logger.debug(msg);
+      if (config.STACKS.ENABLED) {
+        indexer.$run();
+        // In development, DO NOT uncomment
+        // await stacksMempool.runProjection();
+
+        await stacksMempool.$updateStacksMempool();
+        await stacksBlocks.$updateBlocks();
+      } else {
+        try {
+          await memPool.$updateMemPoolInfo();
+        } catch (e) {
+          const msg = `updateMempoolInfo: ${(e instanceof Error ? e.message : e)}`;
+          if (config.MEMPOOL.USE_SECOND_NODE_FOR_MINFEE) {
+            logger.warn(msg);
+          } else {
+            logger.debug(msg);
+          }
         }
+        await poolsUpdater.updatePoolsJson();
+        await blocks.$updateBlocks();
+        await memPool.$updateMempool();
+        indexer.$run();
       }
-      await poolsUpdater.updatePoolsJson();
-      await blocks.$updateBlocks();
-      await memPool.$updateMempool();
-      indexer.$run();
 
       setTimeout(this.runMainUpdateLoop.bind(this), config.MEMPOOL.POLL_RATE_MS);
       this.currentBackendRetryInterval = 5;
@@ -178,6 +191,7 @@ class Server {
       const loggerMsg = `runMainLoop error: ${(e instanceof Error ? e.message : e)}. Retrying in ${this.currentBackendRetryInterval} sec.`;
       if (this.currentBackendRetryInterval > 5) {
         logger.warn(loggerMsg);
+        stacksMempool.setOutOfSync();
         mempool.setOutOfSync();
       } else {
         logger.debug(loggerMsg);
@@ -221,6 +235,11 @@ class Server {
       memPool.setAsyncMempoolChangedCallback(websocketHandler.handleMempoolChange.bind(websocketHandler));
       blocks.setNewAsyncBlockCallback(websocketHandler.handleNewBlock.bind(websocketHandler));
     }
+    if (!config.MEMPOOL.ENABLED && config.STACKS.ENABLED){
+      statistics.setNewStatisticsEntryCallback(websocketHandler.handleNewStatistic.bind(websocketHandler));
+      stacksBlocks.setNewAsyncBlockCallback(websocketHandler.handleNewStacksBlock.bind(websocketHandler));
+      stacksMempool.setAsyncMempoolChangedCallback(websocketHandler.handleStacksMempoolChange.bind(websocketHandler));
+    }
     fiatConversion.setProgressChangedCallback(websocketHandler.handleNewConversionRates.bind(websocketHandler));
     loadingIndicators.setProgressChangedCallback(websocketHandler.handleLoadingChanged.bind(websocketHandler));
   }
@@ -243,6 +262,10 @@ class Server {
       generalLightningRoutes.initRoutes(this.app);
       nodesRoutes.initRoutes(this.app);
       channelsRoutes.initRoutes(this.app);
+    }
+    if (config.STACKS.ENABLED && !config.MEMPOOL.ENABLED) {
+      statisticsRoutes.initRoutes(this.app);
+      stacksRoutes.initRoutes(this.app);
     }
   }
 }

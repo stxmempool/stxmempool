@@ -168,8 +168,9 @@ export class BlockchainBlocksComponent implements OnInit, OnDestroy {
     return item.height;
   }
 
-  getStyleForBlock(block: BlockExtended) {
+  getStyleForBlock(block: any) {
     const greenBackgroundHeight = 100 - (block.weight / this.stateService.env.BLOCK_WEIGHT_UNITS) * 100;
+
     let addLeft = 0;
 
     if (block?.extras?.stage === 1) {

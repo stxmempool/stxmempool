@@ -1,0 +1,59 @@
+<ng-container *ngIf="(loadingBlocks$ | async) === false; else loadingBlocks">
+  <div class="mempool-blocks-container" [class.time-ltr]="timeLtr" *ngIf="(difficultyAdjustments$ | async) as da;">
+    <div class="flashing">
+      <ng-template ngFor let-projectedBlock [ngForOf]="mempoolBlocks$ | async" let-i="index" [ngForTrackBy]="trackByFn">
+        <div [attr.data-cy]="'mempool-block-' + i" class="bitcoin-block text-center mempool-block" id="mempool-block-{{ i }}" [ngStyle]="mempoolBlockStyles[i]" [class.blink-bg]="projectedBlock.blink">
+          <a draggable="false" [routerLink]="['/mempool-block/' | relativeUrl, i]"
+            class="blockLink" [ngClass]="{'disabled': (this.stateService.blockScrolling$ | async)}">&nbsp;</a>
+            <!-- Include this link when we have projected Blocks from stacks-inspect -->
+            <!-- <div [attr.data-cy]="'mempool-block-' + i + '-height'" class="block-height">
+              <a [routerLink]="['/mempool-block/' | relativeUrl, i]">{{ i=== 0 ? 'Projected Block' : 'All Txs' }}</a>
+            </div> -->
+          <div class="block-body">
+            <div [attr.data-cy]="'mempool-block-' + i + '-fees'" class="fees">
+              ~{{ projectedBlock.medianFee | number:feeRounding }} <span i18n="shared.sat-vbyte|uSTX/vB">uSTX/B</span>
+            </div>
+            <div [attr.data-cy]="'mempool-block-' + i + '-fee-span'" class="fee-span">
+              {{ projectedBlock.feeRange[0] | number:feeRounding }} - {{ projectedBlock.feeRange[projectedBlock.feeRange.length - 1] | number:feeRounding }} <span i18n="shared.sat-vbyte|uSTX/vB">uSTX/B</span>
+            </div>
+            <div *ngIf="showMiningInfo" class="block-size">
+              <app-amount [attr.data-cy]="'mempool-block-' + i + '-total-fees'" [satoshis]="projectedBlock.totalFees" digitsInfo="1.2-3" [noFiat]="true"></app-amount>
+            </div>
+            <div *ngIf="!showMiningInfo" class="block-size" [innerHTML]="'&lrm;' + (projectedBlock.blockSize | bytes: 2)"></div>
+            <div [attr.data-cy]="'mempool-block-' + i + '-transaction-count'" class="transaction-count">
+              <ng-container *ngTemplateOutlet="projectedBlock.nTx === 1 ? transactionsSingular : transactionsPlural; context: {$implicit: projectedBlock.nTx | number}"></ng-container>
+              <ng-template #transactionsSingular let-i i18n="shared.transaction-count.singular">{{ i }} transaction</ng-template>
+              <ng-template #transactionsPlural let-i i18n="shared.transaction-count.plural">{{ i }} transactions</ng-template>
+            </div>
+            <div [attr.data-cy]="'mempool-block-' + i + '-time'" class="time-difference" *ngIf="projectedBlock.blockVSize <= stateService.blockVSize; else mergedBlock">
+              <ng-template [ngIf]="network === 'liquid' || network === 'liquidtestnet'" [ngIfElse]="timeDiffMainnet">
+                <app-time-until [time]="(1 * i) + now + 61000" [fastRender]="false" [fixedRender]="true"></app-time-until>
+              </ng-template>
+              <ng-template #timeDiffMainnet>
+                <app-time-until [time]="da.timeAvg * (i + 1) + now + da.timeOffset" [fastRender]="false" [fixedRender]="true" [forceFloorOnTimeIntervals]="['hour']"></app-time-until>
+              </ng-template>
+            </div>
+            <ng-template #mergedBlock>
+              <div [attr.data-cy]="'mempool-block-' + i + '-blocks'" class="time-difference">
+                <b>(<ng-container *ngTemplateOutlet="blocksPlural; context: {$implicit: projectedBlock.blockVSize / stateService.blockVSize | ceil }"></ng-container>)</b>
+                <ng-template #blocksPlural let-i i18n="shared.blocks">{{ i }} <span class="shared-block">blocks</span></ng-template>
+              </div>
+            </ng-template>
+          </div>
+          <span class="animated-border"></span>
+        </div>
+      </ng-template>
+    </div>
+    <div *ngIf="arrowVisible" id="arrow-up" [ngStyle]="{'right': rightPosition + 75 + 'px', transition: transition }"></div>
+  </div>
+</ng-container>
+
+<ng-template #loadingBlocks>
+  <div class="mempool-blocks-container" [class.time-ltr]="timeLtr">
+    <div class="flashing">
+      <ng-template ngFor let-projectedBlock [ngForOf]="mempoolEmptyBlocks" let-i="index" [ngForTrackBy]="trackByFn">
+        <div class="bitcoin-block text-center mempool-block" id="mempool-block-{{ i }}" [ngStyle]="mempoolEmptyBlockStyles[i]"></div>
+      </ng-template>
+    </div>
+  </div>
+</ng-template>

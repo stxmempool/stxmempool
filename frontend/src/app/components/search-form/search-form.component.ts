@@ -9,6 +9,7 @@ import { ElectrsApiService } from '../../services/electrs-api.service';
 import { RelativeUrlPipe } from '../../shared/pipes/relative-url/relative-url.pipe';
 import { ApiService } from '../../services/api.service';
 import { SearchResultsComponent } from './search-results/search-results.component';
+import { c32addressDecode } from 'c32check';
 
 @Component({
   selector: 'app-search-form',
@@ -33,10 +34,18 @@ export class SearchFormComponent implements OnInit {
       this.dropdownHidden = true;
     }
   }
+  //BTC
+  // regexAddress = /^([a-km-zA-HJ-NP-Z1-9]{26,35}|[a-km-zA-HJ-NP-Z1-9]{80}|[A-z]{2,5}1[a-zA-HJ-NP-Z0-9]{39,59})$/;
 
-  regexAddress = /^([a-km-zA-HJ-NP-Z1-9]{26,35}|[a-km-zA-HJ-NP-Z1-9]{80}|[A-z]{2,5}1[a-zA-HJ-NP-Z0-9]{39,59})$/;
+  //BTC
   regexBlockhash = /^[0]{8}[a-fA-F0-9]{56}$/;
-  regexTransaction = /^([a-fA-F0-9]{64})(:\d+)?$/;
+
+  //BTC
+  // regexTransaction = /^([a-fA-F0-9]{64})(:\d+)?$/;
+
+  //STX
+  regexTransaction = /0x[A-Fa-f0-9]{64}/;
+
   regexBlockheight = /^[0-9]{1,9}$/;
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
@@ -151,7 +160,9 @@ export class SearchFormComponent implements OnInit {
           const matchesBlockHeight = this.regexBlockheight.test(searchText);
           const matchesTxId = this.regexTransaction.test(searchText) && !this.regexBlockhash.test(searchText);
           const matchesBlockHash = this.regexBlockhash.test(searchText);
-          const matchesAddress = this.regexAddress.test(searchText);
+          // const matchesAddress = this.regexAddress.test(searchText);
+          const matchesAddress = this.validateStacksAddress(searchText);
+
 
           return {
             searchText: searchText,
@@ -192,7 +203,8 @@ export class SearchFormComponent implements OnInit {
     const searchText = result || this.searchForm.value.searchText.trim();
     if (searchText) {
       this.isSearching = true;
-      if (this.regexAddress.test(searchText)) {
+      // if (this.regexAddress.test(searchText)) {
+      if (this.validateStacksAddress(searchText)) {
         this.navigate('/address/', searchText);
       } else if (this.regexBlockhash.test(searchText) || this.regexBlockheight.test(searchText)) {
         this.navigate('/block/', searchText);
@@ -229,5 +241,13 @@ export class SearchFormComponent implements OnInit {
       searchText: '',
     });
     this.isSearching = false;
+  }
+  validateStacksAddress(stacksAddress: string): boolean {
+    try {
+      c32addressDecode(stacksAddress);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

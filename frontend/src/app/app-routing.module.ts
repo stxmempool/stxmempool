@@ -20,6 +20,7 @@ import { AssetsFeaturedComponent } from './components/assets/assets-featured/ass
 import { AssetsComponent } from './components/assets/assets.component';
 import { AssetComponent } from './components/asset/asset.component';
 import { AssetsNavComponent } from './components/assets/assets-nav/assets-nav.component';
+import { StacksMasterPageComponent } from './components/stacks-master-page/stacks-master-page.component';
 
 const browserWindow = window || {};
 // @ts-ignore
@@ -364,7 +365,15 @@ if (browserWindowEnv && browserWindowEnv.BASE_MODULE === 'bisq') {
     loadChildren: () => import('./bisq/bisq.module').then(m => m.BisqModule)
   }];
 }
-
+if (browserWindowEnv && browserWindowEnv.BASE_MODULE === 'stacks') {
+  routes = [
+    {
+      path: '',
+      component: StacksMasterPageComponent,
+      loadChildren: () => import('./stacks/stacks.module').then(m => m.StacksModule)
+    }
+  ]
+}
 if (browserWindowEnv && browserWindowEnv.BASE_MODULE === 'liquid') {
   routes = [
     {

@@ -7,6 +7,9 @@ import HashratesRepository from './repositories/HashratesRepository';
 import bitcoinClient from './api/bitcoin/bitcoin-client';
 import priceUpdater from './tasks/price-updater';
 import PricesRepository from './repositories/PricesRepository';
+import config from './config';
+import stacksBlocks from './api/stacks/stacks-blocks';
+import stacksMempool from './api/stacks/stacks-mempool';
 
 class Indexer {
   runIndexer = true;
@@ -42,10 +45,19 @@ class Indexer {
   }
 
   public async $run() {
-    if (!Common.indexingEnabled() || this.runIndexer === false ||
-      this.indexerRunning === true || mempool.hasPriority()
-    ) {
-      return;
+    if (config.STACKS.ENABLED) {
+      if (!Common.indexingEnabled() || this.runIndexer === false ||
+        this.indexerRunning === true || stacksMempool.hasPriority()
+      ) {
+        return;
+      }
+    }
+    if (config.MEMPOOL.ENABLED) {
+      if (!Common.indexingEnabled() || this.runIndexer === false ||
+        this.indexerRunning === true || mempool.hasPriority()
+      ) {
+        return;
+      }
     }
 
     // Do not attempt to index anything unless Bitcoin Core is fully synced
@@ -60,24 +72,36 @@ class Indexer {
     logger.debug(`Running mining indexer`);
 
     try {
-      await priceUpdater.$run();
+      if (config.STACKS.ENABLED && Common.indexingEnabled()) {
+        const chainValid = await stacksBlocks.$generateStacksBlockDatabase();
+        if (chainValid === false) {
+          // Chain of block hash was invalid, so we need to reindex. Stop here and continue at the next iteration
+          logger.warn(`The chain of block hash is invalid, re-indexing invalid data in 10 seconds.`);
+          setTimeout(() => this.reindex(), 10000);
+          this.indexerRunning = false;
+          return;
+        }
+        await stacksBlocks.$generateStacksBlocksSummariesDatabase();
+      } else {
+        await priceUpdater.$run();
 
-      const chainValid = await blocks.$generateBlockDatabase();
-      if (chainValid === false) {
-        // Chain of block hash was invalid, so we need to reindex. Stop here and continue at the next iteration
-        logger.warn(`The chain of block hash is invalid, re-indexing invalid data in 10 seconds.`);
-        setTimeout(() => this.reindex(), 10000);
-        this.indexerRunning = false;
-        return;
+        const chainValid = await blocks.$generateBlockDatabase();
+        if (chainValid === false) {
+          // Chain of block hash was invalid, so we need to reindex. Stop here and continue at the next iteration
+          logger.warn(`The chain of block hash is invalid, re-indexing invalid data in 10 seconds.`);
+          setTimeout(() => this.reindex(), 10000);
+          this.indexerRunning = false;
+          return;
+        }
+
+        this.runSingleTask('blocksPrices');
+        await mining.$indexDifficultyAdjustments();
+        await this.$resetHashratesIndexingState(); // TODO - Remove this as it's not efficient
+        await mining.$generateNetworkHashrateHistory();
+        await mining.$generatePoolHashrateHistory();
+        await blocks.$generateBlocksSummariesDatabase();
+        await blocks.$generateCPFPDatabase();
       }
-
-      this.runSingleTask('blocksPrices');
-      await mining.$indexDifficultyAdjustments();
-      await this.$resetHashratesIndexingState(); // TODO - Remove this as it's not efficient
-      await mining.$generateNetworkHashrateHistory();
-      await mining.$generatePoolHashrateHistory();
-      await blocks.$generateBlocksSummariesDatabase();
-      await blocks.$generateCPFPDatabase();
     } catch (e) {
       this.indexerRunning = false;
       logger.err(`Indexer failed, trying again in 10 seconds. Reason: ` + (e instanceof Error ? e.message : e));

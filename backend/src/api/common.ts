@@ -2,6 +2,7 @@ import { CpfpInfo, TransactionExtended, TransactionStripped } from '../mempool.i
 import config from '../config';
 import { NodeSocket } from '../repositories/NodesSocketsRepository';
 import { isIP } from 'net';
+import { StacksTransactionExtended, StacksTransactionStripped } from './stacks/stacks-api.interface';
 export class Common {
   static nativeAssetId = config.MEMPOOL.NETWORK === 'liquidtestnet' ?
     '144c654344aa716d6f3abcc1ca90e5641e4e2a7f633bc09fe3baf64585819a49'
@@ -34,7 +35,7 @@ export class Common {
     return numbers[index];
   }
 
-  static getFeesInRange(transactions: TransactionExtended[], rangeLength: number) {
+  static getFeesInRange(transactions: TransactionExtended[] |  StacksTransactionExtended[], rangeLength: number) {
     const arr = [transactions[transactions.length - 1].effectiveFeePerVsize];
     const chunk = 1 / (rangeLength - 1);
     let itemsToAdd = rangeLength - 2;
@@ -76,6 +77,16 @@ export class Common {
       fee: tx.fee,
       vsize: tx.weight / 4,
       value: tx.vout.reduce((acc, vout) => acc + (vout.value ? vout.value : 0), 0),
+    };
+  }
+  static stripStacksTransaction(tx: StacksTransactionExtended): StacksTransactionStripped {
+    return {
+      txid: tx.tx_id,
+      fee: tx.feeRateAsNumber,
+      vsize: tx.vsize,
+      // place holder value
+      type: tx.tx_type,
+      execution_cost_read_count: tx.execution_cost_read_count || 0,
     };
   }
 
@@ -184,6 +195,12 @@ export class Common {
     return (
       Common.indexingEnabled() &&
       config.MEMPOOL.BLOCKS_SUMMARIES_INDEXING === true
+    );
+  }
+  static stacksBlocksSummariesIndexingEnabled(): boolean {
+    return (
+      Common.indexingEnabled() &&
+      config.STACKS.BLOCKS_SUMMARIES_INDEXING === true
     );
   }
 

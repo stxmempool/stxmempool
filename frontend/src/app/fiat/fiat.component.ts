@@ -13,6 +13,8 @@ export class FiatComponent implements OnInit {
 
   @Input() value: number;
   @Input() digitsInfo = '1.2-2';
+  // @Input() digitsInfo = '1.0-1';
+
 
   constructor(
     private stateService: StateService,

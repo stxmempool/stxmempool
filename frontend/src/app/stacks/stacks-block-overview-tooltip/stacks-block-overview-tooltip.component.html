@@ -1,0 +1,37 @@
+<div
+  #tooltip
+  class="block-overview-tooltip"
+  [class.clickable]="clickable"
+  [style.visibility]="tx ? 'visible' : 'hidden'"
+  [style.left]="tooltipPosition.x + 'px'"
+  [style.top]="tooltipPosition.y + 'px'"
+>
+  <table>
+    <tbody>
+      <tr>
+        <td class="td-width" i18n="shared.transaction">Transaction</td>
+        <td>
+          <a [routerLink]="['/tx/' | relativeUrl, txid]">{{ txid | shortenString : 16}}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="td-width" i18n="dashboard.latest-transactions.transaction-type">Transaction Type</td>
+        <td>{{convertTxType(value) | titlecase }}</td>
+      </tr>
+      <tr>
+        <td class="td-width" i18n="transaction.fee|Transaction fee">Fee</td>
+        <td>{{ fee | number }} <span class="symbol" i18n="shared.sat|sat">uSTX</span> &nbsp; <span class="fiat"><app-stacks-fiat [value]="fee"></app-stacks-fiat></span></td>
+      </tr>
+      <tr>
+        <td class="td-width" i18n="transaction.fee-rate|Transaction fee rate">Fee rate</td>
+        <td>
+          {{ feeRate | feeRounding }} <span class="symbol" i18n="shared.uSTX-byte|uSTX/B">uSTX/B</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="td-width" i18n="transaction.vsize|Transaction Size">Size</td>
+        <td [innerHTML]="'&lrm;' + (size | bytes: 2)"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

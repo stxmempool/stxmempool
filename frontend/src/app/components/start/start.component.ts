@@ -31,6 +31,7 @@ export class StartComponent implements OnInit, OnDestroy {
     });
     this.stateService.blocks$
       .subscribe((blocks: any) => {
+
         if (this.stateService.network !== '') {
           return;
         }
