@@ -201,7 +201,7 @@ cd mempool
 ```
 ### 2. Configure the Frontend
 
-Copy frontend config
+Copy frontend config:
 
 ```
 cd frontend
