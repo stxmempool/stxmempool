@@ -170,7 +170,7 @@ In particular, make sure:
 - set `ENABLED` in `MEMPOOL` to false 
 - the correct `SOCKET` path is specified in `DATABASE`
 
-### 6. Run Stxempool Backend
+### 5. Run Stxempool Backend
 
 Run the Stxmempool backend:
 
