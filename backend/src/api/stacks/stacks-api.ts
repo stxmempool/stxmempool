@@ -20,7 +20,7 @@ class StacksApi {
     blockchain: 'stacks',
     network: 'mainnet'
   };
-  protected apiUrl = config.STACKS.DEDICATED_API ? config.STACKS.DEDICATED_API_URL : 'https://stacks-node-api.mainnet.stacks.co';
+  protected apiUrl = config.STACKS.DEDICATED_API ? config.STACKS.DEDICATED_API_URL : 'https://api.hiro.so';
   // constructor () {}
 
   public async $getTransaction(txId: string): Promise<Transaction | MempoolTransaction> {
@@ -107,6 +107,11 @@ class StacksApi {
     } catch (e) {
       logger.err(`Cannot fetch all verbose block transactions. Reason: ` + (e instanceof Error ? e.message : e));
     }
+  }
+
+  public async $getTransactionFee(txId: string): Promise<number> {
+    const { data } = await axios.get<Transaction>(`${this.apiUrl}/extended/v1/tx/${txId}`);
+    return Number(data.fee_rate);
   }
 
   public async $getStacksMempoolTransactions(): Promise<string[]> {

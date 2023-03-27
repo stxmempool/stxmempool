@@ -1,10 +1,10 @@
 # The Stxmempool Open Source Project
 
-Stxmempool is an adaptation of The Mempool Open Source Project™. Stxmempool is a mempool visualizer for the the Stacks blockchain ecosystem. A live site is available at [stxmempool.space](https://stxmempool.space/).
+Stxmempool is an adaptation of The Mempool Open Source Project™. Stxmempool is a mempool visualizer for the the Stacks blockchain ecosystem. A live site is available at [stxmempool.com](https://stxmempool.com/).
 
 The open-source project is developed and operated for the benefit of the Bitcoin and Stacks community, with a focus on the emerging transaction fee market.
 
-![mempool](https://stxmempool.space/resources/screenshots/stacks-v1.1-dashboard.png)
+![mempool](https://stxmempool.com/resources/screenshots/stacks-v1.1-dashboard.png)
 
 # System Requirements
 
@@ -41,7 +41,7 @@ If you are running completely on the public Hiro API, then you will just need a 
 - Pruned BTC node: ~15GB
 - Stxmempool Repo: ~2.5GB
 
-### Full instance with an ability to launch mempool.space or stxmempool.space
+### Full instance with an ability to launch mempool.space or stxmempool.com
 
 - Full BTC node with indexing enabled: ~550GB
 
@@ -55,7 +55,7 @@ This setup will allow you to work with mempool.space and stxmempool.space.
 
 Currently Stxmempool supports a local installation with limited production support. Stxmempool is primarily focused on development. Later we wish to provide more support to non-developers.
 
-This codebase does not support the functionality to switch between networks like mempool.space does (i.e. click a dropdown memu and switch to a locally hosted memmpool.space, bisq.markets or liquid.network). The following guide will help you setup a enviroment similar to [stxmempool.space](https://stxmempool.space/).
+This codebase does not support the functionality to switch between networks like mempool.space does (i.e. click a dropdown memu and switch to a locally hosted memmpool.space, bisq.markets or liquid.network). The following guide will help you setup a enviroment similar to [stxmempool.com](https://stxmempool.com/).
 
 ## Backend
 
@@ -65,7 +65,7 @@ Get the latest Stxmempool code:
 
 ```
 git clone https://github.com/stxmempool/stxmempool
-cd mempool
+cd stxmempool
 ```
 ### 2. Configure Bitcoin Core
 
@@ -197,7 +197,7 @@ Get the latest Stxmempool code:
 
 ```
 git clone https://github.com/stxmempool/stxmempool
-cd mempool
+cd stxmempool
 ```
 ### 2. Configure the Frontend
 

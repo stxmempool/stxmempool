@@ -48,6 +48,20 @@ export class Common {
     arr.push(transactions[0].effectiveFeePerVsize);
     return arr;
   }
+  static getProjectedFeesInRange(transactions: any[], rangeLength: number) {
+
+    const arr = [transactions[transactions.length - 1].effectiveFeePerVsize];
+    const chunk = 1 / (rangeLength - 1);
+    let itemsToAdd = rangeLength - 2;
+
+    while (itemsToAdd > 0) {
+      arr.push(transactions[Math.floor(transactions.length * chunk * itemsToAdd)].effectiveFeePerVsize);
+      itemsToAdd--;
+    }
+
+    arr.push(transactions[0].effectiveFeePerVsize);
+    return arr;
+  }
 
   static findRbfTransactions(added: TransactionExtended[], deleted: TransactionExtended[]): { [txid: string]: TransactionExtended } {
     const matches: { [txid: string]: TransactionExtended } = {};

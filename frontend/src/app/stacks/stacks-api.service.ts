@@ -60,7 +60,7 @@ export class StacksApiService {
   }
 
   searchStacksApi$(id: string): Observable<SearchSuccessResult> {
-    return this.httpClient.get<SearchSuccessResult>(`https://stacks-node-api.mainnet.stacks.co/extended/v1/search/${id}`);
+    return this.httpClient.get<SearchSuccessResult>(`https://api.hiro.so/extended/v1/search/${id}`);
   }
 
   getBlockHashFromHeight$(height: number): Observable<string> {
