@@ -45,9 +45,23 @@ class FiatConversion {
 
   private async updateCurrency(): Promise<void> {
     if (config.STACKS.ENABLED) {
-      const conversionRate = await stacksApi.$getStacksPrice();
-      // this.conversionRates['USD'] = conversionRate;
-      this.conversionRates['USD'] = Math.round(100 * conversionRate) / 100;
+      const setDelay = (secs: number = 1): Promise<void> => new Promise(resolve => setTimeout(() => resolve(), secs * 1000));
+      let retry = 0;
+      while(retry < config.MEMPOOL.EXTERNAL_MAX_RETRY) {
+        logger.debug('Querying currency rates service...');
+        try {
+          const conversionRate = await stacksApi.$getStacksPrice();
+          if (!conversionRate) throw new Error(`Could not fetch data from https://api.coincap.io/v2/assets/stacks,`);
+          this.conversionRates['USD'] = Math.round(100 * conversionRate) / 100;
+          this.ratesInitialized = true;
+          logger.debug(`USD Conversion Rate: ${this.conversionRates.USD}`);
+          break;
+        } catch (e) {
+          logger.err('Error updating fiat conversion rates: '  + (e instanceof Error ? e.message : e));
+          await setDelay(config.MEMPOOL.EXTERNAL_RETRY_INTERVAL);
+          retry++;
+        }
+      }
     } else {
       type axiosOptions = {
         headers: {
