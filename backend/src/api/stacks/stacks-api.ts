@@ -58,9 +58,9 @@ class StacksApi {
 
   // TODO Create a more effiecient way to store and update current STX value
   public async $getStacksPrice(): Promise<number> {
-    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=blockstack&vs_currencies=usd');
-    const price: number = response.data.blockstack.usd;
-    return price;
+    const response = await axios.get('https://api.coincap.io/v2/assets/stacks');
+    const price: string = response.data.data.priceUsd;
+    return Number(price);
   }
 
   public async $getCoinbaseTransaction(blockHeight: number, blockHash: string): Promise<string> {
